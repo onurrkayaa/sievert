@@ -1,3 +1,5 @@
+using Sievert.Core.Analysis;
+
 namespace Sievert.Core.Rules;
 
 /// <summary>
@@ -20,4 +22,16 @@ public sealed record Finding(
     string FilePath,
     int Line,
     string MethodName,
-    Severity Severity);
+    Severity Severity)
+{
+    /// <summary>
+    /// Bulgu test kodunda mi. Yoldan turetiliyor, kural bunu ayrica hesaplamiyor; olcut
+    /// Asama 1'de yazilan test/uretim heuristiginin ta kendisi, ikinci bir tahmin yok.
+    ///
+    /// Isaret var ama muafiyet yok: bazi kaliplar (ornegin SV002'nin aradigi .Result)
+    /// test kodunda mesru olabiliyor, ama "test kodu" kesin bir bilgi degil, yola ve ada
+    /// bakan bir tahmin. Tahmine dayanip bulguyu gizlemek yerine bulguyu isaretleyip
+    /// karari okuyana birakiyorum.
+    /// </summary>
+    public bool IsTestCode => FileAnalysis.IsTestCodePath(FilePath);
+}

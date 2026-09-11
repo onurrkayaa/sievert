@@ -55,7 +55,17 @@ Right now there are two commands. `sievert scan <path>` reads the C# files under
 and prints the types and methods it found as a tree, with a summary at the end.
 `sievert check <path>` runs the rules instead and prints each finding as a diagnostic
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
-default). Both commands take `--json`. There is only one rule so far, SV001 async void.
+default). Both commands take `--json`. There are three rules so far:
+
+| Code | Severity | What it looks for |
+|---|---|---|
+| SV001 | error | `async void` methods that aren't event handlers |
+| SV002 | warning | blocking on a task with `.Result`, `.Wait()` or `.GetAwaiter().GetResult()` |
+| SV003 | warning | a call whose returned task is dropped on the floor |
+
+SV002 and SV003 both decide what is a task by looking at names, because there is no
+semantic model yet. That produces false positives, which is a trade I took on purpose -
+`docs/sinirliliklar.md` says what goes wrong in each direction.
 
 Both commands also take `--exclude <pattern>`, and you can pass it more than once. `*`
 matches inside one path segment and `**` matches zero or more segments, so patterns look
@@ -74,20 +84,22 @@ always prints how many files were excluded, so you can tell a working pattern fr
 pattern for them. They are not counted in the excluded number either.
 
 CI runs `check` on this repository itself, right after the tests, so the tool has to pass
-its own rule:
+its own rules:
 
 ```bash
-dotnet run --project src/Sievert.Cli -- check . --exclude 'samples/**'
+dotnet run --project src/Sievert.Cli -- check .
 ```
 
-`samples/` is excluded because those files are broken on purpose - they are test data the
-test project reads.
+There is no flag on that line because this repository has its own `sievert.json` at the
+root, and the tool reads it the same way it would read yours. `samples/` is excluded there
+because those files are broken on purpose - they are test data the test project reads.
 
 ## Configuration
 
 `sievert.json` is optional. If there is one in the directory you are scanning it gets read;
 if there isn't, every rule runs and nothing is excluded. `--config <path>` points at a
-different file, and in that case the file has to exist.
+different file, and in that case the file has to exist. `--config` is resolved against your
+current working directory, not against the directory being scanned.
 
 ```json
 {
@@ -114,10 +126,10 @@ were excluded, and how many directories were never entered at all:
 
 ```
 Ozet
-  Taranan dosya  : 56
-  Dislanan dosya : 6
+  Taranan dosya  : 61
+  Dislanan dosya : 8
   Atlanan klasor : 9
-  Etkin kural    : SV001
+  Etkin kural    : SV001, SV002, SV003
   Kapali kural   : yok
   Bulgu          : 0
 ```
@@ -138,7 +150,7 @@ Exit codes are the same for both commands:
 1. Roslyn syntax tree traversal: read a C# file as structure, not text — done
 2. First detector: SV001 async void — done
 3. Detector catalogue: 6 .NET-specific defect patterns behind an IRule
-   plugin interface, rules loaded from JSON
+   plugin interface, configured from JSON — 3 of 6 written
 4. Git history mining with LibGit2Sharp: churn, ownership, past fixes,
    simplified SZZ labelling, stored in PostgreSQL via EF Core
 5. Risk engine: weighted baseline, then ML.NET classifier, then
@@ -158,5 +170,7 @@ what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 h
 started: SV001 now also treats `+= MethodName` in the same file or the same partial class
 as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag, CI
 checks this repository with it, and rules live in a catalogue that an optional
-`sievert.json` can turn on and off (ADR 0009). There is still only one rule. Nothing from stage 4 onwards (git history, risk scoring, API,
+`sievert.json` can turn on and off (ADR 0009). There are three rules now: SV001, SV002 and
+SV003. SV002 and SV003 have not been measured on a real repository yet - SV001 is the only
+one with numbers behind it. Nothing from stage 4 onwards (git history, risk scoring, API,
 dashboard) has been written.

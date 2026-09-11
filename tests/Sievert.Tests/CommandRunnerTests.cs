@@ -15,6 +15,7 @@ public class CommandRunnerTests : IDisposable
         Directory.CreateDirectory(FindingDirectory);
         Directory.CreateDirectory(EmptyDirectory);
         Directory.CreateDirectory(ExemptDirectory);
+        Directory.CreateDirectory(WarningDirectory);
 
         File.WriteAllText(Path.Combine(CleanDirectory, "Temiz.cs"), """
             public class Temiz
@@ -48,6 +49,20 @@ public class CommandRunnerTests : IDisposable
             }
             """);
 
+        File.WriteAllText(Path.Combine(WarningDirectory, "Bekleyen.cs"), """
+            using System.Threading.Tasks;
+
+            public class Bekleyen
+            {
+                public int Oku()
+                {
+                    return YukleAsync().Result;
+                }
+
+                private Task<int> YukleAsync() => Task.FromResult(1);
+            }
+            """);
+
         // Komutlar ekrana yaziyor; testte sadece cikis koduna bakiyoruz.
         Console.SetOut(TextWriter.Null);
         Console.SetError(TextWriter.Null);
@@ -68,6 +83,31 @@ public class CommandRunnerTests : IDisposable
     private string EmptyDirectory => Path.Combine(_root, "bos");
 
     private string ExemptDirectory => Path.Combine(_root, "muaf");
+
+    /// <summary>Icinde sadece uyari seviyesinde bulgu (SV002) olan bir klasor.</summary>
+    private string WarningDirectory => Path.Combine(_root, "uyari");
+
+    [Fact]
+    public void FindingBelowTheThreshold_DoesNotBreakTheBuild()
+    {
+        // SV002 warning seviyesinde. --fail-on error verilince bulgu esigin altinda
+        // kaliyor: ekrana yaziliyor ama cikis kodu 0. Asama 2'de tek kuralim error
+        // oldugu icin bu senaryoyu uctan uca deneyemiyordum.
+        Assert.Equal(ExitCodes.FindingsFound, CommandRunner.Run(["check", WarningDirectory]));
+        Assert.Equal(ExitCodes.Clean, CommandRunner.Run(["check", WarningDirectory, "--fail-on", "error"]));
+    }
+
+    [Fact]
+    public void ABelowThresholdFinding_IsStillPrinted()
+    {
+        StringWriter output = new();
+        Console.SetOut(output);
+
+        CommandRunner.Run(["check", WarningDirectory, "--fail-on", "error"]);
+
+        // "Gormezden gelmek" ile "gizlemek" ayni sey degil (ADR 0006).
+        Assert.Contains("SV002", output.ToString(), StringComparison.Ordinal);
+    }
 
     [Fact]
     public void CheckJson_CarriesExemptionsFromTheRule()

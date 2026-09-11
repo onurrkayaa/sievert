@@ -11,6 +11,24 @@ public enum ExemptionReason
     /// <c>+= MetotAdi</c> biciminde bir abonelik var.
     /// </summary>
     Subscription,
+
+    /// <summary>
+    /// Uygulamanin giris noktasi (<c>Main</c>). SV002 icin: konsol girisinde bloklamak
+    /// mesru olabiliyor, orada tikanacak bir senkronizasyon baglami yok.
+    /// </summary>
+    EntryPoint,
+
+    /// <summary>
+    /// Sonuc <c>_ =</c> ile bilincli olarak atilmis. SV003 icin: yazan kisi donen gorevi
+    /// umursamadigini acikca soylemis.
+    /// </summary>
+    DiscardedResult,
+
+    /// <summary>
+    /// Cagri <c>Task.Run(...)</c> icinde, yani zaten ayri bir goreve verilmis.
+    /// SV003 icin: cagiranin onu beklemesi beklenmiyor.
+    /// </summary>
+    FireAndForget,
 }
 
 /// <summary>

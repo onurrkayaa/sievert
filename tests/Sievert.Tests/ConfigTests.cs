@@ -200,7 +200,7 @@ public class ConfigEndToEndTests : IDisposable
 
         Assert.Equal(ExitCodes.FindingsFound, CommandRunner.Run(["check", _root]));
         Assert.Equal(
-            ["SV001"],
+            RuleCatalog.KnownCodes,
             json.RootElement.GetProperty("summary").GetProperty("rules").GetProperty("activeCodes")
                 .EnumerateArray().Select(code => code.GetString()!).ToArray());
     }
@@ -214,10 +214,12 @@ public class ConfigEndToEndTests : IDisposable
         JsonElement rules = json.RootElement.GetProperty("summary").GetProperty("rules");
 
         Assert.Empty(json.RootElement.GetProperty("findings").EnumerateArray());
-        Assert.Empty(rules.GetProperty("activeCodes").EnumerateArray());
         Assert.Equal(
             ["SV001"],
             rules.GetProperty("disabledCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
+        Assert.DoesNotContain(
+            "SV001",
+            rules.GetProperty("activeCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
         Assert.Equal(ExitCodes.Clean, CommandRunner.Run(["check", _root]));
     }
 

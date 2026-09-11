@@ -28,3 +28,11 @@ gorursen normal.
 - `OtherSubscriber.cs` - dar kapsam testi. `Uploader` ile ayni klasorde ama onun
   parcasi degil; `Refresh` adini abone ediyor. `Uploader.Refresh` yine de bulgu
   uretmeli, cunku ad esitligi tek basina yetmiyor.
+- `Blocking.cs` - SV002'nin ornekleri. Yakalanmasi gereken dort bloklama
+  (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()` ve task gibi duran bir alan),
+  muaf tutulan bir `Main`, ve bulgu uretmemesi gereken iki sinir durum: Task gibi
+  durmayan bir nesnenin kendi `Result` property'si, bir de dogru yazilmis `await`.
+- `MissingAwait.cs` - SV003'un ornekleri. Iki bulgu (bosta birakilan cagri ve
+  await edilmemis `ConfigureAwait` zinciri), iki muafiyet (`_ =` ile bilincli atma
+  ve `Task.Run` icindeki fire-and-forget), ve bulgu uretmemesi gereken uc sinir
+  durum: await edilen cagri, degiskene alinan cagri, adi `Async` ile bitmeyen cagri.

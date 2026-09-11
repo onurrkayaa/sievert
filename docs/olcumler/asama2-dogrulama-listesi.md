@@ -16,7 +16,9 @@ Iki tablo var, cunku iki farkli soru soruyorlar:
   ikinci parametrenin tip adi `EventArgs` ile bittigi icin kural onlari
   atladi. Soru: atlamakta hakli miydi, yoksa yanlis negatif mi?
 
-Uc alan bos birakildi, onlari sen dolduracaksin.
+Uc alan bos birakildi, onlari sen dolduracaksin. Her satirin imzasi, govdesinin
+ilk 10 satiri, olaya bagli olup olmadigi ve ikinci parametresinin tipi
+[asama2-dogrulama-baglami.md](asama2-dogrulama-baglami.md) dosyasinda.
 
 ShareX taramasinda toplam 106 `async void` metot var: 10'u bulgu, 96'si muaf.
 Asagidaki 20 satir bunlarin orneklemi: 18 ayri dosyadan, sekiz ayri projeden,

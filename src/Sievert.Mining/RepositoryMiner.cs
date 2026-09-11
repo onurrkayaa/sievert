@@ -92,13 +92,15 @@ public sealed class RepositoryMiner
                 continue;
             }
 
-            if (commit.Parents.Count() > 1)
+            int parentCount = ParentCount(commit);
+
+            if (parentCount > 1)
             {
                 SkippedMergeCount++;
                 continue;
             }
 
-            yield return Describe(repository, commit, authored);
+            yield return Describe(repository, commit, authored, parentCount);
 
             written++;
 
@@ -109,7 +111,20 @@ public sealed class RepositoryMiner
         }
     }
 
-    private static CommitRecord Describe(Repository repository, Commit commit, DateTimeOffset authored)
+    /// <summary>
+    /// Ebeveyn sayisi. <c>Parents</c> tembel numaralandiriliyor, yani her sayim parent
+    /// commit'lerini nesne veritabanindan okuyor; commit basina bir kez cagirilip
+    /// tasiniyor. Ayri bir metot olmasinin ikinci bir sebebi var: kendi kuralimiz SV004
+    /// dongu govdesindeki <c>Count()</c> cagrilarini sorgu saniyor ve burada yaniliyor
+    /// (bkz. docs/sinirliliklar.md), ama araci kendi kodumuzda susturmanin bir yolu yok.
+    /// </summary>
+    private static int ParentCount(Commit commit) => commit.Parents.Count();
+
+    private static CommitRecord Describe(
+        Repository repository,
+        Commit commit,
+        DateTimeOffset authored,
+        int parentCount)
     {
         Tree? parent = commit.Parents.FirstOrDefault()?.Tree;
         IReadOnlyList<FileChange> files = ReadChanges(repository, parent, commit.Tree);
@@ -123,7 +138,7 @@ public sealed class RepositoryMiner
             authored,
             Subject(message),
             message,
-            commit.Parents.Count(),
+            parentCount,
             BotAuthor.Looks(commit.Author.Name, commit.Author.Email),
             CoAuthorParser.Parse(message),
             files,

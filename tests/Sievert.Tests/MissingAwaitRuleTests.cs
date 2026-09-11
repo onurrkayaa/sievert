@@ -56,4 +56,32 @@ public class MissingAwaitRuleTests
     private static IReadOnlyList<Finding> Findings() => Run().Findings;
 
     private static RuleResult Run() => RuleTestHelper.InspectSample(Rule, "MissingAwait.cs");
+
+    [Fact]
+    public void TwoCallsInOneLambda_AreTwoRecordsOnDifferentLines()
+    {
+        // Muafiyet kaydinda metot adi cevreleyen metot olarak kaliyor; iki kaydi
+        // birbirinden ayiran sey satir numarasi.
+        IReadOnlyList<Exemption> exemptions = RuleTestHelper.InspectSource(
+            Rule,
+            "src/Arkaplan.cs",
+            """
+            public class Arkaplan
+            {
+                public void Basla()
+                {
+                    Task.Run(() =>
+                    {
+                        BirAsync();
+                        IkiAsync();
+                    });
+                }
+            }
+            """)
+            .Exemptions;
+
+        Assert.Equal(2, exemptions.Count);
+        Assert.All(exemptions, exemption => Assert.Equal("Basla", exemption.MethodName));
+        Assert.Equal(2, exemptions.Select(exemption => exemption.Line).Distinct().Count());
+    }
 }

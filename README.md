@@ -55,17 +55,25 @@ Right now there are two commands. `sievert scan <path>` reads the C# files under
 and prints the types and methods it found as a tree, with a summary at the end.
 `sievert check <path>` runs the rules instead and prints each finding as a diagnostic
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
-default). Both commands take `--json`. There are three rules so far:
+default). Both commands take `--json`. There are six rules:
 
 | Code | Severity | What it looks for |
 |---|---|---|
 | SV001 | error | `async void` methods that aren't event handlers |
 | SV002 | warning | blocking on a task with `.Result`, `.Wait()` or `.GetAwaiter().GetResult()` |
 | SV003 | warning | a call whose returned task is dropped on the floor |
+| SV004 | warning | a query-looking call inside a loop body (N+1) |
+| SV005 | warning | a `new` of something disposable that never gets disposed |
+| SV006 | info | a public `Task` method with no `CancellationToken` parameter |
 
-SV002 and SV003 both decide what is a task by looking at names, because there is no
-semantic model yet. That produces false positives, which is a trade I took on purpose -
-`docs/sinirliliklar.md` says what goes wrong in each direction.
+All of them decide what things are by looking at names, because there is no semantic model
+yet. That produces false positives, which is a trade I took on purpose -
+`docs/adr/0010-ad-temelli-tespit-ve-kabul-edilen-yanlis-pozitifler.md` explains the trade
+and `docs/sinirliliklar.md` lists what goes wrong in each direction, rule by rule.
+
+SV006 is `info` rather than a warning on purpose. It fires on nearly every async method in
+a codebase that never thought about cancellation, and `--fail-on` defaults to `warning`, so
+it shows up in the output without breaking anyone's build.
 
 Both commands also take `--exclude <pattern>`, and you can pass it more than once. `*`
 matches inside one path segment and `**` matches zero or more segments, so patterns look
@@ -126,12 +134,12 @@ were excluded, and how many directories were never entered at all:
 
 ```
 Ozet
-  Taranan dosya  : 61
-  Dislanan dosya : 8
+  Taranan dosya  : 67
+  Dislanan dosya : 11
   Atlanan klasor : 9
-  Etkin kural    : SV001, SV002, SV003
+  Etkin kural    : SV001, SV002, SV003, SV004, SV005, SV006
   Kapali kural   : yok
-  Bulgu          : 0
+  Bulgu          : 0  (hata 0 / uyari 0 / bilgi 0)
 ```
 
 `--json` carries the same information, with the skipped directories listed by path.
@@ -150,7 +158,7 @@ Exit codes are the same for both commands:
 1. Roslyn syntax tree traversal: read a C# file as structure, not text — done
 2. First detector: SV001 async void — done
 3. Detector catalogue: 6 .NET-specific defect patterns behind an IRule
-   plugin interface, configured from JSON — 3 of 6 written
+   plugin interface, configured from JSON — written, not measured yet
 4. Git history mining with LibGit2Sharp: churn, ownership, past fixes,
    simplified SZZ labelling, stored in PostgreSQL via EF Core
 5. Risk engine: weighted baseline, then ML.NET classifier, then
@@ -170,7 +178,7 @@ what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 h
 started: SV001 now also treats `+= MethodName` in the same file or the same partial class
 as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag, CI
 checks this repository with it, and rules live in a catalogue that an optional
-`sievert.json` can turn on and off (ADR 0009). There are three rules now: SV001, SV002 and
-SV003. SV002 and SV003 have not been measured on a real repository yet - SV001 is the only
-one with numbers behind it. Nothing from stage 4 onwards (git history, risk scoring, API,
+`sievert.json` can turn on and off (ADR 0009). All six detectors for stage 3 are written.
+Only SV001 has been measured on a real repository; SV002 through SV006 have tests and
+sample files but no precision numbers behind them yet, so treat their output as untested. Nothing from stage 4 onwards (git history, risk scoring, API,
 dashboard) has been written.

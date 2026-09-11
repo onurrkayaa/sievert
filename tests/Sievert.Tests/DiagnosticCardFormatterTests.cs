@@ -61,9 +61,29 @@ public class DiagnosticCardFormatterTests
 
         Assert.Contains("Ozet", lines);
         Assert.Contains("  Taranan dosya  : 3", lines);
-        Assert.Contains("  Bulgu          : 2", lines);
+        Assert.Contains("  Bulgu          : 2  (hata 2 / uyari 0 / bilgi 0)", lines);
         Assert.Contains("  SV001          : 1", lines);
         Assert.Contains("  SV002          : 1", lines);
+    }
+
+    [Fact]
+    public void Summary_CountsEachSeveritySeparately()
+    {
+        // SV006 info seviyesinde ve cok bulgu uretiyor; hata/uyari sayilariyla
+        // karismasin diye kirilim ayri yaziliyor.
+        Finding[] findings =
+        [
+            Found(severity: Severity.Error),
+            Found(severity: Severity.Warning),
+            Found(severity: Severity.Info),
+            Found(severity: Severity.Info),
+        ];
+
+        Assert.Contains(
+            "  Bulgu          : 4  (hata 1 / uyari 1 / bilgi 2)",
+            DiagnosticCardFormatter.Format(findings, CheckSummary.Of(3, findings))
+                .Select(line => line.PlainText)
+                .ToArray());
     }
 
     [Fact]
@@ -85,7 +105,7 @@ public class DiagnosticCardFormatterTests
         string[] lines = Format();
 
         Assert.Contains("Bulgu yok.", lines);
-        Assert.Contains("  Bulgu          : 0", lines);
+        Assert.Contains("  Bulgu          : 0  (hata 0 / uyari 0 / bilgi 0)", lines);
     }
 
     [Fact]

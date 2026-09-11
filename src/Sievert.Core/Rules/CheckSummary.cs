@@ -13,6 +13,24 @@ public sealed record RuleUsage(IReadOnlyList<string> ActiveCodes, IReadOnlyList<
     public static readonly RuleUsage None = new([], []);
 }
 
+/// <summary>
+/// Bulgularin seviyeye gore dagilimi. Toplam sayi tek basina yaniltici olabiliyor:
+/// SV006 gibi info seviyesindeki bir kural cok bulgu uretiyor ve build'i kirmiyor, ama
+/// sadece toplama bakan biri durumun kotulestigini sanabilir.
+/// </summary>
+/// <param name="Error">Hata seviyesindeki bulgu sayisi.</param>
+/// <param name="Warning">Uyari seviyesindeki bulgu sayisi.</param>
+/// <param name="Info">Bilgi seviyesindeki bulgu sayisi.</param>
+public sealed record SeverityCounts(int Error, int Warning, int Info)
+{
+    /// <summary>Bulgulari seviyeye gore sayar.</summary>
+    public static SeverityCounts Of(IReadOnlyList<Finding> findings) =>
+        new(
+            findings.Count(finding => finding.Severity == Severity.Error),
+            findings.Count(finding => finding.Severity == Severity.Warning),
+            findings.Count(finding => finding.Severity == Severity.Info));
+}
+
 /// <summary>Tek bir kural kodunun kac bulgu urettigi.</summary>
 /// <param name="RuleCode">Kuralin kodu, ornegin "SV001".</param>
 /// <param name="Count">O kuraldan cikan bulgu sayisi.</param>
@@ -34,13 +52,15 @@ public sealed record RuleCodeCount(string RuleCode, int Count);
 /// Bunlarin icindeki dosyalar ExcludedFileCount'a girmiyor.
 /// </param>
 /// <param name="Rules">Hangi kurallarin calistigi ve hangilerinin kapatildigi.</param>
+/// <param name="BySeverity">Bulgularin seviyeye gore dagilimi.</param>
 public sealed record CheckSummary(
     int FileCount,
     int FindingCount,
     IReadOnlyList<RuleCodeCount> ByRuleCode,
     int ExcludedFileCount,
     IReadOnlyList<string> SkippedDirectories,
-    RuleUsage Rules)
+    RuleUsage Rules,
+    SeverityCounts BySeverity)
 {
     /// <summary>Bulgulari sayip ozeti cikarir. Cikti her calistirmada ayni olsun diye kural kodlari siralanir.</summary>
     public static CheckSummary Of(
@@ -59,5 +79,6 @@ public sealed record CheckSummary(
                 .ToList(),
             excludedFileCount,
             skippedDirectories ?? [],
-            rules ?? RuleUsage.None);
+            rules ?? RuleUsage.None,
+            SeverityCounts.Of(findings));
 }

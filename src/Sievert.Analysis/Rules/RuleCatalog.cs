@@ -43,7 +43,15 @@ public sealed record RuleSelectionResult(RuleSelection? Selection, string? Error
 /// </summary>
 public static class RuleCatalog
 {
-    private static readonly IRule[] All = [new AsyncVoidRule(), new BlockingCallRule(), new MissingAwaitRule()];
+    private static readonly IRule[] All =
+    [
+        new AsyncVoidRule(),
+        new BlockingCallRule(),
+        new MissingAwaitRule(),
+        new NPlusOneRule(),
+        new DisposableLeakRule(),
+        new CancellationRule(),
+    ];
 
     /// <summary>Tanidigimiz butun kural kodlari, sirali.</summary>
     public static IReadOnlyList<string> KnownCodes { get; } =

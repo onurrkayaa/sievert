@@ -70,4 +70,33 @@ public class BlockingCallRuleTests
     private static IReadOnlyList<Finding> Findings() => Run().Findings;
 
     private static RuleResult Run() => RuleTestHelper.InspectSample(Rule, "Blocking.cs");
+
+    [Fact]
+    public void NestedChain_WhereOnlyTheInnerLinkLooksLikeATask_ReportsOnce()
+    {
+        // LoadAsync().Result.GetAwaiter().GetResult(): dis halkanin hedefi
+        // "LoadAsync().Result", adina bakinca gorev gibi durmuyor, o yuzden elenir.
+        Assert.Single(RuleTestHelper.InspectSource(
+            Rule,
+            "src/Zincir.cs",
+            "public class Zincir { public int Oku() { return LoadAsync().Result.GetAwaiter().GetResult(); } }")
+            .Findings);
+    }
+
+    [Fact]
+    public void NestedChain_WhereBothLinksLookLikeTasks_ReportsTwiceOnTheSameLine()
+    {
+        // Olculmus davranis, bilerek boyle birakildi: pendingTask.Result.Wait() hem
+        // .Wait() hem .Result icin bulgu uretiyor ve ikisi de ayni satirda.
+        // Ikisi de dogru birer tespit; tek satira iki kart basmak dogru mu, henuz karar
+        // verilmedi. Test davranisi sabitliyor ki degisirse fark edelim.
+        IReadOnlyList<Finding> findings = RuleTestHelper.InspectSource(
+            Rule,
+            "src/Zincir.cs",
+            "public class Zincir { Task<Task> pendingTask; public void Bekle() { pendingTask.Result.Wait(); } }")
+            .Findings;
+
+        Assert.Equal(2, findings.Count);
+        Assert.Single(findings.Select(finding => finding.Line).Distinct());
+    }
 }

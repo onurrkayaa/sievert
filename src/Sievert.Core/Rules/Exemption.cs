@@ -29,6 +29,38 @@ public enum ExemptionReason
     /// SV003 icin: cagiranin onu beklemesi beklenmiyor.
     /// </summary>
     FireAndForget,
+
+    /// <summary>
+    /// Nesne bir <c>using</c> bildirimi ya da deyimi icinde olusturulmus.
+    /// SV005 icin: kapsam bitince atiliyor.
+    /// </summary>
+    UsingScope,
+
+    /// <summary>
+    /// Nesne bir alana atanmis. SV005 icin: sahibi sinif, Dispose baska bir yerde olabilir.
+    /// </summary>
+    OwnedByType,
+
+    /// <summary>
+    /// Nesne cagirana donduruluyor. SV005 icin: sahiplik cagirana geciyor.
+    /// </summary>
+    CallerOwns,
+
+    /// <summary>
+    /// Metot public degil. SV006 icin: imza disaridan gorunmuyor, serbestce degistirilebilir.
+    /// </summary>
+    NotPublic,
+
+    /// <summary>
+    /// Imza bir arayuzden ya da taban siniftan geliyor (explicit arayuz uygulamasi veya
+    /// <c>override</c>). SV006 icin: parametre eklenemez.
+    /// </summary>
+    InheritedSignature,
+
+    /// <summary>
+    /// Dosya test kodu gibi duruyor. SV006 icin: testlerde iptal destegi beklenmiyor.
+    /// </summary>
+    TestCode,
 }
 
 /// <summary>

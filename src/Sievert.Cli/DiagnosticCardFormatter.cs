@@ -63,7 +63,7 @@ public static class DiagnosticCardFormatter
             ("Atlanan klasor", summary.SkippedDirectories.Count.ToString(CultureInfo.InvariantCulture)),
             ("Etkin kural", CodeList(summary.Rules.ActiveCodes)),
             ("Kapali kural", CodeList(summary.Rules.DisabledCodes)),
-            ("Bulgu", summary.FindingCount.ToString(CultureInfo.InvariantCulture)),
+            ("Bulgu", FindingCounts(summary)),
         ];
 
         rows.AddRange(summary.ByRuleCode.Select(entry =>
@@ -77,6 +77,18 @@ public static class DiagnosticCardFormatter
                 new OutputSpan("  " + label.PadRight(labelColumn) + " : ", OutputColor.Dim),
                 new OutputSpan(value, OutputColor.Normal));
         }
+    }
+
+    /// <summary>
+    /// Toplam bulgu sayisi ve seviye kirilimi. Kirilim her zaman yaziliyor: info
+    /// seviyesindeki bulgular build'i kirmadigi icin toplamin icinde kaybolmasinlar.
+    /// </summary>
+    private static string FindingCounts(CheckSummary summary)
+    {
+        SeverityCounts counts = summary.BySeverity;
+
+        return $"{summary.FindingCount.ToString(CultureInfo.InvariantCulture)}  "
+            + $"(hata {counts.Error} / uyari {counts.Warning} / bilgi {counts.Info})";
     }
 
     /// <summary>Kural kodlarini tek satirda yazar. Bos listeyi "yok" diye gosteriyoruz ki

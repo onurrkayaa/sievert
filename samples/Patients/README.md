@@ -36,3 +36,12 @@ gorursen normal.
   await edilmemis `ConfigureAwait` zinciri), iki muafiyet (`_ =` ile bilincli atma
   ve `Task.Run` icindeki fire-and-forget), ve bulgu uretmemesi gereken uc sinir
   durum: await edilen cagri, degiskene alinan cagri, adi `Async` ile bitmeyen cagri.
+- `NPlusOne.cs` - SV004'un ornekleri. Uc dongu ici sorgu (foreach, while, for),
+  bulgu uretmemesi gereken iki dogru yazim (sorgu dongunun disinda, sorgu dongunun
+  kaynaginda), ve bilerek konmus bir yanlis pozitif: bellekteki bir listede `Any()`.
+- `Leak.cs` - SV005'in ornekleri. Uc bulgu (`FileStream`, `HttpClient`,
+  `StreamReader`), dort muafiyet (`using` bildirimi, `using` deyimi, alana atama,
+  `return`), bir alan baslangic degeri ve listede olmayan bir tip.
+- `Cancellation.cs` - SV006'nin ornekleri. Iki bulgu (`Task` ve `ValueTask` donen
+  public metotlar), muafiyetler (private, explicit arayuz uygulamasi, `override`)
+  ve aday bile olmayan iki durum: token'i zaten olan metot ve Task donmeyen metot.

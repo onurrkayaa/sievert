@@ -16,6 +16,7 @@ public class CommandRunnerTests : IDisposable
         Directory.CreateDirectory(EmptyDirectory);
         Directory.CreateDirectory(ExemptDirectory);
         Directory.CreateDirectory(WarningDirectory);
+        Directory.CreateDirectory(InfoDirectory);
 
         File.WriteAllText(Path.Combine(CleanDirectory, "Temiz.cs"), """
             public class Temiz
@@ -63,6 +64,18 @@ public class CommandRunnerTests : IDisposable
             }
             """);
 
+        File.WriteAllText(Path.Combine(InfoDirectory, "Servis.cs"), """
+            using System.Threading.Tasks;
+
+            public class Servis
+            {
+                public Task KaydetAsync(string ad)
+                {
+                    return Task.CompletedTask;
+                }
+            }
+            """);
+
         // Komutlar ekrana yaziyor; testte sadece cikis koduna bakiyoruz.
         Console.SetOut(TextWriter.Null);
         Console.SetError(TextWriter.Null);
@@ -86,6 +99,28 @@ public class CommandRunnerTests : IDisposable
 
     /// <summary>Icinde sadece uyari seviyesinde bulgu (SV002) olan bir klasor.</summary>
     private string WarningDirectory => Path.Combine(_root, "uyari");
+
+    /// <summary>Icinde sadece bilgi seviyesinde bulgu (SV006) olan bir klasor.</summary>
+    private string InfoDirectory => Path.Combine(_root, "bilgi");
+
+    [Fact]
+    public void AnInfoOnlyRule_DoesNotBreakTheBuild()
+    {
+        // SV006 cok bulgu uretiyor ve info seviyesinde. --fail-on varsayilani warning
+        // oldugu icin CI'i kirmamasi gerekiyor; tasarimin dogrulamasi bu.
+        StringWriter output = new();
+        Console.SetOut(output);
+
+        Assert.Equal(ExitCodes.Clean, CommandRunner.Run(["check", InfoDirectory]));
+
+        // Kirmiyor ama gizlemiyor da: bulgu ekranda duruyor.
+        Assert.Contains("SV006", output.ToString(), StringComparison.Ordinal);
+        Assert.Contains("bilgi 1", output.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnInfoOnlyRule_BreaksTheBuildOnlyIfYouAskForIt() =>
+        Assert.Equal(ExitCodes.FindingsFound, CommandRunner.Run(["check", InfoDirectory, "--fail-on", "info"]));
 
     [Fact]
     public void FindingBelowTheThreshold_DoesNotBreakTheBuild()

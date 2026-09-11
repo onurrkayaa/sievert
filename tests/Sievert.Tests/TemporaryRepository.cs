@@ -33,6 +33,22 @@ internal sealed class TemporaryRepository : IDisposable
         return repository.Commit(message, who, who);
     }
 
+    /// <summary>Birden fazla dosyayi tek commit'te yazar.</summary>
+    public Commit CommitMany(IReadOnlyDictionary<string, string> contents, string message, Signature? author = null)
+    {
+        foreach ((string relativePath, string content) in contents)
+        {
+            string absolute = System.IO.Path.Combine(Path, relativePath);
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(absolute)!);
+            File.WriteAllText(absolute, content);
+            Commands.Stage(repository, relativePath);
+        }
+
+        Signature who = author ?? Person("Onur", "onur@example.com");
+
+        return repository.Commit(message, who, who);
+    }
+
     /// <summary>Dosyayi yeni yola tasir ve commit atar. Icerik aynen korunuyor.</summary>
     public Commit Rename(string oldPath, string newPath, string message)
     {

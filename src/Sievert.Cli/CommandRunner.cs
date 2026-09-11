@@ -55,6 +55,11 @@ public static class CommandRunner
             return RunMetrics(metrics);
         }
 
+        if (options is LabelOptions labelling)
+        {
+            return RunLabel(labelling);
+        }
+
         if (!File.Exists(options.TargetPath) && !Directory.Exists(options.TargetPath))
         {
             Console.Error.WriteLine($"Bulunamadi: {options.TargetPath}");
@@ -274,13 +279,78 @@ public static class CommandRunner
             context is null ? null : new CommitStore(context),
             context is null
                 ? null
-                : StoreOptionsFor(identity, options.Rewrite));
+                : StoreOptionsFor(identity, options.TargetPath, options.Rewrite));
 
         ConsoleWriter.Write(
             MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath, shallow, result.Store),
             ConsoleWriter.UseColor());
 
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).
+        return ExitCodes.Clean;
+    }
+
+    private static int RunLabel(LabelOptions options)
+    {
+        using SievertContext? context = OpenDatabase();
+
+        if (context is null)
+        {
+            return ExitCodes.ToolError;
+        }
+
+        if (new MetricsRunner(context).FindRepository(options.TargetPath) is not RepositoryRow repository)
+        {
+            Console.Error.WriteLine(
+                $"Veritabaninda boyle bir depo yok: {options.TargetPath}. "
+                + "Once 'sievert mine <repo-yolu> --db' calistir.");
+
+            return ExitCodes.ToolError;
+        }
+
+        // Blame yerel bir klon istiyor; komut sadece depo adi aliyor, o yuzden yol
+        // mine --db sirasinda kaydedilmisti.
+        if (repository.LocalPath is not string path || !Directory.Exists(path))
+        {
+            Console.Error.WriteLine(
+                $"Deponun yerel klasoru bulunamadi ({repository.LocalPath ?? "kayitli degil"}). "
+                + "SZZ git blame calistiriyor, yani klona ihtiyaci var. "
+                + "'sievert mine <repo-yolu> --db' ile yolu yeniden kaydet.");
+
+            return ExitCodes.ToolError;
+        }
+
+        LabelStore store = new(context);
+        IReadOnlyList<(string Sha, DateTimeOffset Date)> fixes = store.Fixes(repository.Id);
+
+        if (fixes.Count == 0)
+        {
+            Console.Error.WriteLine(
+                "Bu depoda duzeltme commit'i isaretli degil. Once 'sievert metrics <repo-adi>' calistir.");
+
+            return ExitCodes.ToolError;
+        }
+
+        System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
+
+        SzzOutcome outcome = new BugIntroducerFinder().Find(
+            path,
+            [.. fixes.Select(fix => new SzzFix(fix.Sha, fix.Date))],
+            SzzOptions.Default);
+
+        LabelResult label = store.Apply(repository.Id, outcome.BlamedShas);
+
+        clock.Stop();
+
+        if (options.OutputPath is string output)
+        {
+            File.WriteAllText(output, LabelJsonFormatter.Summary(repository.Name, label, outcome));
+        }
+
+        ConsoleWriter.Write(
+            LabelFormatter.Format(repository.Name, label, outcome, clock.Elapsed, options.OutputPath),
+            ConsoleWriter.UseColor());
+
+        // label kural calistirmiyor, bulgu uretemez; basariliysa hep 0 (ADR 0006).
         return ExitCodes.Clean;
     }
 
@@ -328,10 +398,24 @@ public static class CommandRunner
     /// Depo kimligini uzak adresten turetir. Uzak adres yoksa klasor adina dusuluyor ve
     /// bu durum kayda geciyor: klasor adiyla eslestirme ciftlenmeye acik, gorunur olsun.
     /// </summary>
-    private static StoreOptions StoreOptionsFor(RepositoryIdentity identity, bool rewrite) =>
+    private static StoreOptions StoreOptionsFor(RepositoryIdentity identity, string path, bool rewrite) =>
         RemoteIdentity.Normalize(identity.RemoteUrl) is string fromRemote
-            ? new StoreOptions(fromRemote, "remote", identity.Name, identity.RemoteUrl, identity.HeadSha, rewrite)
-            : new StoreOptions(identity.Name, "folder", identity.Name, null, identity.HeadSha, rewrite);
+            ? new StoreOptions(
+                fromRemote,
+                "remote",
+                identity.Name,
+                identity.RemoteUrl,
+                identity.HeadSha,
+                Path.GetFullPath(path),
+                rewrite)
+            : new StoreOptions(
+                identity.Name,
+                "folder",
+                identity.Name,
+                null,
+                identity.HeadSha,
+                Path.GetFullPath(path),
+                rewrite);
 
     /// <summary>
     /// Baglanti dizesini bulup baglami acar. Sema eksikse migration'i kendiliginden

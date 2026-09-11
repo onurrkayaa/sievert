@@ -55,6 +55,12 @@ public sealed record MineOptions(
 public sealed record MetricsOptions(string TargetPath, string? OutputPath)
     : CommandOptions(TargetPath, OutputPath is not null, [], null);
 
+/// <summary>label komutunun ayarlari.</summary>
+/// <param name="TargetPath">Depo adi ya da kimligi. Yol degil, veritabanindaki kayit.</param>
+/// <param name="OutputPath">--out ile verilen dosya yolu; etiketleme ozeti oraya yaziliyor.</param>
+public sealed record LabelOptions(string TargetPath, string? OutputPath)
+    : CommandOptions(TargetPath, OutputPath is not null, [], null);
+
 /// <summary>Ayristirma sonucu: ya ayarlar ya da kullaniciya gosterilecek bir hata.</summary>
 /// <param name="Options">Basarili ayristirmada dolu olur.</param>
 /// <param name="Error">Basarisiz ayristirmada dolu olur.</param>
@@ -107,6 +113,12 @@ public static class ArgumentParser
             --out <dosya>       her olcunun min/medyan/p95/max dagilimini
                                 bu dosyaya JSON yazar
 
+          label <repo-adi> [--out <dosya>]
+            SZZ ile hangi commit'in hata getirdigini etiketler. Duzeltme
+            commit'lerinin degistirdigi satirlari git blame ile en son
+            kimin yazdigina bakar. Once mine --db ve metrics calismis olmali
+            --out <dosya>       etiketleme ozetini bu dosyaya JSON yazar
+
         scan ve check icin gecerli:
           --config <yol>      yapilandirma dosyasi. Verilmezse taranan kokteki
                               sievert.json okunur, o da yoksa varsayilanlar calisir
@@ -129,7 +141,7 @@ public static class ArgumentParser
 
         string command = args[0];
 
-        if (command is not ("scan" or "check" or "mine" or "metrics"))
+        if (command is not ("scan" or "check" or "mine" or "metrics" or "label"))
         {
             return new ParseResult(null, $"Bilinmeyen komut: {command}");
         }
@@ -144,7 +156,8 @@ public static class ArgumentParser
             "scan" => ParseScan(args),
             "check" => ParseCheck(args),
             "mine" => ParseMine(args),
-            _ => ParseMetrics(args),
+            "metrics" => ParseMetrics(args),
+            _ => ParseLabel(args),
         };
     }
 
@@ -337,30 +350,37 @@ public static class ArgumentParser
             null);
     }
 
-    private static ParseResult ParseMetrics(string[] args)
+    /// <summary>
+    /// metrics ve label ayni secenegi aliyor: sadece --out. Iki ayri dongu yazmak yerine
+    /// ortak ayristirici.
+    /// </summary>
+    private static ParseResult ParseOutOnly(string[] args, Func<string, string?, CommandOptions> build)
     {
         string? outputPath = null;
 
         for (int i = 2; i < args.Length; i++)
         {
-            switch (args[i])
+            if (args[i] != "--out")
             {
-                case "--out":
-                    if (i + 1 >= args.Length)
-                    {
-                        return new ParseResult(null, "--out bir dosya yolu bekliyor.");
-                    }
-
-                    outputPath = args[++i];
-                    break;
-
-                default:
-                    return new ParseResult(null, $"Bilinmeyen secenek: {args[i]}");
+                return new ParseResult(null, $"Bilinmeyen secenek: {args[i]}");
             }
+
+            if (i + 1 >= args.Length)
+            {
+                return new ParseResult(null, "--out bir dosya yolu bekliyor.");
+            }
+
+            outputPath = args[++i];
         }
 
-        return new ParseResult(new MetricsOptions(args[1], outputPath), null);
+        return new ParseResult(build(args[1], outputPath), null);
     }
+
+    private static ParseResult ParseLabel(string[] args) =>
+        ParseOutOnly(args, (target, output) => new LabelOptions(target, output));
+
+    private static ParseResult ParseMetrics(string[] args) =>
+        ParseOutOnly(args, (target, output) => new MetricsOptions(target, output));
 
     /// <summary>
     /// Saat dilimi yazilmamis bir tarih UTC sayiliyor. Yerel saate gore yorumlasaydim

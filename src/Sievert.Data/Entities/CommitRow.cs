@@ -46,5 +46,15 @@ public sealed class CommitRow
 
     public int ChangedCSharpFiles { get; set; }
 
+    /// <summary>
+    /// Bu commit bir hata getirmis mi. SZZ ile etiketleniyor: bir duzeltme commit'inin
+    /// degistirdigi satirlari en son bu commit yazmissa true. Bir commit hem duzeltme
+    /// (<c>CommitMetrics.IsFix</c>) hem hata getiren olabilir; ikisi ayri alan.
+    /// </summary>
+    public bool IsBugIntroducing { get; set; }
+
+    /// <summary>Etiketin nereden geldigi. Su an tek deger: <c>szz</c>. Etiketlenmemisse null.</summary>
+    public string? LabelSource { get; set; }
+
     public List<CommitFileRow> Files { get; } = [];
 }

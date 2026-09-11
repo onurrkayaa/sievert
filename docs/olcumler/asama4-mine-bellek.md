@@ -111,3 +111,22 @@ Dosya satirlari 500 commit'lik obekler hâlinde okunuyor, tamami ayni anda belle
 girmiyor. Obek obek okumanin ikinci bir sebebi daha var: Npgsql tek baglanti uzerinde
 acik bir okuyucu varken yazmaya izin vermiyor, oysa olculer okuma suruyorken yaziliyor.
 Ilk yazdigim hâli tam da bu yuzden calismadi.
+
+## SZZ etiketleme (Adim 4)
+
+Beklenti (olcumden once): sure 60-180 sn, bellek 300-450 MB.
+
+| Kosu | Commit | Sure | Tepe bellek (RSS) |
+|---|---|---|---|
+| Adim 1: git okuma + JSONL | 2759 | 3,95 sn | 244 MB |
+| Adim 2: git okuma + PostgreSQL'e yazma | 2759 | 5,44 sn | 323 MB |
+| Adim 3: veritabanindan okuma + metrik | 2759 | 0,61 sn | 169 MB |
+| **Adim 4: SZZ etiketleme (blame)** | **288 duzeltme** | **125,04 sn** | **178 MB** |
+
+Sure tahmini tuttu. Bellek tahmini tutmadi: 300-450 MB bekliyordum, 178 MB cikti. Blame'in
+hunk koleksiyonu dosya bitince birakiliyor ve ayni anda yalnizca tek bir dosyanin blame'i
+bellekte duruyor; tahminimde bunlarin birikecegini varsaymisim.
+
+Sure onceki adimlarin 20-30 kati. Sebep tek: blame, sorulan satir icin degil o satirin
+gectigi her dosya icin butun tarihi geriye dogru yuruyor. 5102 satir sorulmasina ragmen
+125 sn surmesinin sebebi bu.

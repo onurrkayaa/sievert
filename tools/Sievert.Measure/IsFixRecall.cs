@@ -90,6 +90,7 @@ public static class IsFixRecall
 
             string word = subject[start..i];
 
+            // sievert:disable SV004 Stems sabit bir dizi, veritabani sorgusu degil
             if (Stems.Any(root => word.StartsWith(root, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;

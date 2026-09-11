@@ -29,6 +29,7 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
             repository.Property(row => row.Name).HasMaxLength(400);
             repository.Property(row => row.RemoteUrl).HasMaxLength(1000);
             repository.Property(row => row.ScannedSha).HasMaxLength(40);
+            repository.Property(row => row.LocalPath).HasMaxLength(1000);
         });
 
         builder.Entity<CommitRow>(commit =>
@@ -47,6 +48,10 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
             commit.Property(row => row.AuthorName).HasMaxLength(400);
             commit.Property(row => row.AuthorEmail).HasMaxLength(400);
             commit.Property(row => row.MessageSubject).HasMaxLength(1000);
+            commit.Property(row => row.LabelSource).HasMaxLength(20);
+
+            // Asama 5 egitim kumesini bu sutundan suzecek.
+            commit.HasIndex(row => row.IsBugIntroducing);
 
             commit.HasOne(row => row.Repository)
                 .WithMany(repository => repository.Commits)

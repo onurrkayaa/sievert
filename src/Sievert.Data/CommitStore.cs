@@ -12,6 +12,7 @@ namespace Sievert.Data;
 /// <param name="RepositoryName">Depo adi, gosterim icin.</param>
 /// <param name="RemoteUrl">origin adresi, yoksa null.</param>
 /// <param name="HeadSha">Tarama sirasinda HEAD'in gosterdigi commit.</param>
+/// <param name="LocalPath">Deponun bu makinedeki klasoru; etiketleme buna ihtiyac duyuyor.</param>
 /// <param name="Rewrite">true ise deponun mevcut commit'leri silinip bastan yaziliyor.</param>
 public sealed record StoreOptions(
     string Identity,
@@ -19,6 +20,7 @@ public sealed record StoreOptions(
     string RepositoryName,
     string? RemoteUrl,
     string? HeadSha,
+    string? LocalPath,
     bool Rewrite);
 
 /// <summary>Yazma isinin sonucu.</summary>
@@ -118,6 +120,7 @@ public sealed class CommitStore(SievertContext context)
             RemoteUrl = options.RemoteUrl,
             ScannedAt = DateTimeOffset.UtcNow,
             ScannedSha = options.HeadSha,
+            LocalPath = options.LocalPath,
         };
 
         context.Repositories.Add(created);
@@ -148,6 +151,7 @@ public sealed class CommitStore(SievertContext context)
         repository.RemoteUrl = options.RemoteUrl;
         repository.ScannedAt = DateTimeOffset.UtcNow;
         repository.ScannedSha = options.HeadSha;
+        repository.LocalPath = options.LocalPath;
 
         if (first is not null && (repository.FirstCommitDate is null || first < repository.FirstCommitDate))
         {

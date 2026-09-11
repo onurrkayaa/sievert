@@ -54,7 +54,7 @@ dotnet test
 dotnet run --project src/Sievert.Cli
 ```
 
-Right now there are four commands. `sievert scan <path>` reads the C# files under a path
+Right now there are five commands. `sievert scan <path>` reads the C# files under a path
 and prints the types and methods it found as a tree, with a summary at the end.
 `sievert check <path>` runs the rules instead and prints each finding as a diagnostic
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
@@ -84,6 +84,15 @@ like a bug fix. It does not go back to git. Every number is computed from what c
 *before* that commit only; if information from later commits leaked in, stage 5 would
 train a model that looks good and is not. `--out <file>` writes the min, median, p95 and
 max of each metric as JSON. The definitions are in ADR 0013.
+
+`sievert label <repo-name>` is where the labels come from. It takes every commit whose
+message looks like a fix, finds the `.cs` lines that fix deleted, and runs git blame on
+the parent version to see who wrote them last; those commits get marked as bug
+introducing. That is the SZZ method. On Polly it labelled 272 of 2759 commits (9.9%),
+which is just under the 10-30% you see in the literature - the funnel explaining why is
+in `docs/olcumler/asama4-szz.md`. Two things worth knowing before trusting it: none of
+the labels have been checked by hand, and blame in LibGit2Sharp does not follow renames,
+which matters for 65% of the files involved. ADR 0014 has the rest.
 
 ### Setting up the database
 

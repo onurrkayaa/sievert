@@ -1,13 +1,14 @@
 using Sievert.Data;
 using Sievert.Data.Metrics;
 using Sievert.Measure;
+using Sievert.Mining;
 
 // Olcum programi. Urunun parcasi degil: raporlardaki sayilari uretmek icin var ve
 // davranis degistirmiyor, sadece okuyup karsilastiriyor. Cikti dogrudan
 // docs/olcumler/ altindaki dosyalara giriyor.
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("Kullanim: measure <isfix|bot> <repo-adi>");
+    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz> <repo-adi>");
     return 2;
 }
 
@@ -39,6 +40,19 @@ switch (args[0])
 
     case "bot":
         BotImpact.Report(commits, bots);
+        return 0;
+
+    case "szz":
+        if (repository.LocalPath is not string path || !Directory.Exists(path))
+        {
+            Console.Error.WriteLine("Deponun yerel klasoru kayitli degil; once mine --db calistir.");
+            return 2;
+        }
+
+        SzzVariants.Report(
+            path,
+            [.. new LabelStore(context).Fixes(repository.Id).Select(fix => new SzzFix(fix.Sha, fix.Date))]);
+
         return 0;
 
     default:

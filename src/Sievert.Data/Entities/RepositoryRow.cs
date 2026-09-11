@@ -41,5 +41,12 @@ public sealed class RepositoryRow
     /// <summary>Tarama sirasinda HEAD'in gosterdigi commit. Hangi surumun okundugu belli olsun diye.</summary>
     public string? ScannedSha { get; set; }
 
+    /// <summary>
+    /// Deponun bu makinedeki klasoru. Etiketleme git blame calistirdigi icin yerel bir
+    /// klona ihtiyac duyuyor ve komut sadece depo adi aliyor. Makineye ozel bir deger
+    /// oldugu icin baska bir makinede gecersiz olabilir; sinirliliklarda yaziyor.
+    /// </summary>
+    public string? LocalPath { get; set; }
+
     public List<CommitRow> Commits { get; } = [];
 }

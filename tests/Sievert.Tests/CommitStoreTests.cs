@@ -131,8 +131,8 @@ public class CommitStoreTests(PostgresFixture postgres)
         string? remote = "https://github.com/App-vNext/Polly.git",
         bool rewrite = false) =>
         Sievert.Mining.RemoteIdentity.Normalize(remote) is string identity
-            ? new StoreOptions(identity, "remote", folder, remote, "abc1234", rewrite)
-            : new StoreOptions(folder, "folder", folder, null, "abc1234", rewrite);
+            ? new StoreOptions(identity, "remote", folder, remote, "abc1234", "/tmp/" + folder, rewrite)
+            : new StoreOptions(folder, "folder", folder, null, "abc1234", "/tmp/" + folder, rewrite);
 
     /// <summary>Hepsi ayni dosyaya dokunan commit'ler; gecmis metrikleri icin.</summary>
     private static IEnumerable<CommitRecord> SameFileCommits(int count)
@@ -229,5 +229,48 @@ public class CommitStoreTests(PostgresFixture postgres)
         ];
 
         Assert.Equal([0, 1, 2, 3], prior);
+    }
+
+    [DockerFact]
+    public void LabellingTwiceWithTheSameInput_LeavesTheSameRows()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        new CommitStore(context).Write(Commits(5), Options());
+
+        int repositoryId = context.Repositories.Single().Id;
+        LabelStore store = new(context);
+        string[] blamed = [.. context.Commits.OrderBy(row => row.Sha).Take(2).Select(row => row.Sha)];
+
+        LabelResult first = store.Apply(repositoryId, blamed);
+        LabelResult second = store.Apply(repositoryId, blamed);
+
+        Assert.Equal(2, first.Labelled);
+        Assert.Equal(0, first.Cleared);
+        Assert.Equal(2, second.Labelled);
+
+        // Ikinci kosu once eskileri temizliyor, yani etiketler birikmiyor.
+        Assert.Equal(2, second.Cleared);
+        Assert.Equal(2, context.Commits.Count(row => row.IsBugIntroducing));
+        Assert.All(
+            context.Commits.Where(row => row.IsBugIntroducing),
+            row => Assert.Equal(LabelStore.Source, row.LabelSource));
+    }
+
+    [DockerFact]
+    public void LabellingWithAnEmptyListClearsEverything()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        new CommitStore(context).Write(Commits(3), Options());
+
+        int repositoryId = context.Repositories.Single().Id;
+        LabelStore store = new(context);
+
+        store.Apply(repositoryId, [.. context.Commits.Select(row => row.Sha)]);
+        LabelResult cleared = store.Apply(repositoryId, []);
+
+        Assert.Equal(0, cleared.Labelled);
+        Assert.Equal(3, cleared.Cleared);
+        Assert.Empty(context.Commits.Where(row => row.IsBugIntroducing));
+        Assert.All(context.Commits, row => Assert.Null(row.LabelSource));
     }
 }

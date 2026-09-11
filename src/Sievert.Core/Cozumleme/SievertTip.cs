@@ -7,13 +7,15 @@ public enum TipTuru
     Record,
     Struct,
     Interface,
+    Enum,
+    Delegate,
 }
 
 /// <summary>Bir dosyada bulunan tek bir tipin özeti.</summary>
 /// <param name="Ad">Tipin adı. İç içe tipler "Dis.Ic" şeklinde yazılır.</param>
 /// <param name="Turu">class / record / struct / interface.</param>
 /// <param name="BaslangicSatiri">Tipin başladığı satır (1'den başlar).</param>
-/// <param name="Metotlar">Tipin doğrudan içinde tanımlı metotlar.</param>
+/// <param name="Metotlar">Tipin doğrudan içinde tanımlı metotlar. Enum ve delegate için her zaman boş.</param>
 public sealed record SievertTip(
     string Ad,
     TipTuru Turu,
@@ -29,6 +31,8 @@ public static class TipTuruAdlari
         TipTuru.Record => "record",
         TipTuru.Struct => "struct",
         TipTuru.Interface => "interface",
+        TipTuru.Enum => "enum",
+        TipTuru.Delegate => "delegate",
         _ => throw new ArgumentOutOfRangeException(nameof(turu), turu, "Bilinmeyen tip turu."),
     };
 
@@ -39,6 +43,8 @@ public static class TipTuruAdlari
         "record" => TipTuru.Record,
         "struct" => TipTuru.Struct,
         "interface" => TipTuru.Interface,
+        "enum" => TipTuru.Enum,
+        "delegate" => TipTuru.Delegate,
         _ => throw new ArgumentOutOfRangeException(nameof(anahtarKelime), anahtarKelime, "Bilinmeyen tip turu."),
     };
 }

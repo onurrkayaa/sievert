@@ -32,7 +32,7 @@ public class OzetleyiciTests
         TaramaOzeti ozet = Ozetleyici.Ozetle(Analizler);
 
         Assert.Equal(0.5, ozet.AsyncOrani);
-        Assert.Equal(5.0, ozet.OrtalamaMetotUzunlugu); // (2 + 10 + 6 + 2) / 4
+        Assert.Equal(5.0, ozet.MetotUzunlugu.Ortalama); // (2 + 10 + 6 + 2) / 4
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class OzetleyiciTests
 
         Assert.Equal(0, ozet.MetotSayisi);
         Assert.Equal(0, ozet.AsyncOrani);
-        Assert.Equal(0, ozet.OrtalamaMetotUzunlugu);
+        Assert.Equal(0, ozet.MetotUzunlugu.Ortalama);
     }
 
     [Fact]

@@ -81,13 +81,14 @@ public class AgacBicimlendiriciTests
         string[] satirlar = Bicimlendir(Dosya("a.cs", Tip("Bir", Metot("Calis", asyncMi: true), Metot("Dur", satirSayisi: 3))));
 
         Assert.Contains("Ozet", satirlar);
-        Assert.Contains("  Dosya                   : 1", satirlar);
-        Assert.Contains("  Tip                     : 1", satirlar);
-        Assert.Contains("  Metot                   : 2", satirlar);
-        Assert.Contains("  Async orani             : %50.0 (1/2)", satirlar);
-        Assert.Contains("  Ortalama metot uzunlugu : 2.0 satir", satirlar);
-        Assert.Contains("  Ayristirilamayan dosya  : 0", satirlar);
-        Assert.Contains("  Tip bulunamayan dosya   : 0", satirlar);
+        Assert.Contains("  Dosya                  : 1  (uretim 1 / test 0)", satirlar);
+        Assert.Contains("  Tip                    : 1", satirlar);
+        Assert.Contains("  Metot                  : 2  (uretim 2 / test 0)", satirlar);
+        Assert.Contains("  Async orani            : %50.0 (1/2)", satirlar);
+        Assert.Contains("  Metot uzunlugu         : ortalama 2.0  medyan 2.0  p90 3  p95 3  en uzun 3", satirlar);
+        Assert.Contains("  Kor nokta              : yok", satirlar);
+        Assert.Contains("  Ayristirilamayan dosya : 0", satirlar);
+        Assert.Contains("  Tip bulunamayan dosya  : 0", satirlar);
     }
 
     [Fact]

@@ -31,7 +31,7 @@ public static class AgacBicimlendirici
 
         foreach (DosyaAnalizi analiz in analizler)
         {
-            satirlar.Add(Satir(new CiktiParcasi(analiz.DosyaYolu, CiktiRengi.Baslik)));
+            satirlar.Add(DosyaBasligi(analiz));
             satirlar.AddRange(DosyayiYaz(analiz, adSutunu, satirSutunu));
         }
 
@@ -150,13 +150,17 @@ public static class AgacBicimlendirici
 
     private static IEnumerable<CiktiSatiri> OzetiYaz(TaramaOzeti ozet)
     {
+        MetotUzunlugu uzunluk = ozet.MetotUzunlugu;
+        KodAyrimi ayrim = ozet.KodAyrimi;
+
         (string Etiket, string Deger)[] satirlar =
         [
-            ("Dosya", Sayi(ozet.DosyaSayisi)),
+            ("Dosya", $"{Sayi(ozet.DosyaSayisi)}  (uretim {ayrim.UretimDosyaSayisi} / test {ayrim.TestDosyaSayisi})"),
             ("Tip", Sayi(ozet.TipSayisi)),
-            ("Metot", Sayi(ozet.MetotSayisi)),
+            ("Metot", $"{Sayi(ozet.MetotSayisi)}  (uretim {ayrim.UretimMetotSayisi} / test {ayrim.TestMetotSayisi})"),
             ("Async orani", $"%{Ondalik(ozet.AsyncOrani * 100)} ({ozet.AsyncMetotSayisi}/{ozet.MetotSayisi})"),
-            ("Ortalama metot uzunlugu", $"{Ondalik(ozet.OrtalamaMetotUzunlugu)} satir"),
+            ("Metot uzunlugu", $"ortalama {Ondalik(uzunluk.Ortalama)}  medyan {Ondalik(uzunluk.Medyan)}  p90 {uzunluk.P90}  p95 {uzunluk.P95}  en uzun {uzunluk.EnUzun}"),
+            ("Kor nokta", KorNoktaOzeti(ozet.KorNokta)),
             ("Ayristirilamayan dosya", Sayi(ozet.AyristirilamayanDosyaSayisi)),
             ("Tip bulunamayan dosya", Sayi(ozet.TipBulunamayanDosyaSayisi)),
         ];
@@ -192,6 +196,28 @@ public static class AgacBicimlendirici
             .Select(metot => metot.SatirSayisi.ToString(CultureInfo.InvariantCulture).Length)
             .DefaultIfEmpty(1)
             .Max();
+
+    /// <summary>Dosya adi, kosullu derleme varsa yaninda kucuk bir isaret.</summary>
+    private static CiktiSatiri DosyaBasligi(DosyaAnalizi analiz)
+    {
+        if (!analiz.KosulluDerlemeVarMi)
+        {
+            return Satir(new CiktiParcasi(analiz.DosyaYolu, CiktiRengi.Baslik));
+        }
+
+        string isaret = analiz.KorNoktaSatirlari > 0
+            ? $"  [#if - {analiz.KorNoktaSatirlari} satir gorulmedi]"
+            : "  [#if]";
+
+        return Satir(
+            new CiktiParcasi(analiz.DosyaYolu, CiktiRengi.Baslik),
+            new CiktiParcasi(isaret, CiktiRengi.Uyari));
+    }
+
+    private static string KorNoktaOzeti(KorNokta korNokta) =>
+        korNokta.DosyaSayisi == 0
+            ? "yok"
+            : $"{korNokta.DosyaSayisi} dosyada #if, {korNokta.SatirSayisi} satir gorulmedi (%{Ondalik(korNokta.Orani * 100)})";
 
     private static string Sayi(int deger) => deger.ToString(CultureInfo.InvariantCulture);
 

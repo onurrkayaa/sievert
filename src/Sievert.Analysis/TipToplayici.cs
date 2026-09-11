@@ -34,6 +34,13 @@ internal sealed class TipToplayici : CSharpSyntaxWalker
 
     public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node) => TipiGez(node, TipTuru.Interface);
 
+    // Enum ve delegate metot icermez, o yuzden sadece kaydedilip icine inilmiyor.
+    public override void VisitEnumDeclaration(EnumDeclarationSyntax node) =>
+        TipiKaydet(node.Identifier.ValueText, TipTuru.Enum, node);
+
+    public override void VisitDelegateDeclaration(DelegateDeclarationSyntax node) =>
+        TipiKaydet(node.Identifier.ValueText, TipTuru.Delegate, node);
+
     public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
         if (_acikTipler.Count == 0)
@@ -58,12 +65,7 @@ internal sealed class TipToplayici : CSharpSyntaxWalker
 
     private void TipiGez(TypeDeclarationSyntax node, TipTuru turu)
     {
-        string ad = _acikTipler.Count == 0
-            ? node.Identifier.ValueText
-            : $"{_acikTipler.Peek().Ad}.{node.Identifier.ValueText}";
-
-        TipKaydi kayit = new(ad, turu, node.GetLocation().GetLineSpan().StartLinePosition.Line + 1);
-        _kayitlar.Add(kayit);
+        TipKaydi kayit = TipiKaydet(node.Identifier.ValueText, turu, node);
         _acikTipler.Push(kayit);
 
         // İç içe tipleri ve metotları bulmak için üyeleri tek tek geziyoruz.
@@ -73,6 +75,18 @@ internal sealed class TipToplayici : CSharpSyntaxWalker
         }
 
         _acikTipler.Pop();
+    }
+
+    /// <summary>Tipi listeye ekler. Ic ice tipler ust tipin adiyla nitelenir.</summary>
+    private TipKaydi TipiKaydet(string ad, TipTuru turu, SyntaxNode node)
+    {
+        TipKaydi kayit = new(
+            _acikTipler.Count == 0 ? ad : $"{_acikTipler.Peek().Ad}.{ad}",
+            turu,
+            node.GetLocation().GetLineSpan().StartLinePosition.Line + 1);
+
+        _kayitlar.Add(kayit);
+        return kayit;
     }
 
     /// <summary>Gezinti sırasında metotları biriktirebilmek için kullanılan ara kayıt.</summary>

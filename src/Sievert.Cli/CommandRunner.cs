@@ -11,6 +11,8 @@ using Sievert.Core.Rules;
 using Microsoft.EntityFrameworkCore;
 
 using Sievert.Data;
+using Sievert.Data.Entities;
+using Sievert.Data.Metrics;
 using Sievert.Mining;
 
 namespace Sievert.Cli;
@@ -45,6 +47,13 @@ public static class CommandRunner
         }
 
         CommandOptions options = result.Options;
+
+        // metrics bir yol almiyor, veritabanindaki bir depo adi aliyor; yol kontrolu
+        // ondan once gelemez.
+        if (options is MetricsOptions metrics)
+        {
+            return RunMetrics(metrics);
+        }
 
         if (!File.Exists(options.TargetPath) && !Directory.Exists(options.TargetPath))
         {
@@ -272,6 +281,46 @@ public static class CommandRunner
             ConsoleWriter.UseColor());
 
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).
+        return ExitCodes.Clean;
+    }
+
+    private static int RunMetrics(MetricsOptions options)
+    {
+        using SievertContext? context = OpenDatabase();
+
+        if (context is null)
+        {
+            return ExitCodes.ToolError;
+        }
+
+        MetricsRunner runner = new(context);
+
+        if (runner.FindRepository(options.TargetPath) is not RepositoryRow repository)
+        {
+            Console.Error.WriteLine(
+                $"Veritabaninda boyle bir depo yok: {options.TargetPath}. "
+                + "Once 'sievert mine <repo-yolu> --db' calistir.");
+
+            return ExitCodes.ToolError;
+        }
+
+        MetricDistribution distribution = new();
+        System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
+
+        MetricsResult result = runner.Run(repository.Id, MetricOptions.Default, distribution.Add);
+
+        clock.Stop();
+
+        if (options.OutputPath is string path)
+        {
+            File.WriteAllText(path, MetricsJsonFormatter.Distribution(repository.Name, distribution));
+        }
+
+        ConsoleWriter.Write(
+            MetricsFormatter.Format(repository.Name, result, clock.Elapsed, options.OutputPath),
+            ConsoleWriter.UseColor());
+
+        // metrics kural calistirmiyor, bulgu uretemez; basariliysa hep 0 (ADR 0006).
         return ExitCodes.Clean;
     }
 

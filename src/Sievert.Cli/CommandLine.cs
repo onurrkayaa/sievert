@@ -49,6 +49,12 @@ public sealed record MineOptions(
     bool Rewrite)
     : CommandOptions(TargetPath, OutputPath is not null, [], null);
 
+/// <summary>metrics komutunun ayarlari.</summary>
+/// <param name="TargetPath">Depo adi ya da kimligi. Yol degil, veritabanindaki kayit.</param>
+/// <param name="OutputPath">--out ile verilen dosya yolu; dagilim ozeti oraya yaziliyor.</param>
+public sealed record MetricsOptions(string TargetPath, string? OutputPath)
+    : CommandOptions(TargetPath, OutputPath is not null, [], null);
+
 /// <summary>Ayristirma sonucu: ya ayarlar ya da kullaniciya gosterilecek bir hata.</summary>
 /// <param name="Options">Basarili ayristirmada dolu olur.</param>
 /// <param name="Error">Basarisiz ayristirmada dolu olur.</param>
@@ -95,6 +101,12 @@ public static class ArgumentParser
                                 ISO bicimi, ornegin 2025-01-01
             --max-commits N     en fazla N commit oku (en yeniden eskiye)
 
+          metrics <repo-adi> [--out <dosya>]
+            veritabanindaki ham veriden commit olculerini hesaplar ve yazar.
+            Git'e gitmez, once mine --db ile veri yazilmis olmali
+            --out <dosya>       her olcunun min/medyan/p95/max dagilimini
+                                bu dosyaya JSON yazar
+
         scan ve check icin gecerli:
           --config <yol>      yapilandirma dosyasi. Verilmezse taranan kokteki
                               sievert.json okunur, o da yoksa varsayilanlar calisir
@@ -117,7 +129,7 @@ public static class ArgumentParser
 
         string command = args[0];
 
-        if (command is not ("scan" or "check" or "mine"))
+        if (command is not ("scan" or "check" or "mine" or "metrics"))
         {
             return new ParseResult(null, $"Bilinmeyen komut: {command}");
         }
@@ -131,7 +143,8 @@ public static class ArgumentParser
         {
             "scan" => ParseScan(args),
             "check" => ParseCheck(args),
-            _ => ParseMine(args),
+            "mine" => ParseMine(args),
+            _ => ParseMetrics(args),
         };
     }
 
@@ -322,6 +335,31 @@ public static class ArgumentParser
         return new ParseResult(
             new MineOptions(args[1], outputPath, since, maxCommits, database, rewrite),
             null);
+    }
+
+    private static ParseResult ParseMetrics(string[] args)
+    {
+        string? outputPath = null;
+
+        for (int i = 2; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "--out":
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--out bir dosya yolu bekliyor.");
+                    }
+
+                    outputPath = args[++i];
+                    break;
+
+                default:
+                    return new ParseResult(null, $"Bilinmeyen secenek: {args[i]}");
+            }
+        }
+
+        return new ParseResult(new MetricsOptions(args[1], outputPath), null);
     }
 
     /// <summary>

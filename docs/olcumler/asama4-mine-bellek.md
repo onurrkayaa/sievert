@@ -84,3 +84,30 @@ Ikinci kosuda hicbir satir yazilmadi (2759 commit "zaten kayitli" diye atlandi) 
 
 Veritabaninda olusan satirlar: 2759 commit, 17 428 dosya degisikligi, 854 bot bayrakli
 commit, 751 `Co-Authored-By` satiri. `/` ile baslayan tek bir yol yok.
+
+## Metrik hesabi (Adim 3)
+
+Bu is veritabanindan okuyor, git'e hic gitmiyor. Olcumden **once** yazilan beklenti suydu:
+bellek Adim 1 ve 2'nin altinda, 120-180 MB civari; sure Adim 2'nin 5,44 sn'sinden kisa,
+2-4 sn civari.
+
+| Kosu | Commit | Sure | Tepe bellek (RSS) |
+|---|---|---|---|
+| Adim 1: git okuma + JSONL | 2759 | 3,95 sn | 244 MB |
+| Adim 2: git okuma + PostgreSQL'e yazma | 2759 | 5,44 sn | 323 MB |
+| **Adim 3: veritabanindan okuma + metrik** | **2759** | **0,61 sn** | **169 MB** |
+
+Bellek tahmini tuttu (169 MB, 120-180 araligi icinde). Sure tahmini **tutmadi**: 2-4 sn
+bekliyordum, 0,61 sn cikti, yani tahminimin bes kati hizli. Diff hesaplamanin ne kadar
+pahali oldugunu kucumsemisim; git tarafi kaldirilinca geriye iki siralanmis sorgu ve
+aritmetik kaliyor.
+
+Bellegin Adim 1'in altina inmemesinin sebebi hesabin kendi durumu: dosya gecmisi ve
+yazar-dosya dokunuslari sozlukleri bellekte buyuyor (Polly'de ~17 bin kayit), ayrica
+dagilim ozeti icin her olcunun butun degerleri tutuluyor (2759 x 15 sayi). Ikisi de
+commit sayisiyla buyuyor; yuz binlerce commit'lik bir repoda olculmedi.
+
+Dosya satirlari 500 commit'lik obekler hâlinde okunuyor, tamami ayni anda bellege
+girmiyor. Obek obek okumanin ikinci bir sebebi daha var: Npgsql tek baglanti uzerinde
+acik bir okuyucu varken yazmaya izin vermiyor, oysa olculer okuma suruyorken yaziliyor.
+Ilk yazdigim hâli tam da bu yuzden calismadi.

@@ -54,7 +54,7 @@ dotnet test
 dotnet run --project src/Sievert.Cli
 ```
 
-Right now there are three commands. `sievert scan <path>` reads the C# files under a path
+Right now there are four commands. `sievert scan <path>` reads the C# files under a path
 and prints the types and methods it found as a tree, with a summary at the end.
 `sievert check <path>` runs the rules instead and prints each finding as a diagnostic
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
@@ -75,6 +75,15 @@ repository does not duplicate anything: commits already stored are skipped, and 
 summary says how many. `--overwrite` deletes what is there and writes again. Derived
 metrics are not computed yet - there is a `CommitMetrics` table but it is empty on
 purpose, stage 4 step 3 fills it. The schema and why it looks like this are in ADR 0012.
+
+`sievert metrics <repo-name>` is the last one. It reads the raw commit data back out of
+the database and computes fifteen numbers per commit - how big the change was, how spread
+out it was (Shannon entropy over the changed lines), how much history the touched files
+already had, how experienced the author was on those files, and whether the message looks
+like a bug fix. It does not go back to git. Every number is computed from what came
+*before* that commit only; if information from later commits leaked in, stage 5 would
+train a model that looks good and is not. `--out <file>` writes the min, median, p95 and
+max of each metric as JSON. The definitions are in ADR 0013.
 
 ### Setting up the database
 

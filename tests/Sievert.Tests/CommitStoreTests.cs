@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Sievert.Core.Mining;
 using Sievert.Data;
 using Sievert.Data.Entities;
+using Sievert.Data.Metrics;
 
 namespace Sievert.Tests;
 
@@ -133,6 +134,18 @@ public class CommitStoreTests(PostgresFixture postgres)
             ? new StoreOptions(identity, "remote", folder, remote, "abc1234", rewrite)
             : new StoreOptions(folder, "folder", folder, null, "abc1234", rewrite);
 
+    /// <summary>Hepsi ayni dosyaya dokunan commit'ler; gecmis metrikleri icin.</summary>
+    private static IEnumerable<CommitRecord> SameFileCommits(int count)
+    {
+        foreach (CommitRecord commit in Commits(count))
+        {
+            yield return commit with
+            {
+                Files = [new FileChange("src/Ayni.cs", null, 10, 2, FileChangeKind.Modified)],
+            };
+        }
+    }
+
     /// <summary>Ikinci commit'ten sonra patlayan bir akis; yarida kesilmeyi taklit ediyor.</summary>
     private static IEnumerable<CommitRecord> FailsAfter(int count)
     {
@@ -167,5 +180,54 @@ public class CommitStoreTests(PostgresFixture postgres)
                 Files: [new FileChange($"src/Dosya{i}.cs", null, 10, 2, FileChangeKind.Modified)],
                 Summary: new CommitChangeSummary(10, 2, 1, 1));
         }
+    }
+
+    [DockerFact]
+    public void MetricsAreWrittenForEveryCommitAndRecomputingGivesTheSameRows()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        new CommitStore(context).Write(Commits(5), Options());
+
+        int repositoryId = context.Repositories.Single().Id;
+        MetricsRunner runner = new(context);
+
+        MetricsResult first = runner.Run(repositoryId, MetricOptions.Default);
+        List<int> firstPrior = [.. context.CommitMetrics.OrderBy(row => row.CommitId).Select(row => row.PriorChanges)];
+
+        MetricsResult second = runner.Run(repositoryId, MetricOptions.Default);
+        List<int> secondPrior = [.. context.CommitMetrics.OrderBy(row => row.CommitId).Select(row => row.PriorChanges)];
+
+        Assert.Equal(5, first.CommitCount);
+        Assert.Equal(5, second.CommitCount);
+
+        // Yeniden hesaplama eski satirlari silip yeniden yaziyor, ikiye katlamiyor.
+        Assert.Equal(5, context.CommitMetrics.Count());
+        Assert.Equal(firstPrior, secondPrior);
+    }
+
+    [DockerFact]
+    public void MetricsReadCommitsInDateOrderSoHistoryGrows()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        new CommitStore(context).Write(SameFileCommits(4), Options());
+
+        int repositoryId = context.Repositories.Single().Id;
+        new MetricsRunner(context).Run(repositoryId, MetricOptions.Default);
+
+        // Dort commit de ayni dosyaya dokunuyor, yani tarih sirasinda PriorChanges
+        // 0, 1, 2, 3 olmali. Sira bozulsaydi bu dizi bozulurdu.
+        List<int> prior =
+        [
+            .. context.CommitMetrics
+                .Join(context.Commits, metric => metric.CommitId, commit => commit.Id, (metric, commit) => new
+                {
+                    commit.AuthorDateUtc,
+                    metric.PriorChanges,
+                })
+                .OrderBy(row => row.AuthorDateUtc)
+                .Select(row => row.PriorChanges),
+        ];
+
+        Assert.Equal([0, 1, 2, 3], prior);
     }
 }

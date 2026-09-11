@@ -23,9 +23,10 @@ public static class ScanRoot
     /// <summary>Analizlerdeki dosya yollarini koke gore goreli hale getirir.</summary>
     public static IReadOnlyList<FileAnalysis> MakePathsRelative(IReadOnlyList<FileAnalysis> analyses, string root) =>
         analyses
-            .Select(analysis => analysis with { FilePath = Relative(analysis.FilePath, root) })
+            .Select(analysis => analysis with { FilePath = RelativePath(analysis.FilePath, root) })
             .ToList();
 
-    private static string Relative(string filePath, string root) =>
+    /// <summary>Tek bir dosya yolunu koke gore goreli hale getirir.</summary>
+    public static string RelativePath(string filePath, string root) =>
         Path.GetRelativePath(root, Path.GetFullPath(filePath));
 }

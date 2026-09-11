@@ -13,3 +13,6 @@ gorursen normal.
 - `Broken.cs` - **bilerek hatali**. Kapanmayan parantez ve eksik noktali virgul
   var. Amaci, sozdizimi bozuk bir dosyada cozumleyicinin exception firlatmadigini
   ve cozebildigi kadarini dondurdugunu dogrulamak.
+- `AsyncVoid.cs` - SV001 kuralinin ornekleri. Icinde yakalanmasi gereken sade
+  bir `async void`, muaf tutulan bir event handler, bulgu uretmemesi gereken bir
+  `async Task` ve sinir durum olarak parametresiz bir `async void` var.

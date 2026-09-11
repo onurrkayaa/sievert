@@ -1,0 +1,7 @@
+{
+  "rules": [
+    { "code": "SV003" },
+    { "code": "SV005" }
+  ],
+  "exclude": ["samples/**"]
+}

@@ -18,8 +18,20 @@ jobs:
       - run: dotnet build --no-restore
       - run: dotnet test --no-build
 
-      # Sievert kendi koduna kendi kurallarini uyguluyor. Ayarlar repo kokundeki
-      # sievert.json'dan geliyor, burada bayrak yok: samples/ oradan disarida
-      # birakiliyor, cunku o dosyalar bilerek hatali ve testlerin okumasi icin duruyorlar.
-      - name: sievert kendi kendini tariyor
+      # Asagidaki iki adim ayni kodu tariyor ama farkli sorulari cevapliyor.
+      #
+      # Birincisi aracin SAVUNDUGU VARSAYILANI siniyor: repo kokundeki sievert.json ne
+      # diyorsa o. SV003 ve SV005 varsayilan olarak kapali (precision'lari %0 olculdu,
+      # bkz. docs/olcumler/asama3-precision.md). Bu adim kirilirsa CI kirilir, cunku
+      # kullanicinin kutudan cikan haliyle gordugu sey budur.
+      - name: sievert kendi kendini tariyor (varsayilan kume)
         run: dotnet run --project src/Sievert.Cli --no-build -- check .
+
+      # Ikincisi aracin TAMAMINI siniyor: varsayilan olarak kapali olan kurallar da
+      # dahil. Amaci bulgu bulmak degil, kapali kurallarin hala calisir durumda
+      # oldugunu ve kendi kodumuz uzerinde ne soyledigini gormek. Bu adim CI'i
+      # KIRMIYOR: kapali kurallarin precision'i dusuk, urettikleri bulgu bir
+      # basarisizlik olcutu degil. Cikti loglarda duruyor.
+      - name: sievert kendi kendini tariyor (tum kurallar)
+        continue-on-error: true
+        run: dotnet run --project src/Sievert.Cli --no-build -- check . --config .github/sievert-tum-kurallar.json

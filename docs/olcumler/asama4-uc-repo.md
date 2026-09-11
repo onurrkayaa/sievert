@@ -4,6 +4,10 @@
 **Repolar:** Polly `2247db24`, ShareX `b5a397ea`, Jellyfin `1d7b6d97` - Asama 3'tekilerin
 ayni commit'leri, tam klon (shallow degil).
 
+**Hangi kodla olculdu:** madencilik ve metrikler `dca4c8d`; etiketleme, huni ve
+esdegerlik sayilari satir kaymasi duzeltildikten sonra, `9592508` ve sonrasi. Her tablonun
+basinda hangisi oldugu ayrica yaziyor.
+
 Bu dosya Asama 4'un butun boru hattini (madencilik, metrik, etiketleme) uc repoda
 calistirip sayilari yan yana koyuyor. **Asama 3'un bulgu sayilariyla birlestirilmedi**,
 o baska bir olcum ve kendi dosyasinda duruyor.
@@ -55,6 +59,8 @@ daha az daralacak ve darbogaz "silinen satiri olan" kademesine kayacak.
 Ucu de tam klon; `Shallow` satiri uc kosuda da `hayir` dedi.
 
 ## Madencilik
+
+**Olcum surumu:** `dca4c8d`. Madencilik kodu B070'ten etkilenmiyor, sayilar gecerli.
 
 | Olcu | Polly | ShareX | Jellyfin |
 |---|---|---|---|
@@ -123,28 +129,33 @@ kumesine yansimasi daha kucuk: ayni dosyada komsu satirlar cogu zaman ayni commi
 geliyor, o yuzden kayma cogu satirda ayni sonuca cikiyor. Asagidaki butun etiket sayilari
 **duzeltilmis kodla** uretildi.
 
-## Bosluk esdegerligi: gosterilemedi
+## Bosluk esdegerligi
 
-Adim 4'te sinirliliklarda su yaziyordu: "bizim bosluk suzgecimiz `git blame -w` ile ayni
-sey degil, ama farki olculmedi". Olculdu. Polly'de rastgele 50 duzeltme commit'i, 274
-dosya, 2243 satir:
+Ayni 50 duzeltme commit'i (ayni tohum, ayni secim), 274 dosya, 2243 satir. Olcum iki kez
+yapildi: once satir kaymasi duzeltilmeden (`dca4c8d`), sonra duzeltildikten sonra
+(`9592508`).
 
-| Karsilastirma | Ayni | Farkli |
-|---|---|---|
-| Bizimki vs `git blame -w` | 805 (%35,9) | 1436 (%64,1) |
-| Bizimki vs duz `git blame` | 1541 (%68,7) | 700 (%31,3) |
-| `git blame -w` vs duz `git blame` | - | 1426 (%63,6) |
+| Karsilastirma | Eski olcum (`dca4c8d`) | Yeni olcum (`9592508`) | Fark |
+|---|---|---|---|
+| Bizimki vs duz `git blame` | 1541 / 2243 (%68,7) | **2190 / 2243 (%97,6)** | +649 satir |
+| Bizimki vs `git blame -w` | 805 / 2243 (%35,9) | 762 / 2243 (%34,0) | -43 satir |
+| `git blame -w` vs duz `git blame` | 1426 farkli (%63,6) | 1428 farkli (%63,7) | ~ayni |
 
-**Esdegerlik gosterilemedi.** Uc satirin biri bile tek basina yeterli degil, ucu birlikte
-soyle okunuyor: `-w` secenegi git'in kendi ciktisini bu satirlarin %63,6'sinda
-degistiriyor, yani cok buyuk bir etki; bizim suzgecimiz ise blame'i hic degistirmedigi
-icin duz blame'e yakin duruyor. Ikisi ayni isi yapmiyor.
+Duz blame uyumunun %97,5'in uzerine cikmasi bekleniyordu, **%97,6 cikti**. Kaydirma
+denemeleri de artik ters yonde: bir satir ileri kaydirinca uyum 1541'e, bir satir geri
+kaydirinca 1564'e dusuyor - yani hizalama simdi dogru yerde.
 
-Not: bu olcum kayma hatasi duzeltilmeden once yapildi, yani "bizimki" sutunu hatali
-kodun ciktisi. Duzeltmeden sonra duz `git blame` ile uyum %97,5'e cikiyor; `-w` ile
-karsilastirma yeniden olculmedi. Sinirlilik maddesi **oldugu gibi kaliyor**, cunku
-esdegerlik gosterilmedi - ustelik yeni sayilar farkin `-w`'den geldigini daha da net
-gosteriyor.
+**Esdegerlik yine gosterilemedi, hatta daha net gosterilemedi.** Kayma duzeltilince
+bizimki duz blame'e neredeyse tam oturdu (%97,6) ama `git blame -w` ile uyum **dusuyor**
+(%35,9'dan %34,0'a). Sebep ucuncu satirda: `-w` secenegi git'in kendi ciktisini bu
+satirlarin %63,7'sinde degistiriyor. Yani bizim suzgecimiz blame'in cevabini hic
+degistirmiyor, sadece hangi satirlarin soruldugunu eliyor; `-w` ise cevabin kendisini
+degistiriyor. Ikisi ayni isi yapmiyor ve yeni sayilar bunu eskisinden daha acik soyluyor.
+
+**Kalan %2,4 (53 satir) ne?** Duz `git blame` ile aramizda hâlâ 53 satirlik fark var ve
+bunun ne oldugu **arastirilmadi**. Beklenen esigi gectigi icin durdum; iki blame
+uygulamasinin diff heuristiklerinde (satir sonu, en kucuk fark secimi, sinir commit
+islemesi) ayrildigi yerler olabilir ama bu bir tahmin, olculmedi.
 
 ## Metrik dagilimlari
 
@@ -252,7 +263,7 @@ sessizce bos sonuc uretmiyor.
 
 ## SZZ hunisi
 
-Butun sayilar duzeltilmis kodla (bir satirlik kayma giderilmis hâliyle).
+**Olcum surumu:** `9592508` (satir kaymasi duzeltilmis).
 
 | Kademe | Polly | ShareX |
 |---|---|---|

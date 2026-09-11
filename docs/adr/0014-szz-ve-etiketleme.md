@@ -100,6 +100,17 @@ girdiden ayni sonuc cikiyor ve onceki kosudan kalan etiket birikmiyor. Uc test b
 siniyor: ayni depoda iki kez calistirma, bos listeyle temizleme ve Mining tarafinda ayni
 commit icin iki kez blame.
 
+## Olcum ve kontrol araclari
+
+SZZ'nin ciktisini denetleyen araclar `tools/` altinda ve urunun parcasi degil:
+`Sievert.Measure` icindeki `blame-w`, `dogrulama`, `satir-kontrol` ve `sizinti` modlari.
+
+Bunlarin arasinda **`tools/liste-kontrol.py` Python**, deponun geri kalani C# oldugu hâlde.
+Sebebi isin kendisi: uretilen markdown listesini ayristirip her satir icin `git` cagirmak.
+Tek kullanimlik bir denetim araci, urun kodu degil, hicbir sey ona bagimli degil ve
+derlemeye girmiyor. Ayni isi C# ile yazmak duzenli ifade ve surec cagirma kodunu iki kat
+uzatirdi. Baska bir Python dosyasi eklemeyi planlamiyorum.
+
 ## Bilinen kusurlar
 
 - **Temel varsayim her zaman dogru degil.** "Duzeltmenin dokundugu satir hatanin

@@ -9,6 +9,8 @@
 **Repo:** App-vNext/Polly, tam klon, `2247db24`. 2759 commit.
 **Olcum programi:** `tools/Sievert.Measure`, `measure szz polly-full`
 **Komut:** `sievert label polly-full --out ...`
+**Hangi kodla olculdu:** `dca4c8d` - satir kaymasi (B070) **duzeltilmeden once**. Bu
+dosyadaki butun etiket sayilari o surumden geliyor.
 
 ## Sonuc
 

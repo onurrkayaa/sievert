@@ -16,7 +16,17 @@ jobs:
 
       - run: dotnet restore
       - run: dotnet build --no-restore
-      - run: dotnet test --no-build
+      # Test sonuclari artefakt olarak saklaniyor. Sebep: bir kosuda tek bir test
+      # dustu ve hangisi oldugu gorulemedi, cunku ozet disinda kayit kalmiyordu.
+      # Zaman asimi degerine dokunmadim; once hangi testin dustugunu bilmek gerekiyor.
+      - run: dotnet test --no-build --logger "trx;LogFileName=test-sonuclari.trx" --results-directory test-sonuclari
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-sonuclari
+          path: test-sonuclari/
+          retention-days: 30
 
       # Asagidaki iki adim ayni kodu tariyor ama farkli sorulari cevapliyor.
       #

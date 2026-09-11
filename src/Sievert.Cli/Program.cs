@@ -1,14 +1,65 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using Sievert.Analysis;
+using Sievert.Cli;
 using Sievert.Core;
+using Sievert.Core.Cozumleme;
 
-string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+AyristirmaSonucu sonuc = ArgumanAyristirici.Ayristir(args);
 
-foreach (BannerLine line in Banner.Render(version, RuntimeInformation.FrameworkDescription))
+if (sonuc.Ayarlar is null)
 {
-    Console.ForegroundColor = line.IsTitle ? ConsoleColor.Blue : ConsoleColor.Gray;
-    Console.WriteLine(line.Text);
+    if (args.Length == 0)
+    {
+        string surum = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+        KonsolYazici.Yaz(
+            Banner.Render(surum, RuntimeInformation.FrameworkDescription)
+                .Select(satir => new CiktiSatiri([new CiktiParcasi(satir.Text, satir.IsTitle ? CiktiRengi.Baslik : CiktiRengi.Soluk)]))
+                .ToList(),
+            KonsolYazici.RenkKullanilsinMi());
+        Console.WriteLine();
+        Console.WriteLine(ArgumanAyristirici.YardimMetni);
+        return 0;
+    }
+
+    Console.Error.WriteLine(sonuc.Hata);
+    Console.Error.WriteLine();
+    Console.Error.WriteLine(ArgumanAyristirici.YardimMetni);
+    return 1;
 }
 
-Console.ResetColor();
+TaramaArgumanlari ayarlar = sonuc.Ayarlar;
+
+if (!File.Exists(ayarlar.Yol) && !Directory.Exists(ayarlar.Yol))
+{
+    Console.Error.WriteLine($"Bulunamadi: {ayarlar.Yol}");
+    return 1;
+}
+
+IReadOnlyList<string> dosyalar = KaynakDosyaBulucu.Bul(ayarlar.Yol);
+
+if (dosyalar.Count == 0)
+{
+    Console.Error.WriteLine($"Taranacak .cs dosyasi yok: {ayarlar.Yol}");
+    return 1;
+}
+
+List<DosyaAnalizi> analizler = dosyalar.Select(DosyaCozumleyici.DosyayiCozumle).ToList();
+TaramaOzeti ozet = Ozetleyici.Ozetle(analizler);
+IReadOnlyList<MetotYeri> enUzunlar = ayarlar.EnUzunKac is int adet
+    ? Ozetleyici.EnUzunMetotlar(analizler, adet)
+    : [];
+
+if (ayarlar.Json)
+{
+    Console.Out.WriteLine(JsonBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar));
+    return 0;
+}
+
+string? kokKlasor = Directory.Exists(ayarlar.Yol) ? ayarlar.Yol : null;
+KonsolYazici.Yaz(
+    AgacBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar, kokKlasor),
+    KonsolYazici.RenkKullanilsinMi());
+
+return 0;

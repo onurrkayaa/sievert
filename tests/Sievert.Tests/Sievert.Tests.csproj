@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\samples\Hastalar\*.cs" Link="Hastalar\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Sievert.Analysis\Sievert.Analysis.csproj" />
   </ItemGroup>
 

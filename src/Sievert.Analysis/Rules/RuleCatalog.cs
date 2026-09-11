@@ -51,6 +51,7 @@ public static class RuleCatalog
         new NPlusOneRule(),
         new DisposableLeakRule(),
         new CancellationRule(),
+        new UnjustifiedSuppressionRule(),
     ];
 
     /// <summary>Tanidigimiz butun kural kodlari, sirali.</summary>

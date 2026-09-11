@@ -13,4 +13,11 @@ public sealed record RuleResult(IReadOnlyList<Finding> Findings, IReadOnlyList<E
 {
     /// <summary>Ne bulgu ne muafiyet.</summary>
     public static readonly RuleResult Empty = new([], []);
+
+    /// <summary>
+    /// <c>// sievert:disable</c> yorumuyla susturulan bulgular. Kurallar bunu uretmiyor;
+    /// susturma kuralin degil calistiricinin isi, cunku bir kuralin kendi bulgusunun
+    /// susturuldugunu bilmesine gerek yok.
+    /// </summary>
+    public IReadOnlyList<Suppression> Suppressions { get; init; } = [];
 }

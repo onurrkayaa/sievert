@@ -53,6 +53,11 @@ public sealed record RuleCodeCount(string RuleCode, int Count);
 /// </param>
 /// <param name="Rules">Hangi kurallarin calistigi ve hangilerinin kapatildigi.</param>
 /// <param name="BySeverity">Bulgularin seviyeye gore dagilimi.</param>
+/// <param name="SuppressedCount">
+/// <c>// sievert:disable</c> yorumuyla susturulan bulgu sayisi. Ozette duruyor cunku
+/// susturma gizli bir kolaylik olmamali: kac bulgunun gormezden gelindigi olculebilir
+/// bir sayi (ADR 0015).
+/// </param>
 public sealed record CheckSummary(
     int FileCount,
     int FindingCount,
@@ -60,7 +65,8 @@ public sealed record CheckSummary(
     int ExcludedFileCount,
     IReadOnlyList<string> SkippedDirectories,
     RuleUsage Rules,
-    SeverityCounts BySeverity)
+    SeverityCounts BySeverity,
+    int SuppressedCount)
 {
     /// <summary>Bulgulari sayip ozeti cikarir. Cikti her calistirmada ayni olsun diye kural kodlari siralanir.</summary>
     public static CheckSummary Of(
@@ -68,7 +74,8 @@ public sealed record CheckSummary(
         IReadOnlyList<Finding> findings,
         int excludedFileCount = 0,
         IReadOnlyList<string>? skippedDirectories = null,
-        RuleUsage? rules = null) =>
+        RuleUsage? rules = null,
+        int suppressedCount = 0) =>
         new(
             fileCount,
             findings.Count,
@@ -80,5 +87,6 @@ public sealed record CheckSummary(
             excludedFileCount,
             skippedDirectories ?? [],
             rules ?? RuleUsage.None,
-            SeverityCounts.Of(findings));
+            SeverityCounts.Of(findings),
+            suppressedCount);
 }

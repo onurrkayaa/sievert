@@ -156,8 +156,8 @@ public class JsonFormatterTests
 
         Assert.Equal(["SV001", "SV002", "SV003"], codes);
         Assert.Equal(
-            JsonFormatter.FormatCheck("/kok", findings, [], CheckSummary.Of(3, findings)),
-            JsonFormatter.FormatCheck("/kok", findings, [], CheckSummary.Of(3, findings)));
+            JsonFormatter.FormatCheck("/kok", findings, [], [], CheckSummary.Of(3, findings)),
+            JsonFormatter.FormatCheck("/kok", findings, [], [], CheckSummary.Of(3, findings)));
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class JsonFormatterTests
         Exemption[] exemptions = [new("SV001", "Patients/AsyncVoid.cs", 16, "OnSaved", ExemptionReason.Signature)];
 
         JsonElement exemption = JsonDocument
-            .Parse(JsonFormatter.FormatCheck("/kok", [], exemptions, CheckSummary.Of(3, [])))
+            .Parse(JsonFormatter.FormatCheck("/kok", [], exemptions, [], CheckSummary.Of(3, [])))
             .RootElement
             .GetProperty("exemptions")[0];
 
@@ -195,7 +195,7 @@ public class JsonFormatterTests
     }
 
     private static JsonElement ParseCheck(Finding[] findings, string root = "/kok") =>
-        JsonDocument.Parse(JsonFormatter.FormatCheck(root, findings, [], CheckSummary.Of(3, findings))).RootElement;
+        JsonDocument.Parse(JsonFormatter.FormatCheck(root, findings, [], [], CheckSummary.Of(3, findings))).RootElement;
 
     private static JsonElement Parse(FileAnalysis analysis, string root = "/kok") =>
         JsonDocument.Parse(JsonFormatter.Format(root, [analysis], Summarizer.Summarize([analysis]), [])).RootElement;

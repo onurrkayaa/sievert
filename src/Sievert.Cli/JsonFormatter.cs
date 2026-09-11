@@ -44,9 +44,15 @@ public static class JsonFormatter
         string scanRoot,
         IReadOnlyList<Finding> findings,
         IReadOnlyList<Exemption> exemptions,
+        IReadOnlyList<Suppression> suppressions,
         CheckSummary summary) =>
         JsonSerializer.Serialize(
-            new CheckOutput(scanRoot, findings, exemptions.Count == 0 ? null : exemptions, summary),
+            new CheckOutput(
+                scanRoot,
+                findings,
+                exemptions.Count == 0 ? null : exemptions,
+                suppressions.Count == 0 ? null : suppressions,
+                summary),
             Options);
 
     /// <summary>check ciktisinin en dis katmani. exemptions bos oldugunda hic yazilmaz.</summary>
@@ -55,6 +61,8 @@ public static class JsonFormatter
         IReadOnlyList<Finding> Findings,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         IReadOnlyList<Exemption>? Exemptions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<Suppression>? Suppressions,
         CheckSummary Summary);
 
     /// <summary>JSON'un en dis katmani. longestMethods --top verilmediyse hic yazilmaz.</summary>

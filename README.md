@@ -93,7 +93,19 @@ The database tests use Testcontainers and start a real PostgreSQL container. If 
 not running they are skipped, and `dotnet test` reports them as skipped rather than
 passing quietly.
 
-There are six rules:
+If a rule is wrong about one particular line, you can silence it there:
+
+```csharp
+// sievert:disable SV004 this list is in memory, not a database query
+_ = items.Any();
+```
+
+The reason is required - without one the suppression does not count and the tool reports
+it as a finding of its own (SV007). Suppressions only cover the line right after the
+comment, there is no file-wide version, and every suppressed finding is counted in the
+summary and listed in `--json`. Why it works this way is in ADR 0015.
+
+There are seven rules:
 
 | Code | Severity | What it looks for |
 |---|---|---|
@@ -103,6 +115,7 @@ There are six rules:
 | SV004 | warning | a query-looking call inside a loop body (N+1) |
 | SV005 | warning | a `new` of something disposable that never gets disposed |
 | SV006 | info | a public `Task` method with no `CancellationToken` parameter |
+| SV007 | warning | a `// sievert:disable` comment with no reason written after it |
 
 All of them decide what things are by looking at names, because there is no semantic model
 yet. That produces false positives, which is a trade I took on purpose -
@@ -198,7 +211,7 @@ Ozet
   Taranan dosya  : 67
   Dislanan dosya : 11
   Atlanan klasor : 9
-  Etkin kural    : SV001, SV002, SV003, SV004, SV005, SV006
+  Etkin kural    : SV001, SV002, SV003, SV004, SV005, SV006, SV007
   Kapali kural   : yok
   Bulgu          : 0  (hata 0 / uyari 0 / bilgi 0)
 ```

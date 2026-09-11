@@ -21,6 +21,12 @@ internal static class RuleTestHelper
             .Single(context => context.File.AbsolutePath == Path.Combine(directory, fileName));
     }
 
+    /// <summary>Diskte olmayan bir kaynak icin baglam uretir.</summary>
+    public static RuleContext Context(string relativePath, string source) =>
+        new(
+            new ScannedFile(Path.GetFullPath(relativePath), relativePath, CSharpSyntaxTree.ParseText(source)),
+            []);
+
     /// <summary>Diskte olmayan bir kaynagi verilen goreli yolla inceler.</summary>
     public static RuleResult InspectSource(IRule rule, string relativePath, string source) =>
         rule.Inspect(new RuleContext(

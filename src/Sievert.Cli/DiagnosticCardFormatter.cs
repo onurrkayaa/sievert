@@ -64,6 +64,7 @@ public static class DiagnosticCardFormatter
             ("Etkin kural", CodeList(summary.Rules.ActiveCodes)),
             ("Kapali kural", CodeList(summary.Rules.DisabledCodes)),
             ("Bulgu", FindingCounts(summary)),
+            ("Susturulan", summary.SuppressedCount.ToString(CultureInfo.InvariantCulture)),
         ];
 
         rows.AddRange(summary.ByRuleCode.Select(entry =>

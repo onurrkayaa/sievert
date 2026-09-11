@@ -110,7 +110,11 @@ public class RuleCatalogTests
         // Varsayilan kume "her sey acik" degil: olculen precision'a gore secildi.
         RuleSelection selection = RuleCatalog.Select(SievertConfig.Default).Selection!;
 
-        Assert.Equal(["SV001", "SV002", "SV004", "SV006"], selection.Enabled.Select(rule => rule.Code).ToArray());
+        // SV007 de varsayilan kumede: susturmalari denetleyen kural, susturulacak
+        // bulgulari ureten kurallardan once kapatilamamali.
+        Assert.Equal(
+            ["SV001", "SV002", "SV004", "SV006", "SV007"],
+            selection.Enabled.Select(rule => rule.Code).ToArray());
         Assert.Equal(RuleCatalog.DefaultOffCodes, selection.DisabledCodes);
     }
 
@@ -236,7 +240,7 @@ public class ConfigEndToEndTests : IDisposable
         JsonElement rules = json.RootElement.GetProperty("summary").GetProperty("rules");
 
         Assert.Equal(
-            ["SV001", "SV002", "SV004", "SV006"],
+            ["SV001", "SV002", "SV004", "SV006", "SV007"],
             rules.GetProperty("activeCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
         Assert.Equal(
             RuleCatalog.DefaultOffCodes,

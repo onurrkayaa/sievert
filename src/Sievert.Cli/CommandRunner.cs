@@ -211,11 +211,13 @@ public static class CommandRunner
             findings,
             excludedCount,
             skippedDirectories,
-            new RuleUsage(selection.Enabled.Select(rule => rule.Code).ToArray(), selection.DisabledCodes));
+            new RuleUsage(selection.Enabled.Select(rule => rule.Code).ToArray(), selection.DisabledCodes),
+            result.Suppressions.Count);
 
         if (options.Json)
         {
-            Console.Out.WriteLine(JsonFormatter.FormatCheck(root, findings, result.Exemptions, summary));
+            Console.Out.WriteLine(
+                JsonFormatter.FormatCheck(root, findings, result.Exemptions, result.Suppressions, summary));
         }
         else
         {

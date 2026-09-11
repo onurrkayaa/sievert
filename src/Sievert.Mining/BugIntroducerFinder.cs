@@ -200,11 +200,20 @@ public sealed class BugIntroducerFinder
         return accused;
     }
 
+    /// <summary>
+    /// Verilen 1 TABANLI satiri iceren blame hunk'i. LibGit2Sharp'in
+    /// <c>FinalStartLineNumber</c> degeri 0 TABANLI; yamadan cikardigimiz satir numaralari
+    /// ise 1 tabanli. Ilk yazdigim hâli ikisini dogrudan karsilastiriyordu ve bir satir
+    /// kaymayla yanlis commit'i sucluyordu. Olcumu ADR 0014'te: duz <c>git blame</c> ile
+    /// uyum %68,7'den %97,5'e cikti.
+    /// </summary>
     private static BlameHunk? HunkFor(BlameHunkCollection hunks, int line)
     {
+        int zeroBased = line - 1;
+
         foreach (BlameHunk hunk in hunks)
         {
-            if (line >= hunk.FinalStartLineNumber && line < hunk.FinalStartLineNumber + hunk.LineCount)
+            if (zeroBased >= hunk.FinalStartLineNumber && zeroBased < hunk.FinalStartLineNumber + hunk.LineCount)
             {
                 return hunk;
             }

@@ -123,4 +123,37 @@ public class BugIntroducerFinderTests
             repository.Path,
             [new SzzFix(fix.Sha, fix.Author.When.ToUniversalTime())],
             options ?? SzzOptions.Default);
+
+    [Fact]
+    public void TheRightLineIsBlamedWhenAFileHasTwoAuthors()
+    {
+        // Bu testin kucuk dosyalarda gozden kacan bir hatayi yakalamasi gerekiyor:
+        // dosyanin her satiri ayri bir commit'ten geliyorsa, bir satirlik kayma
+        // yanlis commit'i suclar. Tek commit'lik dosyalarda kayma gorunmuyor.
+        using TemporaryRepository repository = new();
+
+        Commit first = repository.Commit(
+            "src/a.cs",
+            "class A\n{\n    int Bir = 1;\n    int Iki = 2;\n    int Uc = 3;\n}\n",
+            "ilk hâli");
+
+        Commit second = repository.Commit(
+            "src/a.cs",
+            "class A\n{\n    int Bir = 1;\n    int Iki = 22;\n    int Uc = 3;\n}\n",
+            "Iki degisti");
+
+        // Duzeltme SADECE 'Bir' satirini degistiriyor; onu en son yazan first commit'i.
+        Commit fix = repository.Commit(
+            "src/a.cs",
+            "class A\n{\n    int Bir = 11;\n    int Iki = 22;\n    int Uc = 3;\n}\n",
+            "fix Bir");
+
+        SzzOutcome outcome = new BugIntroducerFinder().Find(
+            repository.Path,
+            [new SzzFix(fix.Sha, fix.Author.When.ToUniversalTime())],
+            SzzOptions.Default);
+
+        Assert.Contains(first.Sha, outcome.BlamedShas);
+        Assert.DoesNotContain(second.Sha, outcome.BlamedShas);
+    }
 }

@@ -51,6 +51,7 @@ public static partial class RowRecheck
                 [new SzzFix(fixSha, DateTimeOffset.MaxValue)],
                 SzzOptions.Default);
 
+            // sievert:disable SV004 BlamedShas bellekteki bir liste, veritabani sorgusu degil
             bool blamed = outcome.BlamedShas.Any(sha => sha.StartsWith(culpritSha, StringComparison.Ordinal));
 
             if (labelledSection)

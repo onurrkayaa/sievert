@@ -8,7 +8,7 @@ using Sievert.Mining;
 // docs/olcumler/ altindaki dosyalara giriyor.
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz> <repo-adi>");
+    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti> <repo-adi>");
     return 2;
 }
 
@@ -53,6 +53,39 @@ switch (args[0])
             path,
             [.. new LabelStore(context).Fixes(repository.Id).Select(fix => new SzzFix(fix.Sha, fix.Date))]);
 
+        return 0;
+
+    case "blame-w":
+        if (repository.LocalPath is not string blamePath || !Directory.Exists(blamePath))
+        {
+            Console.Error.WriteLine("Deponun yerel klasoru kayitli degil; once mine --db calistir.");
+            return 2;
+        }
+
+        BlameEquivalence.Report(
+            blamePath,
+            [.. new LabelStore(context).Fixes(repository.Id).Select(fix => new SzzFix(fix.Sha, fix.Date))],
+            sampleSize: 50);
+
+        return 0;
+
+    case "dogrulama":
+        if (repository.LocalPath is not string listPath || !Directory.Exists(listPath))
+        {
+            Console.Error.WriteLine("Deponun yerel klasoru kayitli degil; once mine --db calistir.");
+            return 2;
+        }
+
+        VerificationList.Report(
+            listPath,
+            repository.RemoteUrl ?? repository.Name,
+            [.. new LabelStore(context).Fixes(repository.Id).Select(fix => new SzzFix(fix.Sha, fix.Date))],
+            rowsPerKind: 5);
+
+        return 0;
+
+    case "sizinti":
+        LeakCheck.Report(context, runner, repository.Id, sampleSize: 20);
         return 0;
 
     default:

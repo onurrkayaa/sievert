@@ -35,6 +35,20 @@ degil, olculen bir mesafe.
 satirlarda olabiliyor) dosyanin ilk hunk'i yaziliyor ve bu belirtiliyor. Hunk 40 satiri
 asarsa kirpiliyor ve kirpildigi yaziliyor.
 
+**Ayni harf iki kumede zit anlam tasiyordu, alan degerleri ayrildi.** Etiketli
+satirlarda `E` "suclama dogru" demekti; etiketsiz satirlarda ayni harf "bu satir
+suclanmaliydi, arac kacirdi" demek, yani aracin hatasi. Karistirilmasin diye etiketsiz
+satirlarin karar degerleri yeniden adlandirildi:
+
+| Etiketsiz satirlarda eski | Yeni | Anlami |
+|---|---|---|
+| `E` | `KACIRDI` | Bu satir suclanmaliydi, arac kacirdi |
+| `H` | `DOGRU-RET` | Aracin suclamamasi dogru |
+| `Belirsiz` | `BELIRSIZ` | Veri karar vermeye yetmiyor |
+
+Etiketli satirlar `E` / `H` / `Belirsiz` olarak kaldi. **Hicbir karar degistirilmedi**,
+yalnizca ayni kararin yazimi degisti.
+
 **Baglam:** suclanan ya da aday satirin ebeveyn surumundeki hâli, ustunde ve altinda
 sekizer satirla. Ilgili satirlarin basinda `>>>` isareti var.
 
@@ -377,7 +391,7 @@ Suclanan satirin baglami:
         45          var count = ObjectPool<object>.MaxCapacity + 10;
 ```
 
-Karar:H
+Karar: DOGRU-RET
 Not:
 
 ### Satir 7 / 30  [Polly]  [etiketli: HAYIR]
@@ -441,7 +455,7 @@ Suclanan satirin baglami:
        163                  .Handle<TimeoutRejectedException>()
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 8 / 30  [Polly]  [etiketli: HAYIR]
@@ -484,7 +498,7 @@ Suclanan satirin baglami:
          9  [assembly: CLSCompliant(true)]
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 9 / 30  [Polly]  [etiketli: HAYIR]
@@ -529,7 +543,7 @@ Suclanan satirin baglami:
         87                  BulkheadEngine.ImplementationAsync(
 ```
 
-Karar:H
+Karar: DOGRU-RET
 Not:
 
 ### Satir 10 / 30  [Polly]  [etiketli: HAYIR]
@@ -580,7 +594,7 @@ Suclanan satirin baglami:
        117          return outcome;
 ```
 
-Karar: Belirsiz
+Karar: BELIRSIZ
 Not:
 
 ### Satir 11 / 30  [ShareX]  [etiketli: EVET]
@@ -854,7 +868,7 @@ Suclanan satirin baglami:
        265                  }
 ```
 
-Karar: Belirsiz
+Karar: BELIRSIZ
 Not:
 
 ### Satir 17 / 30  [ShareX]  [etiketli: HAYIR]
@@ -903,7 +917,7 @@ Suclanan satirin baglami:
        194          }
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 18 / 30  [ShareX]  [etiketli: HAYIR]
@@ -964,7 +978,7 @@ Suclanan satirin baglami:
        521              }
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 19 / 30  [ShareX]  [etiketli: HAYIR]
@@ -1021,7 +1035,7 @@ Suclanan satirin baglami:
         77              this.ucBeforeUpload.Size = new System.Drawing.Size(400, 289);
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 20 / 30  [ShareX]  [etiketli: HAYIR]
@@ -1070,7 +1084,7 @@ Suclanan satirin baglami:
        568              }
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 21 / 30  [Jellyfin]  [etiketli: EVET]
@@ -1426,7 +1440,7 @@ Suclanan satirin baglami:
       6951                  {
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 27 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1502,7 +1516,7 @@ Suclanan satirin baglami:
         53  
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 28 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1551,7 +1565,7 @@ Suclanan satirin baglami:
         49                      if (isHidden.HasValue && isHidden.Value != scheduledTask.IsHidden)
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 29 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1601,7 +1615,7 @@ Suclanan satirin baglami:
       1513              {
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 
 ### Satir 30 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1648,6 +1662,6 @@ Suclanan satirin baglami:
        240              if (string.IsNullOrEmpty(value))
 ```
 
-Karar:E
+Karar: KACIRDI
 Not:
 

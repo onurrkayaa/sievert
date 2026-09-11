@@ -55,15 +55,18 @@ Right now the CLI only prints a banner. There is nothing to analyse yet.
 
 ## Roadmap
 
-- [x] **Stage 0** - Project skeleton: solution, projects, CI, docs
-- [ ] **Stage 1** - Read git history with LibGit2Sharp
-- [ ] **Stage 2** - Parse C# files with Roslyn and find bug patterns
-- [ ] **Stage 3** - Turn both signals into one risk score with an explanation
-- [ ] **Stage 4** - Store results in PostgreSQL with EF Core
-- [ ] **Stage 5** - Train an ML.NET model on past bug fixes instead of fixed weights
-- [ ] **Stage 6** - Better CLI output and report formats
-- [ ] **Stage 7** - Run it in CI and comment the score on pull requests
-- [ ] **Stage 8** - Documentation and a first release
+0. Project scaffolding, CI, ADRs — done
+1. Roslyn syntax tree traversal: read a C# file as structure, not text
+2. First detector: SV001 async void
+3. Detector catalogue: 6 .NET-specific defect patterns behind an IRule
+   plugin interface, rules loaded from JSON
+4. Git history mining with LibGit2Sharp: churn, ownership, past fixes,
+   simplified SZZ labelling, stored in PostgreSQL via EF Core
+5. Risk engine: weighted baseline, then ML.NET classifier, then
+   calibration (Brier, ECE, reliability diagram) — the research core
+6. ASP.NET Core Web API + Blazor dashboard
+7. GitHub Action bot that comments risk on pull requests
+8. Test suite, Docker Compose, evaluation on real open-source C# repos
 
 ## Status
 

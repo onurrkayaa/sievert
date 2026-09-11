@@ -1,70 +1,65 @@
-# SZZ etiketlerinin dogrulama listesi
+# SZZ etiketlerinin dogrulama listesi (v1 - KULLANMAYIN)
+
+> **Bu liste gecersiz, yerine `asama4-etiketleme-dogrulama.md` var.** Iki sebeple
+> duruyor, silmiyorum: ikisinin farki B070'in ve liste ureticisindeki kusurun olcusu.
+>
+> 1. **Etiketli satirlar gecerli.** Bagimsiz kontrolde Polly'nin bes etiketli satirinin
+>    besi de bugunku algoritmayla dogrulandi.
+> 2. **Etiketsiz satirlarin bir kismi yanlis.** Uretici, bir commit'i bir hunk'ta silinen
+>    satira denk gelmedigi icin "suclanmamis" sayiyordu; oysa ayni commit baska bir
+>    hunk'ta ya da baska bir dosyada suclanmis olabiliyor. Polly'de bes etiketsiz
+>    satirin ikisi bu yuzden yanlisti.
+>
+> Kusur duzeltildi ve liste yeniden uretildi.
+
+# Eski liste
 
 **Tarih:** 2026-09-11
 **Repolar:** Polly `2247db24`, ShareX `b5a397ea`, Jellyfin `1d7b6d97`
 **Uretim:** `tools/Sievert.Measure`, `measure dogrulama <repo>`
-**Kontrol:** `tools/liste-kontrol.py` ve `measure satir-kontrol`
-**Hangi kodla uretildi:** satir kaymasi duzeltildikten (`9592508`) ve liste ureticisindeki
-aday suzme kusuru giderildikten sonra. Onceki surum
-`asama4-etiketleme-dogrulama-v1.md` dosyasinda duruyor.
+**Kontrol:** `tools/liste-kontrol.py`
 
 Adim 4'te 272 etiket uretilmis ama hicbiri kaynak koda bakilarak dogrulanmamisti. Bu
-liste o acigi kapatmak icin var. **E/H sutunlari bilerek bos**; isaretleme ayri bir is.
+liste o acigi kapatmak icin var. **E/H sutunlari bilerek bos**; isaretleme ayri bir is
+ve bu dosyayi uretmekle ayni kisinin ayni oturumda yapmasi dogru olmaz.
 
 ## Nasil secildi
 
-30 satir, **uc repoya dagitilmis** (her repodan 10). Tek repodan ornekleme almadim.
+30 satir, **uc repoya dagitilmis** (her repodan 10). Tek repodan ornekleme almadim:
+daha once iki kez tek repoya bakip genel sonuc cikarmak yanilticiydi.
 
 Her repodan:
 
 - **5 etiketlenmis satir:** bir duzeltmenin sildigi satirlar blame edilmis ve o satirlari
   en son yazan commit suclanmis.
-- **5 etiketlenmemis satir:** ayni dosyanin blame'inde gorunen ama o duzeltmenin **hicbir
-  yerinde** suclanmamis commit. Yani SZZ'nin firsati vardi, suclamadi.
+- **5 etiketlenmemis satir:** ayni dosyanin blame'inde gorunen ama duzeltmenin sildigi
+  satirlara denk gelmeyen commit. Yani SZZ'nin firsati vardi, suclamadi. Bunlar
+  "kacirilmis olabilir mi" sorusunun ornekleri.
 
-Secim rastgele (sabit tohum 42), en cok suclanan commit'lerden degil. Her duzeltme
+Secim rastgele (sabit tohum 42), **en cok suclanan commit'lerden degil**. Her duzeltme
 commit'inden en fazla bir satir aliniyor.
 
-**Jellyfin satirlari nereden geliyor:** Jellyfin'in etiketlemesi veritabaninda henuz
-tamamlanmadi, yani `IsBugIntroducing` sutunu o repo icin bos. Liste satirlari veritabanindan
-degil, ayni SZZ hesabinin dogrudan calistirilmasindan geliyor; bu yuzden Jellyfin'den de
-onar satir secilebildi ve **eksik satir yok**. Satirlar veritabanina yazilacak etiketlerle
-ayni hesaptan cikiyor, farklari yalnizca henuz kaydedilmemis olmalari.
+> Ilk uretimde bu sinir yoktu ve Polly'nin on satirinin tamami tek bir duzeltmeden
+> (`Fix CA2000/redundant suppressions`) geldi. Orneklem repoya degil o commit'e bakiyordu;
+> sinir bu yuzden eklendi.
 
 ## Kaynaga karsi kontrol
 
-Iki ayri kontrol yapildi.
+Liste yazildiktan sonra programatik olarak kontrol edildi. Bakilanlar: iki sha da depoda
+var mi, yazilan dosya duzeltmede gercekten degismis mi, yazilan satir araligi duzeltmenin
+sildigi satirlarla ortusuyor mu (etiketsiz satirlarda ortusMEmeli), baglantilar dogru
+repoya ve dogru sha'ya gidiyor mu, suclanan commit duzeltmeden once mi yazilmis.
 
-**1) Metin ve kaynak kontrolu** (`liste-kontrol.py`): iki sha da depoda var mi, yazilan
-dosya duzeltmede degismis mi, satir araligi duzeltmenin sildigi satirlarla ortusuyor mu
-(etiketsiz satirlarda ortusMEmeli), baglantilar dogru repoya ve dogru sha'ya gidiyor mu,
-suclanan commit duzeltmeden once mi yazilmis.
+| Repo | Kontrol edilen satir | Sapma |
+|---|---|---|
+| Polly | 10 | 0 |
+| ShareX | 10 | 0 |
+| Jellyfin | 10 | 0 |
 
-**2) Bagimsiz satir kontrolu** (`measure satir-kontrol`): satirdaki duzeltme commit'i icin
-SZZ bastan calistirilip, yazan suclanan commit'in gercekten suclananlar arasinda olup
-olmadigina bakildi. Bu, listeyi ureten kodun aynisini kullanmayan tek kontrol ve
-ilk kosusunda **gercek bir kusur yakaladi**: Polly'nin bes etiketsiz satirinin ikisi
-aslinda ayni duzeltme tarafindan baska bir hunk'ta suclanmisti. Uretici duzeltildi.
-
-Yeni listede iki kontrol de temiz: metin kontrolu uc repoda da 0 sapma, bagimsiz satir
-kontrolu **30/30 dogruladi** (15 etiketli satirin 15'i suclananlar arasinda, 15 etiketsiz
-satirin 15'i suclananlar arasinda degil).
-
-## v1 ile fark
-
-| | v1 | v2 | Ayni kalan |
-|---|---|---|---|
-| Etiketli satir | 15 | 15 | **15 / 15** |
-| Etiketsiz satir | 15 | 15 | 9 / 15 |
-| Toplam | 30 | 30 | 24 / 30 |
-
-**Etiketli satirlarin hicbiri degismedi.** Bu beklenen sonuc: v1 zaten satir kaymasi
-duzeltildikten SONRA uretilmisti, yani B070'in bu listeye etkisi yok. Degisen alti satir
-tamamen liste ureticisindeki aday suzme kusurundan geliyor - etiketsiz sayilan ama aslinda
-suclanmis commit'ler cikarilinca yerlerine baskalari geldi.
-
-Yani iki listenin farki B070'in olcusu **degil**; B070 bu listeye hic yansimamis. Olculen
-sey, ureticinin kendi kusurunun olcusu: etiketsiz satirlarin %40'i yanlisti.
+Kontrol ilk kosusunda 15 sapma buldu ve ikisi de gercek kusurdu: biri kontrol
+programinin kendi hatasiydi (etiketsiz satirlara etiketli satir kuralini uyguluyordu),
+digeri urun kodundaki bir satir kaymasiydi. Ikincisi `docs/olcumler/asama4-uc-repo.md`
+icinde anlatiliyor; asagidaki liste duzeltilmis kodla uretildi.
 
 ## Polly
 
@@ -83,10 +78,10 @@ sey, ureticinin kendi kusurunun olcusu: etiketsiz satirlarin %40'i yanlisti.
 | # | Duzeltme | Duzeltme basligi | Suclanan | Suclanan basligi | Dosya | Satir | Baglantilar | Gercek mi (E/H) | Neden | Yontem nasil duzelmeli |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | `3b8ba0e4` | Fix mutant | `5e19d1df` | Introduce ObjectPool and use it for ResilienceContext pooling (#1111) | `test/Polly.Core.Tests/Utils/ObjectPoolTests.cs` | 26-37 | [duzeltme](https://github.com/App-vNext/Polly/commit/3b8ba0e4f4db6d8260053336a7e95584ea9ac0d8) / [suclanan](https://github.com/App-vNext/Polly/commit/5e19d1df68ac90a316eb9978f37406cfe2dfe3cc) |  |  |  |
-| 2 | `f55880c5` | Fix Retry strategy example code (#2527) | `2384117c` | [Docs] Minor cleanups (#1768) | `src/Snippets/Docs/Retry.cs` | 155 | [duzeltme](https://github.com/App-vNext/Polly/commit/f55880c5c3c36087222ece6f765713d1267121e7) / [suclanan](https://github.com/App-vNext/Polly/commit/2384117c816ac49d4b0541aef984d61e23c75f35) |  |  |  |
+| 2 | `f55880c5` | Fix Retry strategy example code (#2527) | `83700e86` | Add antipatterns to retry strategy (#1603) | `src/Snippets/Docs/Retry.cs` | 154 | [duzeltme](https://github.com/App-vNext/Polly/commit/f55880c5c3c36087222ece6f765713d1267121e7) / [suclanan](https://github.com/App-vNext/Polly/commit/83700e86888a94bc33fbb6a948e75d78686c1ea4) |  |  |  |
 | 3 | `4379f4b8` | Document issue 510 fix | `ce32f88f` | Add CLSCompliant attribute | `src/Polly.NetStandard11/Properties/AssemblyInfo.cs` | 1 | [duzeltme](https://github.com/App-vNext/Polly/commit/4379f4b8e936f465e79825760d0d919a26e24165) / [suclanan](https://github.com/App-vNext/Polly/commit/ce32f88fe70972096903fbcde9b86616802d4fe9) |  |  |  |
-| 4 | `33344166` | Fix Minor typo in Bulkhead intellisence (#246) | `e8fc3064` | Make BulkheadPolicy truly async for .NET4.0 (#180) | `src/Polly.Shared/Bulkhead/BulkheadSyntaxAsync.cs` | 79 | [duzeltme](https://github.com/App-vNext/Polly/commit/33344166be5338ae57aa456953b3e5c2bb119bc4) / [suclanan](https://github.com/App-vNext/Polly/commit/e8fc30646e0a298271339fc3b3e8719dd470c579) |  |  |  |
-| 5 | `18e94385` | Fix samples | `22df6409` | Bump PollyVersion from 8.0.0-alpha.4 to 8.0.0-alpha.5 (#1381) | `samples/Extensibility/Program.cs` | 106-109 | [duzeltme](https://github.com/App-vNext/Polly/commit/18e94385d85663e84236a5be2a76de16f57f291b) / [suclanan](https://github.com/App-vNext/Polly/commit/22df6409cb2cba79eeb712c7978be2c576298448) |  |  |  |
+| 4 | `33344166` | Fix Minor typo in Bulkhead intellisence (#246) | `e8fc3064` | Make BulkheadPolicy truly async for .NET4.0 (#180) | `src/Polly.Shared/Bulkhead/BulkheadSyntaxAsync.cs` | 7-12 | [duzeltme](https://github.com/App-vNext/Polly/commit/33344166be5338ae57aa456953b3e5c2bb119bc4) / [suclanan](https://github.com/App-vNext/Polly/commit/e8fc30646e0a298271339fc3b3e8719dd470c579) |  |  |  |
+| 5 | `18e94385` | Fix samples | `edb1ffbf` | Adopt Alpha 2 in samples (#1338) | `samples/Intro/Program.cs` | 49-51 | [duzeltme](https://github.com/App-vNext/Polly/commit/18e94385d85663e84236a5be2a76de16f57f291b) / [suclanan](https://github.com/App-vNext/Polly/commit/edb1ffbff4cdf4ba9ac43bc77caefc3f235bb12c) |  |  |  |
 
 ## ShareX
 
@@ -104,10 +99,10 @@ sey, ureticinin kendi kusurunun olcusu: etiketsiz satirlarin %40'i yanlisti.
 
 | # | Duzeltme | Duzeltme basligi | Suclanan | Suclanan basligi | Dosya | Satir | Baglantilar | Gercek mi (E/H) | Neden | Yontem nasil duzelmeli |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | `d8a803f9` | fixed surface prepare error | `794168f5` | Revert major TaskSettings changes | `ShareX/TaskHelpers.cs` | 257 | [duzeltme](https://github.com/ShareX/ShareX/commit/d8a803f9ce047b52eee3ab1523527113b3179506) / [suclanan](https://github.com/ShareX/ShareX/commit/794168f54ed2eb2a1964caa7d27e62fb713be90a) |  |  |  |
+| 1 | `d8a803f9` | fixed surface prepare error | `0ec7a242` | Added print image button to image editor | `ShareX/TaskHelpers.cs` | 232 | [duzeltme](https://github.com/ShareX/ShareX/commit/d8a803f9ce047b52eee3ab1523527113b3179506) / [suclanan](https://github.com/ShareX/ShareX/commit/0ec7a24240251a2d2b1d2ebe3578e4ba2917ab1b) |  |  |  |
 | 2 | `ac484aa3` | Fix bad english, attempt 2 | `a991572a` | Fixed SFTP directory error when using absolute path | `ShareX.UploadersLib/FileUploaders/SFTP.cs` | 186 | [duzeltme](https://github.com/ShareX/ShareX/commit/ac484aa3d10d16e5a7f6adf70e0749099ef899c4) / [suclanan](https://github.com/ShareX/ShareX/commit/a991572ad31ca242e6a81ca862a66245885e6065) |  |  |  |
-| 3 | `376084ec` | Fixed notification click action issue | `417d6f3d` | Create test tasks instead of test panels | `ShareX/TaskManager.cs` | 501-513 | [duzeltme](https://github.com/ShareX/ShareX/commit/376084ec83c55889059431c946965f8d7d7de534) / [suclanan](https://github.com/ShareX/ShareX/commit/417d6f3da09e83e478f3db92d2dd3108f484e11b) |  |  |  |
-| 4 | `f6f945f9` | Fix for rectangle capture staying top of dialogs | `5554acf8` | Dynamic destination changes | `ShareX/Forms/BeforeUploadForm.Designer.cs` | 68-69 | [duzeltme](https://github.com/ShareX/ShareX/commit/f6f945f918028447a1b26f8d5f409727cad5438a) / [suclanan](https://github.com/ShareX/ShareX/commit/5554acf8b5799852fd7c318757cde25d6618c6da) |  |  |  |
+| 3 | `376084ec` | Fixed notification click action issue | `5ccc6480` | History show up in main form list now | `ShareX/TaskManager.cs` | 500 | [duzeltme](https://github.com/ShareX/ShareX/commit/376084ec83c55889059431c946965f8d7d7de534) / [suclanan](https://github.com/ShareX/ShareX/commit/5ccc6480c0b97cf3a77c222f29a77a0fa99ee08e) |  |  |  |
+| 4 | `f6f945f9` | Fix for rectangle capture staying top of dialogs | `5554acf8` | Dynamic destination changes | `ShareX/Forms/BeforeUploadForm.Designer.cs` | 75 | [duzeltme](https://github.com/ShareX/ShareX/commit/f6f945f918028447a1b26f8d5f409727cad5438a) / [suclanan](https://github.com/ShareX/ShareX/commit/5554acf8b5799852fd7c318757cde25d6618c6da) |  |  |  |
 | 5 | `42104493` | fixed #358: Error window will be top most | `991273a9` | Detect changes done in UploaderConfig.json | `ShareX/Program.cs` | 560 | [duzeltme](https://github.com/ShareX/ShareX/commit/421044930e2d7255bdc37bedf0408456165f3cbc) / [suclanan](https://github.com/ShareX/ShareX/commit/991273a9b18bfd6c5133dc690a895746b7fbf141) |  |  |  |
 
 ## Jellyfin
@@ -128,7 +123,7 @@ sey, ureticinin kendi kusurunun olcusu: etiketsiz satirlarin %40'i yanlisti.
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | `5cfa466d` | fix: cap GetVideoBitrateParamValue at 400 Mbps (#16467) | `0fc28893` | Enable VideoToolbox AV1 decode | `MediaBrowser.Controller/MediaEncoding/EncodingHelper.cs` | 6943 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/5cfa466d8b0069e04c7d5c4e4f9b9a4bb7464034) / [suclanan](https://github.com/jellyfin/jellyfin/commit/0fc288936d10afc146780d118361f2e722768ee6) |  |  |  |
 | 2 | `3fc71293` | Fix AddProperParentChildRelationBaseItemWithCascade migration deleting... | `a0b3e2b0` | Optimize internal querying of UserData, other fixes (#14795) | `src/Jellyfin.Database/Jellyfin.Database.Providers.Sqlite/Migrations/20250913211637_AddProperParentChildRelationBaseItemWithCascade.cs` | 35-52 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/3fc71293b4e8c30b7cdf2b7d2154a8a0c97fad79) / [suclanan](https://github.com/jellyfin/jellyfin/commit/a0b3e2b071509f440db10768f6f8984c7ea382d6) |  |  |  |
-| 3 | `81c0451b` | Fix response code & docs | `2f2bceb1` | Remove default parameter values | `Jellyfin.Api/Controllers/ScheduledTasksController.cs` | 40-41 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/81c0451b5e578bb8a41dcb81f2766dbd1eb7f055) / [suclanan](https://github.com/jellyfin/jellyfin/commit/2f2bceb1104d8ea669ca21fc40200247aca956ed) |  |  |  |
+| 3 | `81c0451b` | Fix response code & docs | `f67daa84` | Update endpoint docs | `Jellyfin.Api/Controllers/ScheduledTasksController.cs` | 35-36 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/81c0451b5e578bb8a41dcb81f2766dbd1eb7f055) / [suclanan](https://github.com/jellyfin/jellyfin/commit/f67daa84b04ae6c8ffcc42c038a65ecb8a433861) |  |  |  |
 | 4 | `9849f522` | fix playlist runtime display | `dfe91e43` | Added IDtoService | `MediaBrowser.Server.Implementations/Dto/DtoService.cs` | 1505 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/9849f522efa21097fcd827635ef75535bb821bf0) / [suclanan](https://github.com/jellyfin/jellyfin/commit/dfe91e43b676915b840f0958e331ba2cb57966d4) |  |  |  |
-| 5 | `1c78482b` | Use authorization code from api-migration to fix startup wizard | `91ffff77` | added dlna music folders | `Emby.Server.Implementations/HttpServer/Security/AuthorizationContext.cs` | 232 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/1c78482b480034738516596248955e3e09756dd6) / [suclanan](https://github.com/jellyfin/jellyfin/commit/91ffff7771cb4ae9f89dbc2cb7a5cec70a3301c2) |  |  |  |
+| 5 | `1c78482b` | Use authorization code from api-migration to fix startup wizard | `9c311980` | fixes #1075 - XSS in "Active Devices" Panel of Admin Dashboard | `Emby.Server.Implementations/HttpServer/Security/AuthorizationContext.cs` | 244 | [duzeltme](https://github.com/jellyfin/jellyfin/commit/1c78482b480034738516596248955e3e09756dd6) / [suclanan](https://github.com/jellyfin/jellyfin/commit/9c3119808b73bdc988312144cc034f55e8a8c616) |  |  |  |
 

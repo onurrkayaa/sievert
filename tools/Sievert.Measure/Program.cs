@@ -8,7 +8,7 @@ using Sievert.Mining;
 // docs/olcumler/ altindaki dosyalara giriyor.
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti> <repo-adi>");
+    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol> <repo-adi>");
     return 2;
 }
 
@@ -82,6 +82,16 @@ switch (args[0])
             [.. new LabelStore(context).Fixes(repository.Id).Select(fix => new SzzFix(fix.Sha, fix.Date))],
             rowsPerKind: 5);
 
+        return 0;
+
+    case "satir-kontrol":
+        if (repository.LocalPath is not string recheckPath || !Directory.Exists(recheckPath))
+        {
+            Console.Error.WriteLine("Deponun yerel klasoru kayitli degil; once mine --db calistir.");
+            return 2;
+        }
+
+        RowRecheck.Report(recheckPath, args[2], args[3]);
         return 0;
 
     case "sizinti":

@@ -59,8 +59,19 @@ public static class VerificationList
         Write("Etiketlenmemis (ayni dosyada, suclanmamis)", Pick(notLabelled, rowsPerKind), remoteUrl);
     }
 
+    /// <summary>
+    /// Bir duzeltme icin iki liste uretir. Onemli ayrinti: "etiketlenmemis" adaylar
+    /// duzeltmenin TAMAMI islendikten sonra suzuluyor. Ilk yazdigim hâli her hunk'ta
+    /// aninda karar veriyordu ve ayni commit'i hem etiketsiz hem etiketli listeye
+    /// koyabiliyordu: commit bir hunk'ta silinen satira denk gelmezken baska bir hunk'ta
+    /// ya da baska bir dosyada denk gelebiliyor. Bagimsiz satir kontrolu bunu Polly'de
+    /// bes etiketsiz satirin ikisinde yakaladi.
+    /// </summary>
     private static void Collect(Repository repository, SzzFix fix, List<Row> labelled, List<Row> notLabelled)
     {
+        List<Row> candidates = [];
+        HashSet<string> accusedAnywhere = new(StringComparer.Ordinal);
+
         Commit? commit = repository.Lookup<Commit>(fix.Sha);
 
         // sievert:disable SV004 Parents bellekteki bir koleksiyon, veritabani sorgusu degil
@@ -144,9 +155,9 @@ public static class VerificationList
                 {
                     accused[culprit.Sha] = (first, last, culprit);
                 }
-                else if (!accused.ContainsKey(culprit.Sha))
+                else
                 {
-                    notLabelled.Add(new Row(
+                    candidates.Add(new Row(
                         fix.Sha,
                         commit.MessageShort,
                         culprit.Sha,
@@ -159,6 +170,8 @@ public static class VerificationList
 
             foreach ((int first, int last, Commit culprit) in accused.Values)
             {
+                accusedAnywhere.Add(culprit.Sha);
+
                 labelled.Add(new Row(
                     fix.Sha,
                     commit.MessageShort,
@@ -169,6 +182,9 @@ public static class VerificationList
                     last));
             }
         }
+
+        // Bu duzeltmenin herhangi bir yerde sucladigi commit'ler aday olamaz.
+        notLabelled.AddRange(candidates.Where(row => !accusedAnywhere.Contains(row.CulpritSha)));
     }
 
     private static IReadOnlyList<Row> Pick(List<Row> rows, int count)

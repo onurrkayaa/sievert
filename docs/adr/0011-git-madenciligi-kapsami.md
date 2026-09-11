@@ -97,9 +97,25 @@ ve bunlardan biri **Jason Botwick** adli gercek bir kisinin commit'i. Digerleri 
 sorun sadece `bot` parcasinin kelime siniri aranmadan kullanilmasi. Abbott, Botond,
 Talbot gibi adlar da ayni sekilde yakalanir.
 
-Karari sessizce degistirmedim, yazildigi gibi uyguladim. Onerim: `bot` parcasi tek basina
-bir kelime olarak aranmali (`[bot]`, `dependabot`, `github-actions` zaten tam parca olarak
-kaliyor). Bu degisiklik yapilirsa Polly'de bayrakli commit sayisi 855'ten 854'e duser.
+Karari sessizce degistirmedim, yazildigi gibi uyguladim.
+
+### Guncelleme: tanim degisti, eski sayi duruyor
+
+Itiraz kabul edildi ve tanim degistirildi. Ikisi de burada dursun:
+
+| | Tanim | Polly'de bayrakli commit |
+|---|---|---|
+| **Eski** | Ad ya da epostada `bot`, `[bot]`, `dependabot` ya da `github-actions` parcasi **gecerse** (duz alt-dizgi aramasi) | **855** |
+| **Yeni** | Ad ya da epostada `bot` **ayri bir kelime olarak** gecerse. Kelime siniri harf ve rakam disindaki her karakter | **854** |
+
+Yeni tanim `[bot]`, `-bot` ve `bot@` biciminin ucunu de tek kuralla yakaliyor: koseli
+parantez, tire ve `@` zaten kelime siniri sayiliyor, yani `dependabot[bot]` icinde `bot`
+ayri bir kelime olarak duruyor. `dependabot` ve `github-actions` parcalarini listeden
+cikardim, cunku ikisi de `[bot]` eki tasiyor ve o ek zaten yakalaniyor.
+
+Iki tanim arasindaki tek fark Polly'nin tarihinde **Jason Botwick**'in tek commit'i; baska
+hicbir commit'in bayragi degismedi, yeni bayraklanan da olmadi. 855 rakami yanlis oldugu
+icin silinmiyor, neyin neden degistigi izlenebilsin diye yukarida duruyor.
 
 ## Bellek: olculdu, tam duz cikmadi
 

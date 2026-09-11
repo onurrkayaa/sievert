@@ -65,11 +65,10 @@ public class CommandRunnerTests : IDisposable
     }
 
     [Fact]
-    public void Check_FindingsBelowTheThreshold_ReturnsClean()
+    public void Check_FailOnErrorStillBreaksOnAnErrorFinding()
     {
-        // SV001 hata seviyesinde; esigi hatanin ustune cikaramadigimiz icin burada
-        // esigin altinda kalan durumu CheckCommand testleri kapsiyor. Burada esik
-        // hata iken yine kirilmasi gerektigini dogruluyoruz.
+        // SV001 hata seviyesinde, yani en yuksek esikte bile build'i kiriyor.
+        // Esigin altinda kalan bulgu durumunu CheckCommand testleri kapsiyor.
         Assert.Equal(ExitCodes.FindingsFound, CommandRunner.Run(["check", FindingDirectory, "--fail-on", "error"]));
     }
 

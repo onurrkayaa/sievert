@@ -1,5 +1,10 @@
 # SZZ etiketlemesi: sayilar
 
+> **Bu dosyadaki etiket sayilari hatali koddan geliyor.** Adim 5'te blame satir
+> numaralarinda bir satirlik kayma bulundu ve duzeltildi; Polly'nin etiket sayisi
+> 272'den 261'e dustu. Sayilari silmiyorum, neyin neden degistigi izlenebilsin diye
+> duruyorlar. Guncel sayilar `asama4-uc-repo.md` dosyasinda.
+
 **Tarih:** 2026-09-11
 **Repo:** App-vNext/Polly, tam klon, `2247db24`. 2759 commit.
 **Olcum programi:** `tools/Sievert.Measure`, `measure szz polly-full`

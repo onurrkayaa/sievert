@@ -94,6 +94,13 @@ in `docs/olcumler/asama4-szz.md`. Two things worth knowing before trusting it: n
 the labels have been checked by hand, and blame in LibGit2Sharp does not follow renames,
 which matters for 65% of the files involved. ADR 0014 has the rest.
 
+The whole pipeline has been run over three repositories - Polly, ShareX and Jellyfin, the
+same commits as in stage 3 - and the numbers are in `docs/olcumler/asama4-uc-repo.md`,
+together with seven health checks against git itself. That run is also where a real bug
+turned up: blame line numbers were off by one, so SZZ was blaming the line below the one
+that changed. It is fixed, there is a regression test, and the old numbers are kept with
+a note saying why they are wrong.
+
 ### Setting up the database
 
 ```bash

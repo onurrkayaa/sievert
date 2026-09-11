@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sievert.Analysis/Sievert.Analysis.csproj" />
+    <Project Path="src/Sievert.Cli/Sievert.Cli.csproj" />
+    <Project Path="src/Sievert.Core/Sievert.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sievert.Tests/Sievert.Tests.csproj" />
+  </Folder>
+</Solution>

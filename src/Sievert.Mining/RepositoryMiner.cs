@@ -40,6 +40,19 @@ public sealed class RepositoryMiner
     public static bool IsRepository(string path) => Repository.Discover(path) is not null;
 
     /// <summary>
+    /// Depo shallow mi, yani tarihi kesilmis mi (<c>git clone --depth N</c>). Boyleyse
+    /// okunan tarih deponun tamami degil ve ozetteki "ilk commit" gercek ilk commit degil.
+    /// Cagiranin bunu kullaniciya soylemesi gerekiyor; burada karar verilmiyor, sadece
+    /// soruluyor.
+    /// </summary>
+    public static bool IsShallow(string path)
+    {
+        using Repository repository = new(path);
+
+        return repository.Info.IsShallow;
+    }
+
+    /// <summary>
     /// Tarihi en yeniden en eskiye dogru yurur. Birlestirme commit'leri (ebeveyn sayisi
     /// birden buyuk) ciktiya girmez ama <see cref="SkippedMergeCount"/> icinde sayilir;
     /// gerekcesi ADR 0011'de.

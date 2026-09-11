@@ -231,13 +231,25 @@ public static class CommandRunner
             return ExitCodes.ToolError;
         }
 
+        bool shallow = RepositoryMiner.IsShallow(options.TargetPath);
+
+        if (shallow)
+        {
+            // Cikis kodunu degistirmiyorum: komut calisti ve elindeki tarihi dogru okudu.
+            // Ama okudugu tarih deponun tamami degil, bunu soylemeden gecmek olcumu bozar.
+            Console.Error.WriteLine(
+                "Uyari: bu depo shallow (tarihi kesilmis). Okunan commit'ler deponun tamami degil, "
+                + "ozetteki ilk commit tarihi de gercek ilk commit degil. Tam tarih icin "
+                + "'git fetch --unshallow' calistir.");
+        }
+
         MineResult result = MineCommand.Run(
             options.TargetPath,
             new MiningOptions(options.Since, options.MaxCommits),
             options.OutputPath);
 
         ConsoleWriter.Write(
-            MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath),
+            MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath, shallow),
             ConsoleWriter.UseColor());
 
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).

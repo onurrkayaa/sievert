@@ -47,6 +47,17 @@ public class MineCommandTests : IDisposable
     }
 
     [Fact]
+    public void ANormalRepository_IsReportedAsNotShallow()
+    {
+        using TemporaryRepository repository = new();
+        repository.Commit("a.cs", "class A;", "tek commit");
+
+        Assert.False(Sievert.Mining.RepositoryMiner.IsShallow(repository.Path));
+        Assert.Contains("Shallow", Capture(() => Run("mine", repository.Path)), StringComparison.Ordinal);
+        Assert.Contains("hayir", Capture(() => Run("mine", repository.Path)), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void MineOnSomethingThatIsNotARepository_IsAToolError()
     {
         string directory = Path.Combine(Path.GetTempPath(), "sievert-bos-" + Guid.NewGuid().ToString("n"));

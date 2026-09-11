@@ -7,7 +7,11 @@ namespace Sievert.Cli;
 /// <summary>mine komutunun ekran ciktisi. Tam veri ekrana degil dosyaya gidiyor.</summary>
 public static class MineFormatter
 {
-    public static IReadOnlyList<OutputLine> Format(MiningSummary summary, TimeSpan elapsed, string? outputPath)
+    public static IReadOnlyList<OutputLine> Format(
+        MiningSummary summary,
+        TimeSpan elapsed,
+        string? outputPath,
+        bool shallow)
     {
         List<OutputLine> lines =
         [
@@ -15,6 +19,7 @@ public static class MineFormatter
             Row("commit", summary.CommitCount.ToString(CultureInfo.InvariantCulture)),
             Row("atlanan birlestirme", summary.SkippedMergeCount.ToString(CultureInfo.InvariantCulture)),
             Row("tarih araligi", Range(summary)),
+            Row("Shallow", shallow ? "evet" : "hayir"),
             Row("farkli yazar", summary.DistinctAuthorCount.ToString(CultureInfo.InvariantCulture) + " (epostaya gore)"),
             Row("bot gorunumlu commit", summary.BotAuthorCommitCount.ToString(CultureInfo.InvariantCulture)),
             Row("Co-Authored-By satiri", summary.CoAuthorLineCount.ToString(CultureInfo.InvariantCulture)),

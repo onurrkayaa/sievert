@@ -1,7 +1,9 @@
 # mine komutunun bellegi ve suresi
 
 **Tarih:** 2026-09-11
-**Olcum:** `/usr/bin/time -l`, macOS, Release yapisi
+**Olcum:** `/usr/bin/time -l`, macOS, Release yapisi. Olculen sey **varsayilan GC ayariyla
+tepe RSS**; projeye hicbir GC ayari konmadi, asagidaki yigin siniri satirlari sadece
+buyumenin nereden geldigini anlamak icin yapilmis denemeler.
 **Repo:** App-vNext/Polly, tam klon (`--filter` yok), `2247db24`'e checkout edilmis.
 Tarihin tamami 2953 commit, bunun 194'u birlestirme, yani okunan 2759 commit.
 

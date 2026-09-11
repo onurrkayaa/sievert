@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 namespace Sievert.Analysis.Rules;
 
 /// <summary>
@@ -17,9 +16,9 @@ public interface IRule
     string Description { get; }
 
     /// <summary>
-    /// Tek bir dosyanin sozdizimi agacini inceler. Bulgu da muafiyet de yoksa
-    /// <see cref="RuleResult.Empty"/> doner. <paramref name="filePath"/> bulgularda
-    /// oldugu gibi yaziliyor, yani tarama kokune gore goreli gelmesi bekleniyor.
+    /// Tek bir dosyayi inceler. Bulgu da muafiyet de yoksa <see cref="RuleResult.Empty"/>
+    /// doner. Kural diske bakmaz: ihtiyaci olan her sey baglamda duruyor, boylece tarama
+    /// disi birakilan bir dosya sonuca karisamiyor.
     /// </summary>
-    RuleResult InspectFile(SyntaxTree tree, string filePath);
+    RuleResult Inspect(RuleContext context);
 }

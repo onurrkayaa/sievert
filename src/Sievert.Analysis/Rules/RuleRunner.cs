@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Sievert.Core.Rules;
 
 namespace Sievert.Analysis.Rules;
@@ -12,23 +10,24 @@ public sealed class RuleRunner(IReadOnlyList<IRule> rules)
 {
     /// <summary>
     /// Her dosyayi bir kez ayristirip butun kurallara verir. Yollar
-    /// <paramref name="scanRoot"/> kokune gore goreli yazilir. Agaci ayristirirken
-    /// dosyanin diskteki tam yolu veriliyor; dosya sinirini asmasi gereken kurallar
-    /// (ornegin SV001'in partial sinif aramasi) o yolu kullaniyor.
+    /// <paramref name="scanRoot"/> kokune gore goreli yazilir. Dosya sinirini asmasi
+    /// gereken kurallar (ornegin SV001'in partial sinif aramasi) komsu dosyalari
+    /// baglamdan aliyor, diskten degil.
     /// </summary>
-    public RuleResult Run(IReadOnlyList<string> filePaths, string scanRoot)
+    public RuleResult Run(IReadOnlyList<string> filePaths, string scanRoot) =>
+        Run(ScannedFileSet.Contexts(ScannedFileSet.Parse(filePaths, scanRoot)));
+
+    /// <summary>Baglamlari hazir olan bir kume uzerinde calistirir.</summary>
+    public RuleResult Run(IReadOnlyList<RuleContext> contexts)
     {
         List<Finding> findings = [];
         List<Exemption> exemptions = [];
 
-        foreach (string filePath in filePaths)
+        foreach (RuleContext context in contexts)
         {
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(File.ReadAllText(filePath), path: filePath);
-            string relativePath = ScanRoot.RelativePath(filePath, scanRoot);
-
             foreach (IRule rule in rules)
             {
-                RuleResult result = rule.InspectFile(tree, relativePath);
+                RuleResult result = rule.Inspect(context);
 
                 findings.AddRange(result.Findings);
                 exemptions.AddRange(result.Exemptions);

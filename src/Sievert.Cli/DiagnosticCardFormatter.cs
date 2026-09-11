@@ -60,6 +60,9 @@ public static class DiagnosticCardFormatter
         [
             ("Taranan dosya", summary.FileCount.ToString(CultureInfo.InvariantCulture)),
             ("Dislanan dosya", summary.ExcludedFileCount.ToString(CultureInfo.InvariantCulture)),
+            ("Atlanan klasor", summary.SkippedDirectories.Count.ToString(CultureInfo.InvariantCulture)),
+            ("Etkin kural", CodeList(summary.Rules.ActiveCodes)),
+            ("Kapali kural", CodeList(summary.Rules.DisabledCodes)),
             ("Bulgu", summary.FindingCount.ToString(CultureInfo.InvariantCulture)),
         ];
 
@@ -75,6 +78,11 @@ public static class DiagnosticCardFormatter
                 new OutputSpan(value, OutputColor.Normal));
         }
     }
+
+    /// <summary>Kural kodlarini tek satirda yazar. Bos listeyi "yok" diye gosteriyoruz ki
+    /// bos bir satir "acaba yazilmadi mi" diye dusundurmesin.</summary>
+    private static string CodeList(IReadOnlyList<string> codes) =>
+        codes.Count == 0 ? "yok" : string.Join(", ", codes);
 
     /// <summary>Seviyenin ekranda gorunen hali. JSON tarafi enum adini kullaniyor, burasi Turkce.</summary>
     private static string SeverityLabel(Severity severity) => severity switch

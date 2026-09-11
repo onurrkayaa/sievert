@@ -7,17 +7,32 @@ namespace Sievert.Cli;
 /// <param name="TargetPath">Taranacak dosya ya da klasor.</param>
 /// <param name="Json">Cikti duz JSON olsun mu.</param>
 /// <param name="Exclude">--exclude ile verilen kaliplar. Verilmediyse bos.</param>
-public abstract record CommandOptions(string TargetPath, bool Json, IReadOnlyList<GlobPattern> Exclude);
+/// <param name="ConfigPath">--config ile verilen yapilandirma yolu. Verilmediyse null.</param>
+public abstract record CommandOptions(
+    string TargetPath,
+    bool Json,
+    IReadOnlyList<GlobPattern> Exclude,
+    string? ConfigPath);
 
 /// <summary>scan komutunun ayarlari.</summary>
 /// <param name="TopCount">--top ile istenen metot sayisi, verilmediyse null.</param>
-public sealed record ScanOptions(string TargetPath, bool Json, IReadOnlyList<GlobPattern> Exclude, int? TopCount)
-    : CommandOptions(TargetPath, Json, Exclude);
+public sealed record ScanOptions(
+    string TargetPath,
+    bool Json,
+    IReadOnlyList<GlobPattern> Exclude,
+    string? ConfigPath,
+    int? TopCount)
+    : CommandOptions(TargetPath, Json, Exclude, ConfigPath);
 
 /// <summary>check komutunun ayarlari.</summary>
 /// <param name="FailOn">Bu seviyede ya da ustunde bulgu varsa cikis kodu 1 olur.</param>
-public sealed record CheckOptions(string TargetPath, bool Json, IReadOnlyList<GlobPattern> Exclude, Severity FailOn)
-    : CommandOptions(TargetPath, Json, Exclude);
+public sealed record CheckOptions(
+    string TargetPath,
+    bool Json,
+    IReadOnlyList<GlobPattern> Exclude,
+    string? ConfigPath,
+    Severity FailOn)
+    : CommandOptions(TargetPath, Json, Exclude, ConfigPath);
 
 /// <summary>Ayristirma sonucu: ya ayarlar ya da kullaniciya gosterilecek bir hata.</summary>
 /// <param name="Options">Basarili ayristirmada dolu olur.</param>
@@ -49,6 +64,8 @@ public static class ArgumentParser
                                 varsayilan warning
 
         Iki komutta da gecerli:
+          --config <yol>      yapilandirma dosyasi. Verilmezse taranan kokteki
+                              sievert.json okunur, o da yoksa varsayilanlar calisir
           --exclude <kalip>   bu kaliba uyan dosyalari tarama. Birden fazla kez
                               verilebilir. * bir yol parcasi icinde, ** sifir ya
                               da daha fazla yol parcasi eslestirir. Ornek:
@@ -86,6 +103,7 @@ public static class ArgumentParser
         bool json = false;
         int? topCount = null;
         List<GlobPattern> exclude = [];
+        string? configPath = null;
 
         for (int i = 2; i < args.Length; i++)
         {
@@ -101,6 +119,15 @@ public static class ArgumentParser
                         return new ParseResult(null, scanError);
                     }
 
+                    break;
+
+                case "--config":
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--config bir yol bekliyor.");
+                    }
+
+                    configPath = args[++i];
                     break;
 
                 case "--top":
@@ -123,7 +150,7 @@ public static class ArgumentParser
             }
         }
 
-        return new ParseResult(new ScanOptions(args[1], json, exclude, topCount), null);
+        return new ParseResult(new ScanOptions(args[1], json, exclude, configPath, topCount), null);
     }
 
     private static ParseResult ParseCheck(string[] args)
@@ -131,6 +158,7 @@ public static class ArgumentParser
         bool json = false;
         Severity failOn = DefaultFailOn;
         List<GlobPattern> exclude = [];
+        string? configPath = null;
 
         for (int i = 2; i < args.Length; i++)
         {
@@ -146,6 +174,15 @@ public static class ArgumentParser
                         return new ParseResult(null, checkError);
                     }
 
+                    break;
+
+                case "--config":
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--config bir yol bekliyor.");
+                    }
+
+                    configPath = args[++i];
                     break;
 
                 case "--fail-on":
@@ -168,7 +205,7 @@ public static class ArgumentParser
             }
         }
 
-        return new ParseResult(new CheckOptions(args[1], json, exclude, failOn), null);
+        return new ParseResult(new CheckOptions(args[1], json, exclude, configPath, failOn), null);
     }
 
     /// <summary>

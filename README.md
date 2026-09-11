@@ -83,6 +83,47 @@ dotnet run --project src/Sievert.Cli -- check . --exclude 'samples/**'
 `samples/` is excluded because those files are broken on purpose - they are test data the
 test project reads.
 
+## Configuration
+
+`sievert.json` is optional. If there is one in the directory you are scanning it gets read;
+if there isn't, every rule runs and nothing is excluded. `--config <path>` points at a
+different file, and in that case the file has to exist.
+
+```json
+{
+  "rules": [
+    { "code": "SV001", "enabled": true, "severity": "warning" }
+  ],
+  "exclude": ["samples/**"]
+}
+```
+
+The file only turns rules on and off and overrides how serious their findings are. What a
+rule actually looks for stays in the code - see `docs/adr/0009-kural-katalogu-ve-yapilandirma.md`
+for why. `severity` is applied before `--fail-on` is checked, so setting a rule to `info`
+really does stop it from breaking the build.
+
+Rules you don't mention keep running with their defaults, so adding a new rule later
+doesn't get silently disabled by an old config file. A rule code the tool doesn't know, or
+a property name it doesn't know, is an error and exits 2 - a typo shouldn't quietly turn a
+rule off. `exclude` here and `--exclude` on the command line are added together; neither
+replaces the other.
+
+The summary prints which rules ran and which ones the config turned off, how many files
+were excluded, and how many directories were never entered at all:
+
+```
+Ozet
+  Taranan dosya  : 56
+  Dislanan dosya : 6
+  Atlanan klasor : 9
+  Etkin kural    : SV001
+  Kapali kural   : yok
+  Bulgu          : 0
+```
+
+`--json` carries the same information, with the skipped directories listed by path.
+
 Exit codes are the same for both commands:
 
 | Code | Meaning |
@@ -115,7 +156,7 @@ sample of its output was checked by hand: precision came out 8/10, with two fals
 positives and one false negative that all trace back to the same cause. The numbers and
 what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 has
 started: SV001 now also treats `+= MethodName` in the same file or the same partial class
-as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag,
-and CI checks this repository with it. There is still only one rule, and rules are not
-loaded from JSON yet. Nothing from stage 4 onwards (git history, risk scoring, API,
+as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag, CI
+checks this repository with it, and rules live in a catalogue that an optional
+`sievert.json` can turn on and off (ADR 0009). There is still only one rule. Nothing from stage 4 onwards (git history, risk scoring, API,
 dashboard) has been written.

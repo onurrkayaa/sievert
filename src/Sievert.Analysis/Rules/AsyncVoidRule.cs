@@ -20,9 +20,10 @@ public sealed class AsyncVoidRule : IRule
     /// handler kalibina uyuyorsa, ya da metoda bir yerde <c>+= MetotAdi</c> ile abone
     /// olunuyorsa. Ikisinin de neden gerektigi ADR 0008'de.
     /// </summary>
-    public RuleResult InspectFile(SyntaxTree tree, string filePath)
+    public RuleResult Inspect(RuleContext context)
     {
-        SyntaxNode root = tree.GetRoot();
+        string filePath = context.File.RelativePath;
+        SyntaxNode root = context.File.Tree.GetRoot();
 
         List<MethodDeclarationSyntax> candidates = root
             .DescendantNodes()
@@ -40,7 +41,7 @@ public sealed class AsyncVoidRule : IRule
 
         HashSet<string> subscribedInThisFile = EventSubscriptionSearch.NamesIn(root);
 
-        // Partial parcalar diskten okunuyor, ayni tip icin bir kez.
+        // Komsu dosyalar taraniyor, ayni tip icin bir kez.
         Dictionary<string, HashSet<string>> subscribedInPartialParts = new(StringComparer.Ordinal);
 
         foreach (MethodDeclarationSyntax method in candidates)
@@ -51,7 +52,7 @@ public sealed class AsyncVoidRule : IRule
                 continue;
             }
 
-            if (IsSubscribed(method, tree.FilePath, subscribedInThisFile, subscribedInPartialParts))
+            if (IsSubscribed(method, context, subscribedInThisFile, subscribedInPartialParts))
             {
                 exemptions.Add(ToExemption(method, filePath, ExemptionReason.Subscription));
                 continue;
@@ -65,13 +66,12 @@ public sealed class AsyncVoidRule : IRule
 
     /// <summary>
     /// Metoda kendi dosyasinda ya da ayni partial sinifin baska bir parcasinda abone
-    /// olunuyor mu. <paramref name="absoluteFilePath"/> agacin diskteki yolu; RuleRunner
-    /// agaci ayristirirken bu yolu veriyor, yoldan ayristirilmamis agaclarda bos geliyor
-    /// ve o zaman sadece dosyanin kendisine bakiliyor.
+    /// olunuyor mu. Parcalar baglamdaki komsu dosyalardan bulunuyor; taranmayan bir dosya
+    /// baglamda olmadigi icin kanit da uretmiyor.
     /// </summary>
     private static bool IsSubscribed(
         MethodDeclarationSyntax method,
-        string absoluteFilePath,
+        RuleContext context,
         HashSet<string> subscribedInThisFile,
         Dictionary<string, HashSet<string>> subscribedInPartialParts)
     {
@@ -82,7 +82,7 @@ public sealed class AsyncVoidRule : IRule
             return true;
         }
 
-        // Partial olmayan bir sinifin baska dosyada parcasi olamaz; diski hic okumuyoruz.
+        // Partial olmayan bir sinifin baska dosyada parcasi olamaz; komsulara hic bakmiyoruz.
         if (method.Parent is not TypeDeclarationSyntax type
             || !type.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
@@ -93,7 +93,7 @@ public sealed class AsyncVoidRule : IRule
 
         if (!subscribedInPartialParts.TryGetValue(typeName, out HashSet<string>? names))
         {
-            names = EventSubscriptionSearch.NamesInPartialParts(absoluteFilePath, typeName);
+            names = EventSubscriptionSearch.NamesInPartialParts(context.FilesInSameFolder, typeName);
             subscribedInPartialParts[typeName] = names;
         }
 

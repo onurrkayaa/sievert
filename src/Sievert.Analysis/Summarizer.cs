@@ -6,7 +6,11 @@ namespace Sievert.Analysis;
 public static class Summarizer
 {
     /// <param name="excludedFileCount">--exclude ile elenen dosya sayisi.</param>
-    public static ScanSummary Summarize(IReadOnlyList<FileAnalysis> analyses, int excludedFileCount = 0)
+    /// <param name="skippedDirectories">Icine hic girilmeyen klasorler, koke gore goreli.</param>
+    public static ScanSummary Summarize(
+        IReadOnlyList<FileAnalysis> analyses,
+        int excludedFileCount = 0,
+        IReadOnlyList<string>? skippedDirectories = null)
     {
         List<SievertMethod> methods = analyses.SelectMany(MethodsOf).ToList();
         int asyncCount = methods.Count(method => method.IsAsync);
@@ -31,7 +35,8 @@ public static class Summarizer
                 TestFileCount: analyses.Count(analysis => analysis.IsTestCode),
                 ProductionMethodCount: analyses.Where(analysis => !analysis.IsTestCode).Sum(analysis => MethodsOf(analysis).Count()),
                 TestMethodCount: analyses.Where(analysis => analysis.IsTestCode).Sum(analysis => MethodsOf(analysis).Count())),
-            ExcludedFileCount: excludedFileCount);
+            ExcludedFileCount: excludedFileCount,
+            SkippedDirectories: skippedDirectories ?? []);
     }
 
     /// <summary>En uzun metotlari uzundan kisaya dogru dondurur.</summary>

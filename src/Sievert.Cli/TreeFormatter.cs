@@ -157,6 +157,7 @@ public static class TreeFormatter
         [
             ("Dosya", $"{Number(summary.FileCount)}  (uretim {split.ProductionFileCount} / test {split.TestFileCount})"),
             ("Dislanan dosya", Number(summary.ExcludedFileCount)),
+            ("Atlanan klasor", Number(summary.SkippedDirectories.Count)),
             ("Tip", Number(summary.TypeCount)),
             ("Metot", $"{Number(summary.MethodCount)}  (uretim {split.ProductionMethodCount} / test {split.TestMethodCount})"),
             ("Async orani", $"%{OneDecimal(summary.AsyncRatio * 100)} ({summary.AsyncMethodCount}/{summary.MethodCount})"),

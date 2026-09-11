@@ -64,12 +64,12 @@ public class ExcludeFilterTests
 
     [Fact]
     public void NoPatterns_KeepsEverything() =>
-        Assert.Equal(4, ExcludeFilter.Apply(Files, Root, []).Count);
+        Assert.Equal(4, ExcludeFilter.Apply(Files, Root, []).Files.Count);
 
     [Fact]
     public void OnePattern_DropsWhatItMatches()
     {
-        IReadOnlyList<string> kept = ExcludeFilter.Apply(Files, Root, [Glob("samples/**")]);
+        IReadOnlyList<string> kept = ExcludeFilter.Apply(Files, Root, [Glob("samples/**")]).Files;
 
         Assert.Equal(2, kept.Count);
         Assert.DoesNotContain(kept, path => path.Contains("samples", StringComparison.Ordinal));
@@ -81,7 +81,7 @@ public class ExcludeFilterTests
         IReadOnlyList<string> kept = ExcludeFilter.Apply(
             Files,
             Root,
-            [Glob("samples/**"), Glob("**/*.Designer.cs")]);
+            [Glob("samples/**"), Glob("**/*.Designer.cs")]).Files;
 
         Assert.Equal([Path.Combine(Root, "src", "Program.cs")], kept);
     }
@@ -91,7 +91,7 @@ public class ExcludeFilterTests
     {
         // Iki kalip da ayni dosyalari tutuyor. Dislanan sayisi kalip sayisina gore
         // degil dosya sayisina gore cikmali, yoksa ozetteki sayi sisiyor.
-        IReadOnlyList<string> kept = ExcludeFilter.Apply(Files, Root, [Glob("samples/**"), Glob("**/*.cs")]);
+        IReadOnlyList<string> kept = ExcludeFilter.Apply(Files, Root, [Glob("samples/**"), Glob("**/*.cs")]).Files;
 
         Assert.Empty(kept);
         Assert.Equal(4, Files.Length - kept.Count);
@@ -209,6 +209,91 @@ public class ExcludeEndToEndTests : IDisposable
     }
 
     [Fact]
+    public void AnExcludedFile_CannotBeUsedAsEvidenceByARule()
+    {
+        // Adim 2'de olculen tutarsizlik buydu: SV001 partial parcalari diskten okudugu icin
+        // dislanan dosya yine de muafiyet uretiyordu. Artik kural sadece taranan kumeyi
+        // goruyor, o yuzden OnShown bulgu olmali.
+        string folder = Path.Combine(_root, "Views");
+        Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, "Screen.cs"), "public partial class Screen { public async void OnShown(ShownArgs a) { } }");
+        File.WriteAllText(Path.Combine(folder, "Screen.Designer.cs"), "public partial class Screen { void Wire(Source s) { s.Shown += OnShown; } }");
+
+        using JsonDocument json = JsonDocument.Parse(
+            Capture(["check", folder, "--exclude", "**/*.Designer.cs", "--json"]));
+
+        Assert.Equal(
+            ["OnShown"],
+            json.RootElement.GetProperty("findings").EnumerateArray()
+                .Select(finding => finding.GetProperty("methodName").GetString()!)
+                .ToArray());
+        Assert.False(json.RootElement.TryGetProperty("exemptions", out _));
+    }
+
+    [Fact]
+    public void AFileInTheScanSet_IsStillUsedAsEvidence()
+    {
+        // Yukaridakinin karsiti: dislama olmayinca kanit yine calismali, yoksa
+        // tutarlilik duzeltmesi ADR 0008'in muafiyetini sessizce oldururdu.
+        string folder = Path.Combine(_root, "Views2");
+        Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, "Screen.cs"), "public partial class Screen { public async void OnShown(ShownArgs a) { } }");
+        File.WriteAllText(Path.Combine(folder, "Screen.Designer.cs"), "public partial class Screen { void Wire(Source s) { s.Shown += OnShown; } }");
+
+        using JsonDocument json = JsonDocument.Parse(Capture(["check", folder, "--json"]));
+
+        Assert.Empty(json.RootElement.GetProperty("findings").EnumerateArray());
+        Assert.Equal(
+            "subscription",
+            json.RootElement.GetProperty("exemptions")[0].GetProperty("reason").GetString());
+    }
+
+    [Fact]
+    public void APatternThatMatchesNothing_Warns()
+    {
+        // Sessiz eslesmeme, yanlis yazilmis bir kalibin tek belirtisi.
+        string errors = CaptureErrors(["check", _root, "--exclude", "yok/**"]);
+
+        Assert.Contains("hicbir dosyayla eslesmedi", errors, StringComparison.Ordinal);
+        Assert.Contains("yok/**", errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void APatternThatIsJustAFolderName_SaysWhatToWriteInstead()
+    {
+        // En sik yapilan hata: "samples" yazip altindaki dosyalarin elenmesini beklemek.
+        string errors = CaptureErrors(["check", _root, "--exclude", "samples"]);
+
+        Assert.Contains("samples/**", errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void APatternThatMatches_DoesNotWarn() =>
+        Assert.DoesNotContain(
+            "eslesmedi",
+            CaptureErrors(["check", _root, "--exclude", "samples/**"]),
+            StringComparison.Ordinal);
+
+    [Fact]
+    public void SkippedDirectories_AreReportedByCountAndByPath()
+    {
+        // obj'nin icine girilmiyor ve icindeki dosyalar "dislanan" sayisina da girmiyor.
+        // Sessiz kalmamasi icin klasorun kendisi raporlaniyor.
+        using JsonDocument json = JsonDocument.Parse(Capture(["check", _root, "--exclude", "samples/**", "--json"]));
+
+        Assert.Equal(
+            ["obj"],
+            json.RootElement.GetProperty("summary").GetProperty("skippedDirectories")
+                .EnumerateArray().Select(path => path.GetString()!).ToArray());
+    }
+
+    [Fact]
+    public void SkippedDirectoryCount_IsOnTheScreenSummary()
+    {
+        Assert.Contains("Atlanan klasor : 1", Capture(["check", _root, "--exclude", "samples/**"]), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void InvalidPattern_IsAToolError() =>
         Assert.Equal(ExitCodes.ToolError, CommandRunner.Run(["check", _root, "--exclude", "src/**tests/*.cs"]));
 
@@ -233,5 +318,23 @@ public class ExcludeEndToEndTests : IDisposable
         CommandRunner.Run(args);
 
         return output.ToString();
+    }
+
+    private static string CaptureErrors(string[] args)
+    {
+        StringWriter errors = new();
+        Console.SetOut(TextWriter.Null);
+        Console.SetError(errors);
+
+        try
+        {
+            CommandRunner.Run(args);
+        }
+        finally
+        {
+            Console.SetError(TextWriter.Null);
+        }
+
+        return errors.ToString();
     }
 }

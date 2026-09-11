@@ -28,48 +28,23 @@ internal static class EventSubscriptionSearch
             .ToHashSet(StringComparer.Ordinal);
 
     /// <summary>
-    /// Ayni klasordeki diger dosyalarda <paramref name="typeName"/> adli partial tipin baska
-    /// bir parcasi varsa, oradaki abonelikleri toplar. Parcalari klasore ve tip adina bakarak
+    /// Komsu dosyalar arasinda <paramref name="typeName"/> adli partial tipin baska bir
+    /// parcasi varsa, oradaki abonelikleri toplar. Parcalari klasore ve tip adina bakarak
     /// buluyoruz; bu bir heuristik, ayrintisi docs/sinirliliklar.md'de.
     /// </summary>
-    /// <param name="absoluteFilePath">
-    /// Incelenen dosyanin diskteki yolu. Bos gelirse (yoldan ayristirilmamis bir agac)
-    /// klasore hic bakilmaz, sadece dosyanin kendisi kanit sayilir.
+    /// <param name="filesInSameFolder">
+    /// Ayni klasordeki diger <em>taranan</em> dosyalar. Diski kendimiz okumuyoruz: tarama
+    /// disi birakilan bir dosya buraya girmedigi icin kanit da olamiyor.
     /// </param>
-    public static HashSet<string> NamesInPartialParts(string absoluteFilePath, string typeName)
+    public static HashSet<string> NamesInPartialParts(
+        IReadOnlyList<ScannedFile> filesInSameFolder,
+        string typeName)
     {
         HashSet<string> names = new(StringComparer.Ordinal);
 
-        if (string.IsNullOrEmpty(absoluteFilePath))
+        foreach (ScannedFile sibling in filesInSameFolder)
         {
-            return names;
-        }
-
-        string? folder = Path.GetDirectoryName(absoluteFilePath);
-
-        if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
-        {
-            return names;
-        }
-
-        foreach (string sibling in Directory.EnumerateFiles(folder, "*.cs"))
-        {
-            if (string.Equals(sibling, absoluteFilePath, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            string text = File.ReadAllText(sibling);
-
-            // Parca olabilmesi icin hem "partial" hem tip adi metinde gecmek zorunda.
-            // Gecmiyorsa dosyayi ayristirmaya gerek yok.
-            if (!text.Contains("partial", StringComparison.Ordinal)
-                || !text.Contains(typeName, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            SyntaxNode root = CSharpSyntaxTree.ParseText(text).GetRoot();
+            SyntaxNode root = sibling.Tree.GetRoot();
 
             if (DeclaresPartialType(root, typeName))
             {

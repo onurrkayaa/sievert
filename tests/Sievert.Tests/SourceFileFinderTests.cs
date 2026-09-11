@@ -44,6 +44,22 @@ public class SourceFileFinderTests : IDisposable
     }
 
     [Fact]
+    public void Search_ReportsTheDirectoriesItNeverEntered()
+    {
+        // Icindeki .cs dosyalarini saymiyoruz (node_modules'u gezmek pahali olurdu),
+        // ama hangi klasorlerin atlandigini soyluyoruz.
+        string[] skipped = Names(SourceFileFinder.Search(_root).SkippedDirectories);
+
+        Assert.Equal([".git", "bin", "node_modules", "obj"], skipped.Order(StringComparer.Ordinal).ToArray());
+    }
+
+    [Fact]
+    public void Search_OnASingleFile_SkipsNothing()
+    {
+        Assert.Empty(SourceFileFinder.Search(Path.Combine(_root, "Bir.cs")).SkippedDirectories);
+    }
+
+    [Fact]
     public void Directory_NonCSharpFilesAreLeftOut()
     {
         Assert.DoesNotContain(SourceFileFinder.Find(_root), path => path.EndsWith(".txt", StringComparison.Ordinal));

@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
+using Sievert.Analysis;
 using Sievert.Analysis.Rules;
 using Sievert.Core.Rules;
 
@@ -101,9 +102,8 @@ public class AsyncVoidRuleTests
                 Path.Combine(far, "Screen.Wiring.cs"),
                 "public partial class Screen { void Wire(Source s) { s.Shown += OnShown; } }");
 
-            RuleResult result = Rule.InspectFile(
-                CSharpSyntaxTree.ParseText(File.ReadAllText(handlerFile), path: handlerFile),
-                "Views/Screen.cs");
+            // Iki dosya da taraniyor ama ayri klasorlerde, o yuzden komsu sayilmiyorlar.
+            RuleResult result = Rule.Inspect(ContextFor(handlerFile, SourceFileFinder.Find(root), root));
 
             Assert.Contains(result.Findings, found => found.MethodName == "OnShown");
         }
@@ -130,10 +130,20 @@ public class AsyncVoidRuleTests
     private static IReadOnlyList<Finding> Inspect(string filePath) =>
         Run(filePath).Findings;
 
+    /// <summary>
+    /// Ornek klasorunun tamamini RuleRunner'in yaptigi gibi ayristirip istenen dosyanin
+    /// baglamini doner. Kural artik diske bakmadigi icin komsulari testin vermesi gerekiyor.
+    /// </summary>
     private static RuleResult Run(string filePath) =>
-        Rule.InspectFile(
-            CSharpSyntaxTree.ParseText(File.ReadAllText(filePath), path: filePath),
-            Path.Combine("Patients", Path.GetFileName(filePath)).Replace('\\', '/'));
+        Rule.Inspect(ContextFor(
+            filePath,
+            SourceFileFinder.Find(Path.Combine(AppContext.BaseDirectory, "Patients")),
+            AppContext.BaseDirectory));
+
+    private static RuleContext ContextFor(string filePath, IReadOnlyList<string> scanned, string scanRoot) =>
+        ScannedFileSet
+            .Contexts(ScannedFileSet.Parse(scanned, scanRoot))
+            .Single(context => context.File.AbsolutePath == Path.GetFullPath(filePath));
 
     private static string SampleFile() =>
         SampleFile("AsyncVoid.cs");

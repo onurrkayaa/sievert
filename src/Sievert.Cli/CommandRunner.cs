@@ -5,6 +5,7 @@ using Sievert.Analysis;
 using Sievert.Analysis.Rules;
 using Sievert.Core;
 using Sievert.Core.Analysis;
+using Sievert.Core.Configuration;
 using Sievert.Core.Rules;
 
 namespace Sievert.Cli;
@@ -46,20 +47,39 @@ public static class CommandRunner
             return ExitCodes.ToolError;
         }
 
-        IReadOnlyList<string> found = SourceFileFinder.Find(options.TargetPath);
+        SourceFileSearch search = SourceFileFinder.Search(options.TargetPath);
 
-        if (found.Count == 0)
+        if (search.Files.Count == 0)
         {
             Console.Error.WriteLine($"Taranacak .cs dosyasi yok: {options.TargetPath}");
             return ExitCodes.ToolError;
         }
 
         // Kok, eleme kaliplari goreli yola uygulanacagi icin elemeden once hesaplaniyor.
+        // Yapilandirma da kokte aranyor, o yuzden o da burada okunuyor.
         string root = ScanRoot.Find(options.TargetPath);
-        IReadOnlyList<string> files = ExcludeFilter.Apply(found, root, options.Exclude);
-        int excludedCount = found.Count - files.Count;
 
-        if (files.Count == 0)
+        ConfigLoadResult configResult = options.ConfigPath is string configPath
+            ? ConfigLoader.LoadFile(configPath)
+            : ConfigLoader.LoadFromRoot(root);
+
+        if (configResult.Config is not SievertConfig config)
+        {
+            Console.Error.WriteLine(configResult.Error);
+            return ExitCodes.ToolError;
+        }
+
+        if (MergeExcludes(options.Exclude, config.Exclude) is not IReadOnlyList<GlobPattern> patterns)
+        {
+            return ExitCodes.ToolError;
+        }
+
+        ExcludeResult excluded = ExcludeFilter.Apply(search.Files, root, patterns);
+        int excludedCount = search.Files.Count - excluded.Files.Count;
+
+        WarnAboutUnmatchedPatterns(excluded.UnmatchedPatterns, root);
+
+        if (excluded.Files.Count == 0)
         {
             // Sessizce 0 donmek tehlikeli olurdu: CI adimi hicbir sey taranmadigi halde
             // "temiz" derdi. Fazla eleyen bir kalip arac hatasi sayiliyor.
@@ -67,21 +87,72 @@ public static class CommandRunner
             return ExitCodes.ToolError;
         }
 
+        IReadOnlyList<string> skipped = search.SkippedDirectories
+            .Select(directory => ScanRoot.RelativePath(directory, root))
+            .ToList();
+
         return options switch
         {
-            ScanOptions scan => RunScan(scan, files, root, excludedCount),
-            CheckOptions check => RunCheck(check, files, root, excludedCount),
+            ScanOptions scan => RunScan(scan, excluded.Files, root, excludedCount, skipped),
+            CheckOptions check => RunCheck(check, excluded.Files, root, excludedCount, skipped, config),
             _ => throw new InvalidOperationException("Bilinmeyen komut turu."),
         };
     }
 
-    private static int RunScan(ScanOptions options, IReadOnlyList<string> files, string root, int excludedCount)
+    /// <summary>
+    /// --exclude ile sievert.json'daki exclude birlesir, biri digerini ezmez. Ezme olsaydi
+    /// dosyaya yazilmis bir kalip komut satirindan tek bir --exclude verilince sessizce
+    /// kaybolurdu. Gecersiz kalip burada da kullanim hatasi.
+    /// </summary>
+    private static IReadOnlyList<GlobPattern>? MergeExcludes(
+        IReadOnlyList<GlobPattern> fromCommandLine,
+        IReadOnlyList<string> fromConfig)
+    {
+        List<GlobPattern> merged = [.. fromCommandLine];
+
+        foreach (string text in fromConfig)
+        {
+            if (GlobPattern.TryParse(text) is not GlobPattern pattern)
+            {
+                Console.Error.WriteLine($"{ConfigLoader.FileName} icinde gecersiz kalip: {text}");
+                return null;
+            }
+
+            merged.Add(pattern);
+        }
+
+        return merged;
+    }
+
+    /// <summary>
+    /// Hicbir dosyayla eslesmeyen kalip icin uyarir. Uyari stderr'e gidiyor ki --json
+    /// ciktisini bozmasin. Kalip var olan bir klasorun adiysa ne yazilmasi gerektigini
+    /// de soyluyoruz, cunku en sik yapilan hata bu.
+    /// </summary>
+    private static void WarnAboutUnmatchedPatterns(IReadOnlyList<GlobPattern> unmatched, string root)
+    {
+        foreach (GlobPattern pattern in unmatched)
+        {
+            string hint = Directory.Exists(Path.Combine(root, pattern.Text))
+                ? $" {pattern.Text} bir klasor; altindaki dosyalar icin {pattern.Text}/** dene."
+                : string.Empty;
+
+            Console.Error.WriteLine($"Uyari: --exclude kalibi hicbir dosyayla eslesmedi: {pattern.Text}.{hint}");
+        }
+    }
+
+    private static int RunScan(
+        ScanOptions options,
+        IReadOnlyList<string> files,
+        string root,
+        int excludedCount,
+        IReadOnlyList<string> skippedDirectories)
     {
         IReadOnlyList<FileAnalysis> analyses = ScanRoot.MakePathsRelative(
             files.Select(FileAnalyzer.AnalyzeFile).ToList(),
             root);
 
-        ScanSummary summary = Summarizer.Summarize(analyses, excludedCount);
+        ScanSummary summary = Summarizer.Summarize(analyses, excludedCount, skippedDirectories);
         IReadOnlyList<MethodLocation> longest = options.TopCount is int count
             ? Summarizer.LongestMethods(analyses, count)
             : [];
@@ -100,14 +171,35 @@ public static class CommandRunner
         return ExitCodes.Clean;
     }
 
-    private static int RunCheck(CheckOptions options, IReadOnlyList<string> files, string root, int excludedCount)
+    private static int RunCheck(
+        CheckOptions options,
+        IReadOnlyList<string> files,
+        string root,
+        int excludedCount,
+        IReadOnlyList<string> skippedDirectories,
+        SievertConfig config)
     {
-        // Kural listesi simdilik burada duruyor. Yol haritasinda JSON'dan okumak var.
-        RuleRunner runner = new([new AsyncVoidRule()]);
+        // Kural listesi RuleCatalog'da; burada sadece yapilandirmayla suzuluyor.
+        RuleSelectionResult selectionResult = RuleCatalog.Select(config);
 
-        RuleResult result = runner.Run(files, root);
-        IReadOnlyList<Finding> findings = result.Findings;
-        CheckSummary summary = CheckSummary.Of(files.Count, findings, excludedCount);
+        if (selectionResult.Selection is not RuleSelection selection)
+        {
+            Console.Error.WriteLine(selectionResult.Error);
+            return ExitCodes.ToolError;
+        }
+
+        RuleResult result = new RuleRunner(selection.Enabled).Run(files, root);
+
+        // Seviye ezmesi bulgular uretildikten sonra uygulaniyor; --fail-on karsilastirmasi
+        // da ezilmis seviyeyi goruyor, cunku asagida bu liste kullaniliyor.
+        IReadOnlyList<Finding> findings = selection.ApplySeverity(result.Findings);
+
+        CheckSummary summary = CheckSummary.Of(
+            files.Count,
+            findings,
+            excludedCount,
+            skippedDirectories,
+            new RuleUsage(selection.Enabled.Select(rule => rule.Code).ToArray(), selection.DisabledCodes));
 
         if (options.Json)
         {

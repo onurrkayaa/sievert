@@ -62,3 +62,25 @@ gittigi. Sadece Polly olculdu.
 Polly'nin tam tarihi JSONL olarak 3,9 MB, 2759 satir. Ayni veriyi tek bir JSON dizisi
 olarak yazsaydim yazarken de okurken de bu 3,9 MB'nin tamami bellege girecekti; JSONL
 tercihinin gerekcesi ADR 0011'de.
+
+## Veritabanina yazarken (Adim 2)
+
+Ayni repo, ayni commit sayisi, bu sefer `--db` ile: git'ten okunan akis hem ozete hem
+PostgreSQL'e gidiyor. Veritabani docker'da `postgres:17`, 5433 portunda.
+
+| Kosu | Commit | Sure | Tepe bellek (RSS) |
+|---|---|---|---|
+| Adim 1: sadece okuma ve JSONL | 2759 | 3,95 sn | 244 MB |
+| Adim 2: okuma + PostgreSQL'e yazma | 2759 | 5,44 sn | **323 MB** |
+| Adim 2: ayni repo ikinci kez (hepsi atlaniyor) | 2759 | 3,92 sn | - |
+
+Yazma yolu tepe bellege 79 MB ekliyor ve isi 1,5 sn uzatiyor. Eklenen sey EF Core ve
+Npgsql'in kendi yuku; commit'ler yine biriktirilmiyor, 500'luk gruplar hâlinde yazilip
+degisiklik izleyici temizleniyor. Izleyici temizlenmeseydi yazilan her commit bellekte
+kalirdi, yani bu sayinin altinda duran sey bir tercih.
+
+Ikinci kosuda hicbir satir yazilmadi (2759 commit "zaten kayitli" diye atlandi) ve sure
+3,92 sn'ye dustu; yani atlama yolu gercekten yazmiyor, sadece karsilastiriyor.
+
+Veritabaninda olusan satirlar: 2759 commit, 17 428 dosya degisikligi, 854 bot bayrakli
+commit, 751 `Co-Authored-By` satiri. `/` ile baslayan tek bir yol yok.

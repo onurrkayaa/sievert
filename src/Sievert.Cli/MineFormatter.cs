@@ -1,6 +1,7 @@
 using System.Globalization;
 
 using Sievert.Core.Mining;
+using Sievert.Data;
 
 namespace Sievert.Cli;
 
@@ -11,7 +12,8 @@ public static class MineFormatter
         MiningSummary summary,
         TimeSpan elapsed,
         string? outputPath,
-        bool shallow)
+        bool shallow,
+        StoreResult? store)
     {
         List<OutputLine> lines =
         [
@@ -26,6 +28,17 @@ public static class MineFormatter
             Row("ad degisimi esigi", "%" + summary.RenameSimilarityThreshold.ToString(CultureInfo.InvariantCulture)),
             Row("sure", elapsed.TotalSeconds.ToString("0.00", CultureInfo.InvariantCulture) + " sn"),
         ];
+
+        if (store is not null)
+        {
+            lines.Add(Row("veritabanina yazilan", store.Written.ToString(CultureInfo.InvariantCulture)));
+            lines.Add(Row("zaten kayitli, atlanan", store.Skipped.ToString(CultureInfo.InvariantCulture)));
+
+            if (store.Deleted > 0)
+            {
+                lines.Add(Row("silinip yeniden yazilan", store.Deleted.ToString(CultureInfo.InvariantCulture)));
+            }
+        }
 
         lines.Add(outputPath is null
             ? Line("Tam veri yazilmadi. Istiyorsan --out <dosya> ver.", OutputColor.Dim)

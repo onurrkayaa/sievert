@@ -33,6 +33,7 @@ src/
   Sievert.Core/               shared models and helpers, depends on nothing
   Sievert.Analysis/           code analysis with Roslyn
   Sievert.Mining/             git history with LibGit2Sharp, separate from Analysis
+  Sievert.Data/               PostgreSQL with EF Core, separate from Mining
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
@@ -67,8 +68,30 @@ flag is deliberately not called `--json`: on the other two commands `--json` is 
 that changes what gets printed, and one name meaning two things is the kind of thing
 that breaks a script quietly.
 `--since <date>` and `--max-commits <n>` limit how much history it reads. Merge commits
-are left out of the data but counted in the summary, and nothing is stored in a database
-yet - that is the next step. Why it works this way is in ADR 0011.
+are left out of the data but counted in the summary. Why it works this way is in ADR 0011.
+
+With `--db` the same pass also writes to PostgreSQL. Running it twice on the same
+repository does not duplicate anything: commits already stored are skipped, and the
+summary says how many. `--yeniden-yaz` deletes what is there and writes again. Derived
+metrics are not computed yet - there is a `CommitMetrics` table but it is empty on
+purpose, stage 4 step 3 fills it. The schema and why it looks like this are in ADR 0012.
+
+### Setting up the database
+
+```bash
+docker run -d --name sievert-db -p 5433:5432   -e POSTGRES_USER=sievert -e POSTGRES_PASSWORD=<your-password> -e POSTGRES_DB=sievert postgres:17
+export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=<your-password>"
+dotnet tool restore && dotnet dotnet-ef database update --project src/Sievert.Data
+```
+
+The connection string is never written into the code. The tool reads `SIEVERT_DB` first,
+then `ConnectionStrings:Sievert` in an `appsettings.json` in the working directory; if
+neither is there it says so and exits with 2. It also will not migrate your database on
+its own - if the schema is out of date it prints the command and stops.
+
+The database tests use Testcontainers and start a real PostgreSQL container. If Docker is
+not running they are skipped, and `dotnet test` reports them as skipped rather than
+passing quietly.
 
 There are six rules:
 

@@ -6,7 +6,11 @@ using Sievert.Analysis.Rules;
 using Sievert.Core;
 using Sievert.Core.Analysis;
 using Sievert.Core.Configuration;
+using Sievert.Core.Mining;
 using Sievert.Core.Rules;
+using Microsoft.EntityFrameworkCore;
+
+using Sievert.Data;
 using Sievert.Mining;
 
 namespace Sievert.Cli;
@@ -243,17 +247,70 @@ public static class CommandRunner
                 + "'git fetch --unshallow' calistir.");
         }
 
+        using SievertContext? context = options.Database ? OpenDatabase() : null;
+
+        if (options.Database && context is null)
+        {
+            return ExitCodes.ToolError;
+        }
+
+        RepositoryIdentity identity = RepositoryMiner.Identify(options.TargetPath);
+
         MineResult result = MineCommand.Run(
             options.TargetPath,
             new MiningOptions(options.Since, options.MaxCommits),
-            options.OutputPath);
+            options.OutputPath,
+            context is null ? null : new CommitStore(context),
+            context is null
+                ? null
+                : new StoreOptions(identity.Name, identity.RemoteUrl, identity.HeadSha, options.Rewrite));
 
         ConsoleWriter.Write(
-            MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath, shallow),
+            MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath, shallow, result.Store),
             ConsoleWriter.UseColor());
 
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).
         return ExitCodes.Clean;
+    }
+
+    /// <summary>
+    /// Baglanti dizesini bulup baglami acar. Sema eksikse migration'i kendiliginden
+    /// uygulamiyorum: baskasinin veritabaninda sessizce sema degistirmek, aracin
+    /// yapmasi gereken bir sey degil. Ne calistirilacagini yaziyorum, karar kullanicinin.
+    /// </summary>
+    private static SievertContext? OpenDatabase()
+    {
+        ConnectionStringResult connection = ConnectionString.Find(Directory.GetCurrentDirectory());
+
+        if (connection.Value is not string value)
+        {
+            Console.Error.WriteLine(connection.Error);
+            return null;
+        }
+
+        SievertContext context = SievertContextBuilder.Create(value);
+
+        try
+        {
+            if (context.Database.GetPendingMigrations().Any())
+            {
+                Console.Error.WriteLine(
+                    "Veritabani semasi guncel degil. Once su komutu calistir: "
+                    + "dotnet dotnet-ef database update --project src/Sievert.Data");
+                context.Dispose();
+
+                return null;
+            }
+        }
+        catch (Exception error)
+        {
+            Console.Error.WriteLine($"Veritabanina baglanilamadi ({connection.Source}): {error.Message}");
+            context.Dispose();
+
+            return null;
+        }
+
+        return context;
     }
 
     private static int WriteBanner()

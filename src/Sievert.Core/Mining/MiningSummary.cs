@@ -21,3 +21,12 @@ public sealed record MiningSummary(
     int BotAuthorCommitCount,
     int CoAuthorLineCount,
     int RenameSimilarityThreshold);
+
+/// <summary>
+/// Deponun kim oldugu. Veritabanina yazarken hangi depo satirinin guncellenecegi buradan
+/// belli oluyor.
+/// </summary>
+/// <param name="Name">Depo klasorunun adi.</param>
+/// <param name="RemoteUrl">origin adresi, tanimli degilse null.</param>
+/// <param name="HeadSha">HEAD'in gosterdigi commit, bos depoda null.</param>
+public sealed record RepositoryIdentity(string Name, string? RemoteUrl, string? HeadSha);

@@ -53,6 +53,23 @@ public sealed class RepositoryMiner
     }
 
     /// <summary>
+    /// Deponun adi, uzak adresi ve HEAD'i. Depo adi calisma klasorunun adindan geliyor;
+    /// uzak adres yoksa null kaliyor, cunku yerel bir depo da taranabilir.
+    /// </summary>
+    public static RepositoryIdentity Identify(string path)
+    {
+        using Repository repository = new(path);
+
+        string? working = repository.Info.WorkingDirectory ?? repository.Info.Path;
+        string name = Path.GetFileName(Path.TrimEndingDirectorySeparator(working ?? path));
+
+        return new RepositoryIdentity(
+            string.IsNullOrEmpty(name) ? path : name,
+            repository.Network.Remotes["origin"]?.Url,
+            repository.Head.Tip?.Sha);
+    }
+
+    /// <summary>
     /// Tarihi en yeniden en eskiye dogru yurur. Birlestirme commit'leri (ebeveyn sayisi
     /// birden buyuk) ciktiya girmez ama <see cref="SkippedMergeCount"/> icinde sayilir;
     /// gerekcesi ADR 0011'de.

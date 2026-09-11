@@ -105,12 +105,45 @@ public class ConfigLoaderTests : IDisposable
 public class RuleCatalogTests
 {
     [Fact]
-    public void WithoutConfig_EveryKnownRuleIsEnabled()
+    public void WithoutConfig_OnlyTheDefaultSetRuns()
     {
+        // Varsayilan kume "her sey acik" degil: olculen precision'a gore secildi.
         RuleSelection selection = RuleCatalog.Select(SievertConfig.Default).Selection!;
 
-        Assert.Equal(RuleCatalog.KnownCodes, selection.Enabled.Select(rule => rule.Code).ToArray());
-        Assert.Empty(selection.DisabledCodes);
+        Assert.Equal(["SV001", "SV002", "SV004", "SV006"], selection.Enabled.Select(rule => rule.Code).ToArray());
+        Assert.Equal(RuleCatalog.DefaultOffCodes, selection.DisabledCodes);
+    }
+
+    [Fact]
+    public void ADefaultOffRule_CanBeTurnedOn()
+    {
+        RuleSelection selection = RuleCatalog
+            .Select(new SievertConfig([new RuleSetting("SV003")], []))
+            .Selection!;
+
+        Assert.Contains(selection.Enabled, rule => rule.Code == "SV003");
+        Assert.DoesNotContain("SV003", selection.DisabledCodes);
+    }
+
+    [Fact]
+    public void ADefaultOffRule_StaysOffIfNotMentioned()
+    {
+        RuleSelection selection = RuleCatalog
+            .Select(new SievertConfig([new RuleSetting("SV001")], []))
+            .Selection!;
+
+        Assert.DoesNotContain(selection.Enabled, rule => rule.Code == "SV005");
+    }
+
+    [Fact]
+    public void ADefaultOnRule_CanStillBeTurnedOff()
+    {
+        RuleSelection selection = RuleCatalog
+            .Select(new SievertConfig([new RuleSetting("SV001", Enabled: false)], []))
+            .Selection!;
+
+        Assert.DoesNotContain(selection.Enabled, rule => rule.Code == "SV001");
+        Assert.Contains("SV001", selection.DisabledCodes);
     }
 
     [Fact]
@@ -119,7 +152,8 @@ public class RuleCatalogTests
         RuleSelection selection = Select(new RuleSetting("SV001", Enabled: false)).Selection!;
 
         Assert.DoesNotContain(selection.Enabled, rule => rule.Code == "SV001");
-        Assert.Equal(["SV001"], selection.DisabledCodes);
+        // Varsayilan kapali olanlar da listede: kapali kume = varsayilanlar + acikca kapatilan.
+        Assert.Equal(["SV001", "SV003", "SV005"], selection.DisabledCodes);
     }
 
     [Fact]
@@ -199,10 +233,14 @@ public class ConfigEndToEndTests : IDisposable
         using JsonDocument json = JsonDocument.Parse(Capture(["check", _root, "--json"]));
 
         Assert.Equal(ExitCodes.FindingsFound, CommandRunner.Run(["check", _root]));
+        JsonElement rules = json.RootElement.GetProperty("summary").GetProperty("rules");
+
         Assert.Equal(
-            RuleCatalog.KnownCodes,
-            json.RootElement.GetProperty("summary").GetProperty("rules").GetProperty("activeCodes")
-                .EnumerateArray().Select(code => code.GetString()!).ToArray());
+            ["SV001", "SV002", "SV004", "SV006"],
+            rules.GetProperty("activeCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
+        Assert.Equal(
+            RuleCatalog.DefaultOffCodes,
+            rules.GetProperty("disabledCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
     }
 
     [Fact]
@@ -215,7 +253,7 @@ public class ConfigEndToEndTests : IDisposable
 
         Assert.Empty(json.RootElement.GetProperty("findings").EnumerateArray());
         Assert.Equal(
-            ["SV001"],
+            ["SV001", "SV003", "SV005"],
             rules.GetProperty("disabledCodes").EnumerateArray().Select(code => code.GetString()!).ToArray());
         Assert.DoesNotContain(
             "SV001",
@@ -294,6 +332,89 @@ public class ConfigEndToEndTests : IDisposable
     }
 
     private void WriteConfig(string json) => File.WriteAllText(Path.Combine(_root, ConfigLoader.FileName), json);
+
+    private static string Capture(string[] args)
+    {
+        StringWriter output = new();
+        Console.SetOut(output);
+
+        CommandRunner.Run(args);
+
+        return output.ToString();
+    }
+}
+
+/// <summary>Varsayilan kume daraltildi; bunun uctan uca gorunur oldugunu dogrulayan testler.</summary>
+[Collection(ConsoleCollection.Name)]
+public class DefaultRuleSetTests : IDisposable
+{
+    private readonly string _root = Path.Combine(Path.GetTempPath(), "sievert-varsayilan-" + Guid.NewGuid().ToString("N"));
+    private readonly TextWriter _stdout = Console.Out;
+    private readonly TextWriter _stderr = Console.Error;
+
+    public DefaultRuleSetTests()
+    {
+        Directory.CreateDirectory(_root);
+
+        // Icinde sadece SV003 (kayip gorev) ve SV005 (atilmayan nesne) bulgusu olan bir dosya.
+        File.WriteAllText(Path.Combine(_root, "Kapali.cs"), """
+            using System.IO;
+            using System.Threading.Tasks;
+
+            public class Kapali
+            {
+                public void Calis()
+                {
+                    GonderAsync();
+                    var akis = new MemoryStream();
+                }
+
+                private Task GonderAsync() => Task.CompletedTask;
+            }
+            """);
+
+        Console.SetError(TextWriter.Null);
+    }
+
+    public void Dispose()
+    {
+        Console.SetOut(_stdout);
+        Console.SetError(_stderr);
+        Directory.Delete(_root, recursive: true);
+        GC.SuppressFinalize(this);
+    }
+
+    [Fact]
+    public void ByDefault_SV003AndSV005DoNotRun()
+    {
+        using JsonDocument json = JsonDocument.Parse(Capture(["check", _root, "--json"]));
+
+        Assert.Empty(json.RootElement.GetProperty("findings").EnumerateArray());
+        Assert.Equal(ExitCodes.Clean, CommandRunner.Run(["check", _root]));
+    }
+
+    [Fact]
+    public void TurnedOnInTheConfigFile_TheyRun()
+    {
+        File.WriteAllText(
+            Path.Combine(_root, ConfigLoader.FileName),
+            """{ "rules": [ { "code": "SV003" }, { "code": "SV005" } ] }""");
+
+        using JsonDocument json = JsonDocument.Parse(Capture(["check", _root, "--json"]));
+
+        Assert.Equal(
+            ["SV003", "SV005"],
+            json.RootElement.GetProperty("findings").EnumerateArray()
+                .Select(finding => finding.GetProperty("ruleCode").GetString()!)
+                .Distinct().Order(StringComparer.Ordinal).ToArray());
+    }
+
+    [Fact]
+    public void TheScreenSummary_NamesTheRulesThatAreOff()
+    {
+        // Sessiz yapilandirma tehlikeli: kapatilan kural ciktida gorunmeli.
+        Assert.Contains("Kapali kural   : SV003, SV005", Capture(["check", _root]), StringComparison.Ordinal);
+    }
 
     private static string Capture(string[] args)
     {

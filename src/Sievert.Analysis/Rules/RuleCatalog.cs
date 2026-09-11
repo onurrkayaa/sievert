@@ -58,13 +58,30 @@ public static class RuleCatalog
         All.Select(rule => rule.Code).Order(StringComparer.Ordinal).ToArray();
 
     /// <summary>
+    /// Varsayilan olarak KAPALI gelen kurallar. Yapilandirmayla acilabiliyorlar.
+    ///
+    /// Varsayilan kume "tanidigim her kural" degil, olculmus precision'a gore secilmis bir
+    /// kume. Jellyfin uzerinde her kuraldan bes bulguya elle bakildi (bkz.
+    /// docs/olcumler/asama3-precision.md): SV003 %0, SV005 %0 cikti. Ikisinin de yanlis
+    /// pozitifleri tek cinsten ve duzeltilebilir, ama duzeltme yazilana kadar acik durmalari
+    /// kullanicinin gordugu bulgularin yarisini gurultuye cevirir.
+    ///
+    /// SV004 de esigin altinda (%20) ama acik birakildi: yanlis pozitiflerinin tek bir kok
+    /// nedeni var (ad, tipin yerine kullaniliyor) ve o neden giderilebilir durumda.
+    /// </summary>
+    public static IReadOnlyList<string> DefaultOffCodes { get; } = ["SV003", "SV005"];
+
+    /// <summary>
     /// Yapilandirmayi katalogla birlestirir. Listede adi gecmeyen kurallar varsayilan
-    /// haliyle acik kaliyor; yapilandirma bir izin listesi degil, sadece istisna listesi.
+    /// haliyle kaliyor; yapilandirma bir izin listesi degil, sadece istisna listesi.
+    /// Varsayilan hal cogu kural icin acik, <see cref="DefaultOffCodes"/> icin kapali.
     /// </summary>
     public static RuleSelectionResult Select(SievertConfig config)
     {
         Dictionary<string, Severity> overrides = new(StringComparer.Ordinal);
-        HashSet<string> disabled = new(StringComparer.Ordinal);
+
+        // Varsayilan kapali kurallarla basliyoruz; yapilandirma bunlari acabilir.
+        HashSet<string> disabled = new(DefaultOffCodes, StringComparer.Ordinal);
 
         foreach (RuleSetting setting in config.Rules)
         {
@@ -81,6 +98,9 @@ public static class RuleCatalog
                 disabled.Add(setting.Code);
                 continue;
             }
+
+            // Adi gecen ve kapatilmamis bir kural aciliyor: varsayilan kapali olsa bile.
+            disabled.Remove(setting.Code);
 
             if (setting.Severity is Severity severity)
             {

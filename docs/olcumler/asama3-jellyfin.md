@@ -45,6 +45,14 @@ repoda kosullu derleme bloklari icinde kalan kod yok.
 | SV006 | info | 421 | 421 | 0 |
 | **Toplam** | | **878** | 789 | 89 |
 
+### Varsayilan kural kumesiyle
+
+Yukaridaki sayilar alti kural da acikken alinmisti. Asama 3 Adim 8'de SV003 ve SV005
+varsayilan kumeden cikarildi (gerekcesi [asama3-precision.md](asama3-precision.md)).
+Ayni tarama varsayilan kumeyle **878 yerine 732 bulgu** verirdi: SV003'un 26 ve
+SV005'in 120 bulgusu dusuyor. Yukaridaki tablo yeniden olculmedi, bu satir mevcut
+sayilardan cikarildi.
+
 ## Seviye dagilimi
 
 | Seviye | Bulgu |

@@ -72,6 +72,22 @@ yet. That produces false positives, which is a trade I took on purpose -
 `docs/adr/0010-ad-temelli-tespit-ve-kabul-edilen-yanlis-pozitifler.md` explains the trade
 and `docs/sinirliliklar.md` lists what goes wrong in each direction, rule by rule.
 
+Not all six run by default. SV003 and SV005 are off unless you turn them on in
+`sievert.json`. The default set is not "everything I have written" - it is the set whose
+precision I actually measured. I checked five findings per rule by hand on a real
+repository (`docs/olcumler/asama3-precision.md`): SV003 and SV005 came out at 0%, so
+leaving them on would mean half of what the tool prints is noise. SV004 also came out
+below the threshold I had set in advance (20%), but its false positives all trace to one
+cause I can fix, so it stays on for now. If you want the other two, put them in your
+config file:
+
+```json
+{ "rules": [ { "code": "SV003" }, { "code": "SV005" } ] }
+```
+
+The summary always prints which rules ran and which ones are off, so a narrowed default
+set is never silent.
+
 SV006 is `info` rather than a warning on purpose. It fires on nearly every async method in
 a codebase that never thought about cancellation, and `--fail-on` defaults to `warning`, so
 it shows up in the output without breaking anyone's build.

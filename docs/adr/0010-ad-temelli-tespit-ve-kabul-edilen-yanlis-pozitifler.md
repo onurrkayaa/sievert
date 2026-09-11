@@ -109,3 +109,20 @@ yazilmadi. Sebep: duzeltme oncesi sayilarin dosyada durmasi gerekiyor. Duzeltme 
 ayni orneklem yeniden olculurse, Asama 2'de ogrenilen tuzaga dusulmus olur - duzeltmenin
 uzerinde tasarlandigi orneklemle olculmesi bir dogrulama degildir. Duzeltmeler ayri bir
 adimda, olcum ise yeni bir orneklemle yapilacak.
+
+### Duzeltmeler yazildi, precision yeniden olculmedi
+
+Uc duzeltme de yazildi: SV003'un ifade agaci muafiyeti, SV005'in acik tip listesi ve
+iki adimli `await using` muafiyeti, SV004'un `Math` elemesi. Bulgu sayilari
+`docs/olcumler/asama3-duzeltme-sonrasi.md` dosyasinda once/sonra olarak duruyor
+(Jellyfin 878 -> 714, ShareX 559 -> 363, Polly 231 -> 229).
+
+Yukaridaki paragrafta yazilan sey hala gecerli: **precision yeniden olculmedi.** Ayni
+orneklemle olculseydi zaten bir dogrulama olmazdi, cunku duzeltmeler o orneklege
+bakilarak yazildi. Yeni bir orneklemle olcmek ayri bir is ve henuz yapilmadi. Yani
+su an elde "su kadar bulgu dustu" bilgisi var, "precision su kadar yukseldi" bilgisi
+yok. SV003 ve SV005 bu yuzden varsayilan kumede kapali kalmaya devam ediyor.
+
+Duzeltmelerden biri plana gore degismek zorunda kaldi. SV003 icin "lambdanin icindeki
+cagrilar muaf olsun" diye yazilmisti; kural zaten lambdanin icine bakmiyordu, isaretledigi
+cagri zincirin sonundaki `ReturnsAsync` idi. Muafiyet aliciya bakacak sekilde yazildi.

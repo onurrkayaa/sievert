@@ -78,8 +78,15 @@ precision I actually measured. I checked five findings per rule by hand on a rea
 repository (`docs/olcumler/asama3-precision.md`): SV003 and SV005 came out at 0%, so
 leaving them on would mean half of what the tool prints is noise. SV004 also came out
 below the threshold I had set in advance (20%), but its false positives all trace to one
-cause I can fix, so it stays on for now. If you want the other two, put them in your
-config file:
+cause I can fix, so it stays on for now.
+
+I have since written those fixes (the numbers are in
+`docs/olcumler/asama3-duzeltme-sonrasi.md`): Jellyfin went from 878 findings to 714 and
+ShareX from 559 to 363. That is a count, not a precision number - I did not re-check the
+findings by hand, so SV003 and SV005 stay off by default until someone measures them
+again on a fresh sample.
+
+If you want the other two, put them in your config file:
 
 ```json
 { "rules": [ { "code": "SV003" }, { "code": "SV005" } ] }

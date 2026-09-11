@@ -82,8 +82,12 @@ Exit codes are the same for both commands:
 
 ## Status
 
-Early development, v0.1.0. Stages 0, 1 and 2 are done: the project builds with CI, Roslyn
+Early development, v0.1.0. Stages 0, 1 and 2 are done. The project builds with CI, Roslyn
 parsing reads a file as structure, and the first rule SV001 runs behind the `check`
-command. Stage 3 has only started in the sense that the `IRule` interface exists - there
-is one rule, and rules are not loaded from JSON yet. Nothing from stage 4 onwards (git
-history, risk scoring, API, dashboard) has been written.
+command. SV001 was measured on two real repositories (Polly and ShareX) and a 20-line
+sample of its output was checked by hand: precision came out 8/10, with two false
+positives and one false negative that all trace back to the same cause. The numbers and
+what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 has only
+started in the sense that the `IRule` interface exists - there is one rule, and rules are
+not loaded from JSON yet. Nothing from stage 4 onwards (git history, risk scoring, API,
+dashboard) has been written.

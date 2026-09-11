@@ -204,7 +204,7 @@ Exit codes are the same for both commands:
 
 ## Status
 
-Early development, v0.1.0. Stages 0, 1 and 2 are done. The project builds with CI, Roslyn
+Early development, v0.1.0. Stages 0 to 3 are done and stage 4 has started. The project builds with CI, Roslyn
 parsing reads a file as structure, and the first rule SV001 runs behind the `check`
 command. SV001 was measured on two real repositories (Polly and ShareX) and a 20-line
 sample of its output was checked by hand: precision came out 8/10, with two false
@@ -215,8 +215,14 @@ as evidence that a method is an event handler (ADR 0008), there is an `--exclude
 checks this repository with it, and rules live in a catalogue that an optional
 `sievert.json` can turn on and off (ADR 0009). All six detectors for stage 3 are written
 and all six have now been run on three real repositories - Polly, ShareX and Jellyfin -
-with the numbers in `docs/olcumler/`. What is still missing is precision: 30 of Jellyfin's
-878 findings are sitting in `docs/olcumler/asama3-dogrulama-listesi.md` waiting to be
-checked by hand, so for now only SV001 has a precision number behind it and the other five
-should be read as untested. Nothing from stage 4 onwards (git history, risk scoring, API,
-dashboard) has been written.
+with the numbers in `docs/olcumler/`. Thirty of those findings, five per rule, were then
+checked by hand against the source: overall precision came out 15/30, and the per-rule
+table is in `docs/olcumler/asama3-precision.md`. Three of the rules had a single fixable
+cause behind their false positives; those fixes are written and the before/after counts
+are in `docs/olcumler/asama3-duzeltme-sonrasi.md` (Jellyfin dropped from 878 findings to
+714). Precision was not measured again after the fixes, so the 15/30 above is still the
+only precision number this project has.
+
+Stage 4 has started with git history. There is a `mine` command that walks a repository's
+commits and writes one JSON object per commit to a file; it does not touch a database yet.
+Risk scoring, the API and the dashboard have not been written.

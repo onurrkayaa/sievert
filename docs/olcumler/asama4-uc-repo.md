@@ -320,6 +320,27 @@ degil o satirin gectigi her dosya icin butun tarihi geriye dogru yuruyor.
 
 34 166 commit = 2759 + 8490 + 22 917. Uc repo tek veritabaninda, kimlik cakismasi yok.
 
+## Jellyfin etiketlemesi: yeni sure tahmini
+
+Ilk tahminim ("20-45 dakika") tutmamisti. Bu kez tahmini olculen iki veriden turettim.
+
+Etiketleme suresi hem duzeltme sayisiyla hem tarih uzunluguyla buyuyor: blame her dosya
+icin butun tarihi geriye yuruyor, yani duzeltme basina sure de repo buyudukce artiyor.
+Iki olcum bunu dogruluyor:
+
+| Repo | Sure | Duzeltme | Duzeltme basina | Commit | Katsayi (sn / duzeltme / commit) |
+|---|---|---|---|---|---|
+| Polly | 125,04 sn | 288 | 0,434 sn | 2953 | 1,47e-4 |
+| ShareX | 851,77 sn | 638 | 1,335 sn | 9479 | 1,41e-4 |
+
+Iki katsayi birbirine cok yakin (%4 fark), yani model tutuyor gorunuyor. Jellyfin icin
+3047 duzeltme ve 30 004 commit ile:
+
+**Tahmin: 1,44e-4 x 30 004 x 3047 = yaklasik 13 160 sn, yani 3,7 saat.**
+
+Ilk tahminimin neden bu kadar kotu oldugu da boylece belli: sureyi yalnizca commit
+sayisiyla olceklemistim, oysa carpim iki terimden olusuyor.
+
 ## Jellyfin etiketlemesi bitmedi
 
 Jellyfin'in etiketlemesi bu oturumda **tamamlanmadi**. Iki kez baslatildi: birincisi
@@ -345,6 +366,11 @@ kontrolleri Jellyfin'de tamamlandi, eksik olan yalnizca etiketleme.
 Bir sonraki adimda yapilacak sey belli: etiketlemeyi kosturup sayiyi eklemek, ve
 maliyeti dusurmek icin blame ciktisini dosya basina onbellege almak (ayni dosya birden
 fazla duzeltme tarafindan blame ediliyor; su an her seferinde bastan hesaplaniyor).
+
+**Adim 5b durumu:** kosu duzeltilmis kodla arka planda suruyor, PID 73923, log
+`tasks/bdp5ktbu7.output`. Rapor yazilirken 1 saat 27 dakikadir calisiyordu; yukaridaki
+tahmine gore yaklasik 2,2 saat daha var. Bitince bu dosyadaki Jellyfin satirlari
+tamamlanacak; bitmezse sutun bos kalacak, tahmini sayi yazilmayacak.
 
 ## Ozet
 

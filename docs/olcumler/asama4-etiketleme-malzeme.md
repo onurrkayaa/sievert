@@ -88,7 +88,7 @@ Suclanan satirin baglami:
         46          var pool = new ObjectPool<object>(() => new object(), _ => true);
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 2 / 30  [Polly]  [etiketli: EVET]
@@ -149,7 +149,7 @@ Suclanan satirin baglami:
        191              .Union(strategyExceptions)
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 3 / 30  [Polly]  [etiketli: EVET]
@@ -212,7 +212,7 @@ Suclanan satirin baglami:
        148                  case CircuitState.Closed:
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 4 / 30  [Polly]  [etiketli: EVET]
@@ -272,7 +272,7 @@ Suclanan satirin baglami:
         75              if (maxParallelization <= 0) throw new ArgumentOutOfRangeException(nameof(maxParallelization), "Value must be greater than zero.");
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 5 / 30  [Polly]  [etiketli: EVET]
@@ -318,7 +318,7 @@ Suclanan satirin baglami:
         62          Timeout = TimeSpan.FromMilliseconds(500),
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 6 / 30  [Polly]  [etiketli: HAYIR]
@@ -377,7 +377,7 @@ Suclanan satirin baglami:
         45          var count = ObjectPool<object>.MaxCapacity + 10;
 ```
 
-Karar:
+Karar:H
 Not:
 
 ### Satir 7 / 30  [Polly]  [etiketli: HAYIR]
@@ -441,7 +441,7 @@ Suclanan satirin baglami:
        163                  .Handle<TimeoutRejectedException>()
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 8 / 30  [Polly]  [etiketli: HAYIR]
@@ -484,7 +484,7 @@ Suclanan satirin baglami:
          9  [assembly: CLSCompliant(true)]
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 9 / 30  [Polly]  [etiketli: HAYIR]
@@ -529,7 +529,7 @@ Suclanan satirin baglami:
         87                  BulkheadEngine.ImplementationAsync(
 ```
 
-Karar:
+Karar:H
 Not:
 
 ### Satir 10 / 30  [Polly]  [etiketli: HAYIR]
@@ -628,7 +628,7 @@ Suclanan satirin baglami:
         56          private void RectangleRegion_MouseDown(object sender, MouseEventArgs e)
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 12 / 30  [ShareX]  [etiketli: EVET]
@@ -720,7 +720,7 @@ Suclanan satirin baglami:
        227              Size newSize = FormSize;
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 14 / 30  [ShareX]  [etiketli: EVET]
@@ -765,7 +765,7 @@ Suclanan satirin baglami:
         78                  uploadResult = UploadStream(stream, path);
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 15 / 30  [ShareX]  [etiketli: EVET]
@@ -805,7 +805,7 @@ Suclanan satirin baglami:
 >>>     15  [assembly: AssemblyFileVersion("9.4.0")]
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 16 / 30  [ShareX]  [etiketli: HAYIR]
@@ -903,7 +903,7 @@ Suclanan satirin baglami:
        194          }
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 18 / 30  [ShareX]  [etiketli: HAYIR]
@@ -964,7 +964,7 @@ Suclanan satirin baglami:
        521              }
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 19 / 30  [ShareX]  [etiketli: HAYIR]
@@ -1021,7 +1021,7 @@ Suclanan satirin baglami:
         77              this.ucBeforeUpload.Size = new System.Drawing.Size(400, 289);
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 20 / 30  [ShareX]  [etiketli: HAYIR]
@@ -1070,7 +1070,7 @@ Suclanan satirin baglami:
        568              }
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 21 / 30  [Jellyfin]  [etiketli: EVET]
@@ -1126,7 +1126,7 @@ Suclanan satirin baglami:
       2626                  sourceBitrate = Convert.ToInt32(sourceBitrate * 2.5);
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 22 / 30  [Jellyfin]  [etiketli: EVET]
@@ -1255,7 +1255,7 @@ Suclanan satirin baglami:
        696                  case StubType.Albums:
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 24 / 30  [Jellyfin]  [etiketli: EVET]
@@ -1367,7 +1367,7 @@ Suclanan satirin baglami:
         80              var info = new AuthorizationInfo
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 26 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1426,7 +1426,7 @@ Suclanan satirin baglami:
       6951                  {
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 27 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1502,7 +1502,7 @@ Suclanan satirin baglami:
         53  
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 28 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1551,7 +1551,7 @@ Suclanan satirin baglami:
         49                      if (isHidden.HasValue && isHidden.Value != scheduledTask.IsHidden)
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 29 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1601,7 +1601,7 @@ Suclanan satirin baglami:
       1513              {
 ```
 
-Karar:
+Karar:E
 Not:
 
 ### Satir 30 / 30  [Jellyfin]  [etiketli: HAYIR]
@@ -1648,6 +1648,6 @@ Suclanan satirin baglami:
        240              if (string.IsNullOrEmpty(value))
 ```
 
-Karar:
+Karar:E
 Not:
 

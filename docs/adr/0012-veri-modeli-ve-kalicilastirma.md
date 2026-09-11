@@ -114,3 +114,17 @@ aracinin isi degil.
 
 **Sonuc:** `sievert mine <repo> --db` git tarihini okuyup PostgreSQL'e yaziyor, ayni
 akistan hem dosyaya hem veritabanina. Turetilmis olculer bir sonraki adimda.
+
+## Ek: paket surumleri tek yerde
+
+Paket surumleri `Directory.Packages.props` icinde, merkezi surum yonetimiyle
+(`ManagePackageVersionsCentrally`). Projelerin `csproj` dosyalarinda `Version` yazmiyor.
+
+Sebep dogrudan olcumlerle ilgili: bir sayinin hangi surumle uretildigi repoda tek bir
+dosyadan okunabilmeli. Surumler csproj'lere dagilmis olsaydi bir projede 10.0.4,
+digerinde 10.0.12 kalabilirdi ve bunu kimse fark etmezdi. Nitekim bir kez oldu: Npgsql'in
+cektigi EF Core 10.0.4 ile ayri yazilmis Design 10.0.12 ayrisip derlemeyi kirdi.
+
+`dotnet-ef` araci da ayni bantta (`.config/dotnet-tools.json`, 10.0.4). Migration ureten
+arac ile calisma zamanindaki EF Core'un ayrisması, uretilmis bir migration'in baska bir
+makinede farkli davranmasi demek olurdu.

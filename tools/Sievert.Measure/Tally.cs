@@ -39,7 +39,7 @@ public static partial class Tally
             return;
         }
 
-        WriteAccuracy(rows);
+        WriteRatios(rows);
     }
 
     private static void WriteCounts(string title, List<Row> rows)
@@ -90,33 +90,64 @@ public static partial class Tally
     }
 
     /// <summary>
-    /// Dogruluk: etiketli satirda E, etiketsiz satirda H "SZZ hakli" demek (olcut
-    /// dosyasindaki ters okuma kurali). Belirsizler paydadan cikariliyor ve kac tane
-    /// cikarildigi yaziliyor.
+    /// Iki oran AYRI yaziliyor ve birlestirilmiyor. Etiketli satirlardan cikan oran
+    /// suclamalarin ne kadarinin dogru oldugunu (precision isareti), etiketsiz
+    /// satirlardan cikan oran SZZ'nin ne kadarini kacirdigini (recall isareti)
+    /// gosteriyor. Tek sayida birlestirmek ikisini de anlamsizlastirir, cunku paydalari
+    /// farkli kumeler.
+    ///
+    /// Olcut dosyasindaki ters okuma kurali geregi: etiketli satirda E "suclama dogru",
+    /// etiketsiz satirda H "suclamamak dogru" demek.
     /// </summary>
-    private static void WriteAccuracy(List<Row> rows)
+    private static void WriteRatios(List<Row> rows)
     {
-        List<Row> decided = [.. rows.Where(row => row.Decision != Decision.Unclear)];
-        int unclear = rows.Count - decided.Count;
+        WriteRatio(
+            "Etiketli satirlar (precision isareti)",
+            [.. rows.Where(row => row.Labelled)],
+            Decision.Yes,
+            "E (suclama dogru)",
+            "H (suclama yanlis)");
 
-        int correct = decided.Count(row =>
-            (row.Labelled && row.Decision == Decision.Yes)
-            || (!row.Labelled && row.Decision == Decision.No));
+        WriteRatio(
+            "Etiketsiz satirlar (recall isareti)",
+            [.. rows.Where(row => !row.Labelled)],
+            Decision.No,
+            "E (suclanmaliydi, SZZ kacirdi)",
+            "H (suclanmamaliydi, SZZ hakli)");
 
-        Console.WriteLine("Dogruluk (Belirsizler paydadan cikarildi):");
-        Console.WriteLine($"  pay      : {correct}");
-        Console.WriteLine($"  payda    : {decided.Count}");
-        Console.WriteLine($"  cikarilan Belirsiz: {unclear}");
+        Console.WriteLine("Iki oran birlestirilmedi: paydalari farkli kumeler.");
+    }
 
-        if (decided.Count == 0)
-        {
-            Console.WriteLine("  oran     : hesaplanamadi, payda sifir");
-            return;
-        }
+    /// <summary>
+    /// Tek bir kume icin pay ve paydayi ayri yazar. Belirsizler paydadan cikariliyor ve
+    /// kac tane cikarildigi da yaziliyor.
+    /// </summary>
+    private static void WriteRatio(
+        string title,
+        List<Row> rows,
+        Decision correct,
+        string yesLabel,
+        string noLabel)
+    {
+        int yes = rows.Count(row => row.Decision == Decision.Yes);
+        int no = rows.Count(row => row.Decision == Decision.No);
+        int unclear = rows.Count(row => row.Decision == Decision.Unclear);
+        int denominator = yes + no;
+        int numerator = correct == Decision.Yes ? yes : no;
 
-        Console.WriteLine(
-            $"  oran     : {correct}/{decided.Count} = "
-            + $"%{(100.0 * correct / decided.Count).ToString("0.0", CultureInfo.InvariantCulture)}");
+        Console.WriteLine($"{title}:");
+        Console.WriteLine($"  {yesLabel,-32}: {yes}");
+        Console.WriteLine($"  {noLabel,-32}: {no}");
+        Console.WriteLine($"  {"Belirsiz (paydadan cikarildi)",-32}: {unclear}");
+        Console.WriteLine($"  {"pay",-32}: {numerator}");
+        Console.WriteLine($"  {"payda",-32}: {denominator}");
+
+        Console.WriteLine(denominator == 0
+            ? $"  {"oran",-32}: hesaplanamadi, payda sifir"
+            : $"  {"oran",-32}: {numerator}/{denominator} = "
+              + $"%{(100.0 * numerator / denominator).ToString("0.0", CultureInfo.InvariantCulture)}");
+
+        Console.WriteLine();
     }
 
     private static List<Row> Read(string path)

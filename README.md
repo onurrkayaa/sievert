@@ -51,7 +51,11 @@ dotnet test
 dotnet run --project src/Sievert.Cli
 ```
 
-Right now the CLI only prints a banner. There is nothing to analyse yet.
+Right now there are two commands. `sievert scan <path>` reads the C# files under a path
+and prints the types and methods it found as a tree, with a summary at the end.
+`sievert check <path>` runs the rules instead and prints each finding as a diagnostic
+card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
+default). Both commands take `--json`. There is only one rule so far, SV001 async void.
 
 ## Roadmap
 

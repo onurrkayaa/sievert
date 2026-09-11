@@ -3,6 +3,7 @@ using System.Text.Json;
 using Sievert.Analysis;
 using Sievert.Cli;
 using Sievert.Core.Analysis;
+using Sievert.Core.Rules;
 
 using static Sievert.Tests.Samples;
 
@@ -90,6 +91,63 @@ public class JsonFormatterTests
 
         Assert.Equal(1, JsonDocument.Parse(json).RootElement.GetProperty("longestMethods").GetArrayLength());
     }
+
+    [Fact]
+    public void Check_TopLevelKeysFollowTheScanOutput()
+    {
+        JsonElement json = ParseCheck([Found()]);
+
+        Assert.Equal("/kok", json.GetProperty("scanRoot").GetString());
+        Assert.Equal(1, json.GetProperty("findings").GetArrayLength());
+        Assert.True(json.TryGetProperty("summary", out _));
+    }
+
+    [Fact]
+    public void Check_FindingCarriesEveryFieldItNeeds()
+    {
+        JsonElement finding = ParseCheck([Found(methodName: "Tick", filePath: "Patients/AsyncVoid.cs", line: 28)])
+            .GetProperty("findings")[0];
+
+        Assert.Equal("SV001", finding.GetProperty("ruleCode").GetString());
+        Assert.Equal("async void metot", finding.GetProperty("title").GetString());
+        Assert.Equal("Patients/AsyncVoid.cs", finding.GetProperty("filePath").GetString());
+        Assert.Equal(28, finding.GetProperty("line").GetInt32());
+        Assert.Equal("Tick", finding.GetProperty("methodName").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(finding.GetProperty("description").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(finding.GetProperty("rationale").GetString()));
+    }
+
+    [Fact]
+    public void Check_SeverityIsWrittenAsAName()
+    {
+        // Sayi yazsak cikti okunmaz olurdu, enum adini camelCase yaziyoruz.
+        Assert.Equal("error", ParseCheck([Found(severity: Severity.Error)]).GetProperty("findings")[0].GetProperty("severity").GetString());
+        Assert.Equal("info", ParseCheck([Found(severity: Severity.Info)]).GetProperty("findings")[0].GetProperty("severity").GetString());
+    }
+
+    [Fact]
+    public void Check_SummaryCarriesCountsAndDistribution()
+    {
+        JsonElement summary = ParseCheck([Found(), Found(ruleCode: "SV002")]).GetProperty("summary");
+
+        Assert.Equal(3, summary.GetProperty("fileCount").GetInt32());
+        Assert.Equal(2, summary.GetProperty("findingCount").GetInt32());
+        Assert.Equal(1, summary.GetProperty("byRuleCode").GetProperty("SV001").GetInt32());
+        Assert.Equal(1, summary.GetProperty("byRuleCode").GetProperty("SV002").GetInt32());
+    }
+
+    [Fact]
+    public void Check_NoFindingsStillProducesTheSameShape()
+    {
+        JsonElement json = ParseCheck([]);
+
+        Assert.Equal(0, json.GetProperty("findings").GetArrayLength());
+        Assert.Equal(0, json.GetProperty("summary").GetProperty("findingCount").GetInt32());
+        Assert.Empty(json.GetProperty("summary").GetProperty("byRuleCode").EnumerateObject());
+    }
+
+    private static JsonElement ParseCheck(Finding[] findings, string root = "/kok") =>
+        JsonDocument.Parse(JsonFormatter.FormatCheck(root, findings, CheckSummary.Of(3, findings))).RootElement;
 
     private static JsonElement Parse(FileAnalysis analysis, string root = "/kok") =>
         JsonDocument.Parse(JsonFormatter.Format(root, [analysis], Summarizer.Summarize([analysis]), [])).RootElement;

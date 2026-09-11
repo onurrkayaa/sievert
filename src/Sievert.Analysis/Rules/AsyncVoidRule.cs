@@ -31,6 +31,7 @@ public sealed class AsyncVoidRule : IRule
             Code,
             Name,
             $"{name} metodu async void. Donus tipini Task yaparsan hatalar cagirana ulasir.",
+            Description,
             filePath,
             method.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
             name,

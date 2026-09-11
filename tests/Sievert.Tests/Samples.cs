@@ -1,4 +1,5 @@
 using Sievert.Core.Analysis;
+using Sievert.Core.Rules;
 
 namespace Sievert.Tests;
 
@@ -19,4 +20,20 @@ internal static class Samples
 
     public static FileAnalysis TypelessSample(string path) =>
         new(path, [], TotalLineCount: 5, ParseErrors: []);
+
+    public static Finding Found(
+        string ruleCode = "SV001",
+        string methodName = "Save",
+        Severity severity = Severity.Error,
+        string filePath = "a.cs",
+        int line = 1) =>
+        new(
+            ruleCode,
+            "async void metot",
+            $"{methodName} metodu async void. Donus tipini Task yaparsan hatalar cagirana ulasir.",
+            "async void bir metotta olusan hata cagirana ulasmaz.",
+            filePath,
+            line,
+            methodName,
+            severity);
 }

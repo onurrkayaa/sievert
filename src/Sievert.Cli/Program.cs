@@ -2,9 +2,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Sievert.Analysis;
+using Sievert.Analysis.Rules;
 using Sievert.Cli;
 using Sievert.Core;
 using Sievert.Core.Analysis;
+using Sievert.Core.Rules;
 
 ParseResult result = ArgumentParser.Parse(args);
 
@@ -29,7 +31,7 @@ if (result.Options is null)
     return 1;
 }
 
-ScanOptions options = result.Options;
+CommandOptions options = result.Options;
 
 if (!File.Exists(options.TargetPath) && !Directory.Exists(options.TargetPath))
 {
@@ -46,23 +48,56 @@ if (files.Count == 0)
 }
 
 string root = ScanRoot.Find(options.TargetPath);
-IReadOnlyList<FileAnalysis> analyses = ScanRoot.MakePathsRelative(
-    files.Select(FileAnalyzer.AnalyzeFile).ToList(),
-    root);
 
-ScanSummary summary = Summarizer.Summarize(analyses);
-IReadOnlyList<MethodLocation> longest = options.TopCount is int count
-    ? Summarizer.LongestMethods(analyses, count)
-    : [];
-
-if (options.Json)
+return options switch
 {
-    Console.Out.WriteLine(JsonFormatter.Format(root, analyses, summary, longest));
+    ScanOptions scan => RunScan(scan, files, root),
+    CheckOptions check => RunCheck(check, files, root),
+    _ => throw new InvalidOperationException("Bilinmeyen komut turu."),
+};
+
+static int RunScan(ScanOptions options, IReadOnlyList<string> files, string root)
+{
+    IReadOnlyList<FileAnalysis> analyses = ScanRoot.MakePathsRelative(
+        files.Select(FileAnalyzer.AnalyzeFile).ToList(),
+        root);
+
+    ScanSummary summary = Summarizer.Summarize(analyses);
+    IReadOnlyList<MethodLocation> longest = options.TopCount is int count
+        ? Summarizer.LongestMethods(analyses, count)
+        : [];
+
+    if (options.Json)
+    {
+        Console.Out.WriteLine(JsonFormatter.Format(root, analyses, summary, longest));
+        return 0;
+    }
+
+    ConsoleWriter.Write(
+        TreeFormatter.Format(analyses, summary, longest),
+        ConsoleWriter.UseColor());
+
     return 0;
 }
 
-ConsoleWriter.Write(
-    TreeFormatter.Format(analyses, summary, longest),
-    ConsoleWriter.UseColor());
+static int RunCheck(CheckOptions options, IReadOnlyList<string> files, string root)
+{
+    // Kural listesi simdilik burada duruyor. Yol haritasinda JSON'dan okumak var.
+    RuleRunner runner = new([new AsyncVoidRule()]);
 
-return 0;
+    IReadOnlyList<Finding> findings = runner.Run(files, root);
+    CheckSummary summary = CheckSummary.Of(files.Count, findings);
+
+    if (options.Json)
+    {
+        Console.Out.WriteLine(JsonFormatter.FormatCheck(root, findings, summary));
+    }
+    else
+    {
+        ConsoleWriter.Write(
+            DiagnosticCardFormatter.Format(findings, summary),
+            ConsoleWriter.UseColor());
+    }
+
+    return CheckCommand.ExitCode(findings, options.FailOn);
+}

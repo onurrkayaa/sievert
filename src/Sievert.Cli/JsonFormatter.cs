@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Sievert.Core.Analysis;
+using Sievert.Core.Rules;
 
 namespace Sievert.Cli;
 
@@ -13,7 +14,7 @@ public static class JsonFormatter
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new TypeKindConverter() },
+        Converters = { new TypeKindConverter(), new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         // Cikti terminale gidiyor, HTML'e degil. Boyle olmazsa Task<int> "Task<int>" diye yaziliyor.
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
@@ -30,6 +31,22 @@ public static class JsonFormatter
         JsonSerializer.Serialize(
             new ScanOutput(scanRoot, analyses, summary, longestMethods.Count == 0 ? null : longestMethods),
             Options);
+
+    /// <summary>
+    /// check komutunun ciktisi. Alan adlari scan ciktisiyla ayni kalipta: en disda tarama koku,
+    /// sonra sonuc dizisi, sonra ozet.
+    /// </summary>
+    public static string FormatCheck(
+        string scanRoot,
+        IReadOnlyList<Finding> findings,
+        CheckSummary summary) =>
+        JsonSerializer.Serialize(new CheckOutput(scanRoot, findings, summary), Options);
+
+    /// <summary>check ciktisinin en dis katmani.</summary>
+    private sealed record CheckOutput(
+        string ScanRoot,
+        IReadOnlyList<Finding> Findings,
+        CheckSummary Summary);
 
     /// <summary>JSON'un en dis katmani. longestMethods --top verilmediyse hic yazilmaz.</summary>
     private sealed record ScanOutput(

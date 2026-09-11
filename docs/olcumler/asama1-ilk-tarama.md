@@ -1,5 +1,9 @@
 # Ilk gercek repo taramasi
 
+> **Not (2026-09-11):** JSON anahtarlari 7eac257 commit'inde Ingilizceye cevrildi.
+> Asagidaki ornek ciktilar ve sayilar olcumu aldigim tarihteki halini gosteriyor,
+> bilerek degistirmedim.
+
 **Tarih:** 2026-09-11
 **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly)
 **Commit:** `2247db2407713fa221d57011814e4be446361b1f` (2026-09-08)

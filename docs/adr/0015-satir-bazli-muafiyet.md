@@ -74,10 +74,17 @@ bambaska bir kuralin bulgusu da elenirdi.
 
 ## SV007 kapatilabilir mi
 
-SV007 katalogda duruyor, yani teknik olarak `sievert.json` ile kapatilabilir. Bunu
-engellemedim ama tutarsiz oldugunun farkindayim: susturmalari denetleyen kurali kapatmak,
-gerekcesiz susturmalari serbest birakir. Su an bunu bir kurala baglamak yerine gorunur
-birakiyorum; kapatilirsa ozetteki "Kapali kural" satirinda gorunuyor.
+SV007 katalogda duruyor, yani teknik olarak `sievert.json` ile kapatilabilir ve bunu
+engellemiyorum. Ama sessiz de birakmiyorum: kapatildiginda hem ekran ozetine hem
+`--json` ciktisindaki `summary.notices` alanina su satir dusuyor:
+
+> SV007 kapali - susturmalar denetlenmiyor, gerekcesiz susturmalar bulgu uretmiyor.
+
+Engellemek yerine gorunur kilmanin sebebi, aracin geri kalaninda verilen kararla ayni:
+bir seyin kapali oldugunu bilmeden "temiz" raporu okumak, kapatabilmekten daha tehlikeli.
+Kapali kural zaten "Kapali kural" satirinda gorunuyordu, ama orada SV007 digerleriyle ayni
+gorunurdu; oysa bu kural kapaninca sadece kendi bulgulari degil, BASKA kurallarin
+susturulmasini denetleyen mekanizma da devre disi kaliyor.
 
 ## Ilk kullanicisi kendi kodumuz oldu
 

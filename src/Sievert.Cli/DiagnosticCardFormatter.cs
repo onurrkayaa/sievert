@@ -70,6 +70,11 @@ public static class DiagnosticCardFormatter
         rows.AddRange(summary.ByRuleCode.Select(entry =>
             (entry.RuleCode, entry.Count.ToString(CultureInfo.InvariantCulture))));
 
+        foreach (string notice in summary.Notices)
+        {
+            yield return Line(new OutputSpan("  " + notice, OutputColor.Warning));
+        }
+
         int labelColumn = rows.Max(row => row.Label.Length);
 
         foreach ((string label, string value) in rows)

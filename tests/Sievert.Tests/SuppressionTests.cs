@@ -99,4 +99,19 @@ public class SuppressionTests
     private static RuleResult Run(string source) =>
         new RuleRunner(RuleCatalog.Select(SievertConfig.Default).Selection!.Enabled)
             .Run([RuleTestHelper.Context("src/Sayac.cs", source)]);
+
+    [Fact]
+    public void WhenSV007IsTurnedOff_TheSummarySaysSo()
+    {
+        RuleUsage rules = new(["SV001"], ["SV007"]);
+        CheckSummary summary = CheckSummary.Of(1, [], rules: rules);
+
+        Assert.Single(summary.Notices);
+        Assert.Contains("SV007 kapali", summary.Notices[0], StringComparison.Ordinal);
+        Assert.Contains("denetlenmiyor", summary.Notices[0], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WhenSV007IsOn_ThereIsNoNotice() =>
+        Assert.Empty(CheckSummary.Of(1, [], rules: new RuleUsage(["SV007"], [])).Notices);
 }

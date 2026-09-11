@@ -68,6 +68,18 @@ public sealed record CheckSummary(
     SeverityCounts BySeverity,
     int SuppressedCount)
 {
+    /// <summary>
+    /// Kullaniciya soylenmesi gereken durumlar. Su an tek uyesi var: SV007 kapatilmissa
+    /// susturmalar denetlenmiyor demektir ve bunun sessiz kalmamasi gerekiyor (ADR 0015).
+    /// </summary>
+    public IReadOnlyList<string> Notices { get; init; } = [];
+
+    /// <summary>SV007 kapaliysa yazilacak uyari, degilse bos liste.</summary>
+    public static IReadOnlyList<string> NoticesFor(RuleUsage rules) =>
+        rules.DisabledCodes.Contains("SV007", StringComparer.Ordinal)
+            ? ["SV007 kapali - susturmalar denetlenmiyor, gerekcesiz susturmalar bulgu uretmiyor."]
+            : [];
+
     /// <summary>Bulgulari sayip ozeti cikarir. Cikti her calistirmada ayni olsun diye kural kodlari siralanir.</summary>
     public static CheckSummary Of(
         int fileCount,
@@ -88,5 +100,8 @@ public sealed record CheckSummary(
             skippedDirectories ?? [],
             rules ?? RuleUsage.None,
             SeverityCounts.Of(findings),
-            suppressedCount);
+            suppressedCount)
+        {
+            Notices = NoticesFor(rules ?? RuleUsage.None),
+        };
 }

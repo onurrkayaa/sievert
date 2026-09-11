@@ -8,8 +8,15 @@ using Sievert.Mining;
 // docs/olcumler/ altindaki dosyalara giriyor.
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme> <repo-adi>");
+    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>");
     return 2;
+}
+
+// Sayim veritabanina hic bakmiyor, dosya okuyor; baglanti aranmadan once ele aliniyor.
+if (args[0] == "sayim")
+{
+    Tally.Report(args[1]);
+    return 0;
 }
 
 string? connection = Environment.GetEnvironmentVariable(ConnectionString.EnvironmentVariable);

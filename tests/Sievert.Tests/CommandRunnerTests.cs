@@ -13,6 +13,7 @@ public class CommandRunnerTests : IDisposable
         Directory.CreateDirectory(CleanDirectory);
         Directory.CreateDirectory(FindingDirectory);
         Directory.CreateDirectory(EmptyDirectory);
+        Directory.CreateDirectory(ExemptDirectory);
 
         File.WriteAllText(Path.Combine(CleanDirectory, "Temiz.cs"), """
             public class Temiz
@@ -27,6 +28,19 @@ public class CommandRunnerTests : IDisposable
             public class Bulgulu
             {
                 public async void Calis()
+                {
+                    await Task.CompletedTask;
+                }
+            }
+            """);
+
+        File.WriteAllText(Path.Combine(ExemptDirectory, "Muaf.cs"), """
+            using System;
+            using System.Threading.Tasks;
+
+            public class Muaf
+            {
+                public async void OnSaved(object sender, EventArgs e)
                 {
                     await Task.CompletedTask;
                 }
@@ -51,6 +65,19 @@ public class CommandRunnerTests : IDisposable
     private string FindingDirectory => Path.Combine(_root, "bulgulu");
 
     private string EmptyDirectory => Path.Combine(_root, "bos");
+
+    private string ExemptDirectory => Path.Combine(_root, "muaf");
+
+    [Fact]
+    public void CheckJson_CarriesExemptionsFromTheRule()
+    {
+        StringWriter output = new();
+        Console.SetOut(output);
+
+        Assert.Equal(ExitCodes.Clean, CommandRunner.Run(["check", ExemptDirectory, "--json"]));
+        Assert.Contains("\"exemptions\"", output.ToString(), StringComparison.Ordinal);
+        Assert.Contains("\"OnSaved\"", output.ToString(), StringComparison.Ordinal);
+    }
 
     [Fact]
     public void Check_CleanCode_ReturnsClean()

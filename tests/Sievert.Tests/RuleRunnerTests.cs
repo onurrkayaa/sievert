@@ -13,8 +13,9 @@ public class RuleRunnerTests
     {
         IReadOnlyList<Finding> findings = Run(new AsyncVoidRule());
 
-        Assert.Equal(["Save", "Tick"], findings.Select(finding => finding.MethodName).Order(StringComparer.Ordinal).ToArray());
-        Assert.All(findings, finding => Assert.Equal(Path.Combine("Patients", "AsyncVoid.cs"), finding.FilePath));
+        Assert.Equal(
+            ["OnDropped", "OnProgress", "Refresh", "Save", "Tick"],
+            findings.Select(finding => finding.MethodName).Order(StringComparer.Ordinal).ToArray());
     }
 
     [Fact]
@@ -24,5 +25,5 @@ public class RuleRunnerTests
     }
 
     private static IReadOnlyList<Finding> Run(params IRule[] rules) =>
-        new RuleRunner(rules).Run(SourceFileFinder.Find(SampleDirectory), AppContext.BaseDirectory);
+        new RuleRunner(rules).Run(SourceFileFinder.Find(SampleDirectory), AppContext.BaseDirectory).Findings;
 }

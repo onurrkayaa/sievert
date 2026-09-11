@@ -156,8 +156,8 @@ public class JsonFormatterTests
 
         Assert.Equal(["SV001", "SV002", "SV003"], codes);
         Assert.Equal(
-            JsonFormatter.FormatCheck("/kok", findings, CheckSummary.Of(3, findings)),
-            JsonFormatter.FormatCheck("/kok", findings, CheckSummary.Of(3, findings)));
+            JsonFormatter.FormatCheck("/kok", findings, [], CheckSummary.Of(3, findings)),
+            JsonFormatter.FormatCheck("/kok", findings, [], CheckSummary.Of(3, findings)));
     }
 
     [Fact]
@@ -170,8 +170,32 @@ public class JsonFormatterTests
         Assert.Equal(0, json.GetProperty("summary").GetProperty("byRuleCode").GetArrayLength());
     }
 
+    [Fact]
+    public void Check_NoExemptions_OmitsTheField()
+    {
+        // Muafiyetler --json'da opsiyonel: hic yoksa alan yazilmiyor, sema sismiyor.
+        Assert.False(ParseCheck([Found()]).TryGetProperty("exemptions", out _));
+    }
+
+    [Fact]
+    public void Check_ExemptionCarriesItsReason()
+    {
+        Exemption[] exemptions = [new("SV001", "Patients/AsyncVoid.cs", 16, "OnSaved", ExemptionReason.Signature)];
+
+        JsonElement exemption = JsonDocument
+            .Parse(JsonFormatter.FormatCheck("/kok", [], exemptions, CheckSummary.Of(3, [])))
+            .RootElement
+            .GetProperty("exemptions")[0];
+
+        Assert.Equal("SV001", exemption.GetProperty("ruleCode").GetString());
+        Assert.Equal("Patients/AsyncVoid.cs", exemption.GetProperty("filePath").GetString());
+        Assert.Equal(16, exemption.GetProperty("line").GetInt32());
+        Assert.Equal("OnSaved", exemption.GetProperty("methodName").GetString());
+        Assert.Equal("signature", exemption.GetProperty("reason").GetString());
+    }
+
     private static JsonElement ParseCheck(Finding[] findings, string root = "/kok") =>
-        JsonDocument.Parse(JsonFormatter.FormatCheck(root, findings, CheckSummary.Of(3, findings))).RootElement;
+        JsonDocument.Parse(JsonFormatter.FormatCheck(root, findings, [], CheckSummary.Of(3, findings))).RootElement;
 
     private static JsonElement Parse(FileAnalysis analysis, string root = "/kok") =>
         JsonDocument.Parse(JsonFormatter.Format(root, [analysis], Summarizer.Summarize([analysis]), [])).RootElement;

@@ -15,13 +15,90 @@ public sealed class AsyncVoidRule : IRule
     public string Description =>
         "async void bir metotta olusan hata cagirana ulasmaz, yakalanamadigi icin uygulamayi dusurur.";
 
-    public IReadOnlyList<Finding> InspectFile(SyntaxTree tree, string filePath) =>
-        tree.GetRoot()
+    /// <summary>
+    /// Muafiyet iki ayri kanit kaynagindan gelebiliyor, biri yetiyor: metodun imzasi event
+    /// handler kalibina uyuyorsa, ya da metoda bir yerde <c>+= MetotAdi</c> ile abone
+    /// olunuyorsa. Ikisinin de neden gerektigi ADR 0008'de.
+    /// </summary>
+    public RuleResult InspectFile(SyntaxTree tree, string filePath)
+    {
+        SyntaxNode root = tree.GetRoot();
+
+        List<MethodDeclarationSyntax> candidates = root
             .DescendantNodes()
             .OfType<MethodDeclarationSyntax>()
-            .Where(method => IsAsyncVoid(method) && !LooksLikeEventHandler(method))
-            .Select(method => ToFinding(method, filePath))
+            .Where(IsAsyncVoid)
             .ToList();
+
+        if (candidates.Count == 0)
+        {
+            return RuleResult.Empty;
+        }
+
+        List<Finding> findings = [];
+        List<Exemption> exemptions = [];
+
+        HashSet<string> subscribedInThisFile = EventSubscriptionSearch.NamesIn(root);
+
+        // Partial parcalar diskten okunuyor, ayni tip icin bir kez.
+        Dictionary<string, HashSet<string>> subscribedInPartialParts = new(StringComparer.Ordinal);
+
+        foreach (MethodDeclarationSyntax method in candidates)
+        {
+            if (LooksLikeEventHandler(method))
+            {
+                exemptions.Add(ToExemption(method, filePath, ExemptionReason.Signature));
+                continue;
+            }
+
+            if (IsSubscribed(method, tree.FilePath, subscribedInThisFile, subscribedInPartialParts))
+            {
+                exemptions.Add(ToExemption(method, filePath, ExemptionReason.Subscription));
+                continue;
+            }
+
+            findings.Add(ToFinding(method, filePath));
+        }
+
+        return new RuleResult(findings, exemptions);
+    }
+
+    /// <summary>
+    /// Metoda kendi dosyasinda ya da ayni partial sinifin baska bir parcasinda abone
+    /// olunuyor mu. <paramref name="absoluteFilePath"/> agacin diskteki yolu; RuleRunner
+    /// agaci ayristirirken bu yolu veriyor, yoldan ayristirilmamis agaclarda bos geliyor
+    /// ve o zaman sadece dosyanin kendisine bakiliyor.
+    /// </summary>
+    private static bool IsSubscribed(
+        MethodDeclarationSyntax method,
+        string absoluteFilePath,
+        HashSet<string> subscribedInThisFile,
+        Dictionary<string, HashSet<string>> subscribedInPartialParts)
+    {
+        string name = method.Identifier.ValueText;
+
+        if (subscribedInThisFile.Contains(name))
+        {
+            return true;
+        }
+
+        // Partial olmayan bir sinifin baska dosyada parcasi olamaz; diski hic okumuyoruz.
+        if (method.Parent is not TypeDeclarationSyntax type
+            || !type.Modifiers.Any(SyntaxKind.PartialKeyword))
+        {
+            return false;
+        }
+
+        string typeName = type.Identifier.ValueText;
+
+        if (!subscribedInPartialParts.TryGetValue(typeName, out HashSet<string>? names))
+        {
+            names = EventSubscriptionSearch.NamesInPartialParts(absoluteFilePath, typeName);
+            subscribedInPartialParts[typeName] = names;
+        }
+
+        return names.Contains(name);
+    }
 
     private Finding ToFinding(MethodDeclarationSyntax method, string filePath)
     {
@@ -33,10 +110,16 @@ public sealed class AsyncVoidRule : IRule
             $"{name} metodu async void. Donus tipini Task yaparsan hatalar cagirana ulasir.",
             Description,
             filePath,
-            method.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            LineOf(method),
             name,
             Severity.Error);
     }
+
+    private Exemption ToExemption(MethodDeclarationSyntax method, string filePath, ExemptionReason reason) =>
+        new(Code, filePath, LineOf(method), method.Identifier.ValueText, reason);
+
+    private static int LineOf(MethodDeclarationSyntax method) =>
+        method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 
     /// <summary>
     /// Iki parametre alan ve ikincisinin tip adi EventArgs ile biten metotlari event handler

@@ -11,12 +11,15 @@ namespace Sievert.Analysis.Rules;
 public sealed class RuleRunner(IReadOnlyList<IRule> rules)
 {
     /// <summary>
-    /// Her dosyayi bir kez ayristirip butun kurallara verir. Bulgulardaki dosya yolu
-    /// <paramref name="scanRoot"/> kokune gore goreli yazilir.
+    /// Her dosyayi bir kez ayristirip butun kurallara verir. Yollar
+    /// <paramref name="scanRoot"/> kokune gore goreli yazilir. Agaci ayristirirken
+    /// dosyanin diskteki tam yolu veriliyor; dosya sinirini asmasi gereken kurallar
+    /// (ornegin SV001'in partial sinif aramasi) o yolu kullaniyor.
     /// </summary>
-    public IReadOnlyList<Finding> Run(IReadOnlyList<string> filePaths, string scanRoot)
+    public RuleResult Run(IReadOnlyList<string> filePaths, string scanRoot)
     {
         List<Finding> findings = [];
+        List<Exemption> exemptions = [];
 
         foreach (string filePath in filePaths)
         {
@@ -25,10 +28,13 @@ public sealed class RuleRunner(IReadOnlyList<IRule> rules)
 
             foreach (IRule rule in rules)
             {
-                findings.AddRange(rule.InspectFile(tree, relativePath));
+                RuleResult result = rule.InspectFile(tree, relativePath);
+
+                findings.AddRange(result.Findings);
+                exemptions.AddRange(result.Exemptions);
             }
         }
 
-        return findings;
+        return new RuleResult(findings, exemptions);
     }
 }

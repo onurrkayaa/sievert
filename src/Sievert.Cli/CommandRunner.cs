@@ -94,12 +94,13 @@ public static class CommandRunner
         // Kural listesi simdilik burada duruyor. Yol haritasinda JSON'dan okumak var.
         RuleRunner runner = new([new AsyncVoidRule()]);
 
-        IReadOnlyList<Finding> findings = runner.Run(files, root);
+        RuleResult result = runner.Run(files, root);
+        IReadOnlyList<Finding> findings = result.Findings;
         CheckSummary summary = CheckSummary.Of(files.Count, findings);
 
         if (options.Json)
         {
-            Console.Out.WriteLine(JsonFormatter.FormatCheck(root, findings, summary));
+            Console.Out.WriteLine(JsonFormatter.FormatCheck(root, findings, result.Exemptions, summary));
         }
         else
         {

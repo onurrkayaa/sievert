@@ -16,3 +16,15 @@ gorursen normal.
 - `AsyncVoid.cs` - SV001 kuralinin ornekleri. Icinde yakalanmasi gereken sade
   bir `async void`, muaf tutulan bir event handler, bulgu uretmemesi gereken bir
   `async Task` ve sinir durum olarak parametresiz bir `async void` var.
+- `EventSubscription.cs` - SV001'in abonelik kaniti icin (ADR 0008). Buradaki
+  metotlarin hicbiri `(object sender, EventArgs e)` kalibina uymuyor, yani karari
+  imza degil abonelik veriyor. Iki tanesi muaf: biri ayni dosyada `+=` ile abone
+  ediliyor, digeri ayni partial sinifin baska bir parcasinda. Ucu bulgu: hic abone
+  olunmayan bir metot, aboneligi sadece yorum satirinda yazan bir metot ve duz
+  atama (`=`) ile bir `Action` alanina baglanan bir metot.
+- `Uploader.Subscriptions.cs` - `EventSubscription.cs` icindeki `Uploader`
+  sinifinin ikinci parcasi. Tek isi, abonelik baska bir dosyada dururken de muaf
+  tutuluyor mu diye kontrol etmek.
+- `OtherSubscriber.cs` - dar kapsam testi. `Uploader` ile ayni klasorde ama onun
+  parcasi degil; `Refresh` adini abone ediyor. `Uploader.Refresh` yine de bulgu
+  uretmeli, cunku ad esitligi tek basina yetmiyor.

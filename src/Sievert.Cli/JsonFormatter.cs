@@ -36,16 +36,25 @@ public static class JsonFormatter
     /// check komutunun ciktisi. Alan adlari scan ciktisiyla ayni kalipta: en disda tarama koku,
     /// sonra sonuc dizisi, sonra ozet.
     /// </summary>
+    /// <param name="exemptions">
+    /// Kuralin bulgu uretmeden gectigi metotlar. Hic yoksa alan JSON'a hic yazilmiyor;
+    /// ekran ciktisinda ise hicbir zaman gorunmuyor.
+    /// </param>
     public static string FormatCheck(
         string scanRoot,
         IReadOnlyList<Finding> findings,
+        IReadOnlyList<Exemption> exemptions,
         CheckSummary summary) =>
-        JsonSerializer.Serialize(new CheckOutput(scanRoot, findings, summary), Options);
+        JsonSerializer.Serialize(
+            new CheckOutput(scanRoot, findings, exemptions.Count == 0 ? null : exemptions, summary),
+            Options);
 
-    /// <summary>check ciktisinin en dis katmani.</summary>
+    /// <summary>check ciktisinin en dis katmani. exemptions bos oldugunda hic yazilmaz.</summary>
     private sealed record CheckOutput(
         string ScanRoot,
         IReadOnlyList<Finding> Findings,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<Exemption>? Exemptions,
         CheckSummary Summary);
 
     /// <summary>JSON'un en dis katmani. longestMethods --top verilmediyse hic yazilmaz.</summary>

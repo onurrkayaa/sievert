@@ -178,7 +178,10 @@ what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 h
 started: SV001 now also treats `+= MethodName` in the same file or the same partial class
 as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag, CI
 checks this repository with it, and rules live in a catalogue that an optional
-`sievert.json` can turn on and off (ADR 0009). All six detectors for stage 3 are written.
-Only SV001 has been measured on a real repository; SV002 through SV006 have tests and
-sample files but no precision numbers behind them yet, so treat their output as untested. Nothing from stage 4 onwards (git history, risk scoring, API,
+`sievert.json` can turn on and off (ADR 0009). All six detectors for stage 3 are written
+and all six have now been run on three real repositories - Polly, ShareX and Jellyfin -
+with the numbers in `docs/olcumler/`. What is still missing is precision: 30 of Jellyfin's
+878 findings are sitting in `docs/olcumler/asama3-dogrulama-listesi.md` waiting to be
+checked by hand, so for now only SV001 has a precision number behind it and the other five
+should be read as untested. Nothing from stage 4 onwards (git history, risk scoring, API,
 dashboard) has been written.

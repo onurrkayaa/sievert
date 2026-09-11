@@ -60,10 +60,23 @@ public class DiagnosticCardFormatterTests
         string[] lines = Format(Found(), Found(ruleCode: "SV002", methodName: "Tick"));
 
         Assert.Contains("Ozet", lines);
-        Assert.Contains("  Taranan dosya : 3", lines);
-        Assert.Contains("  Bulgu         : 2", lines);
-        Assert.Contains("  SV001         : 1", lines);
-        Assert.Contains("  SV002         : 1", lines);
+        Assert.Contains("  Taranan dosya  : 3", lines);
+        Assert.Contains("  Bulgu          : 2", lines);
+        Assert.Contains("  SV001          : 1", lines);
+        Assert.Contains("  SV002          : 1", lines);
+    }
+
+    [Fact]
+    public void Summary_AlwaysShowsHowManyFilesWereExcluded()
+    {
+        // Dosya atlamak sessiz kalmasin diye satir her zaman yaziliyor, sifir olsa bile.
+        Assert.Contains(
+            "  Dislanan dosya : 0",
+            DiagnosticCardFormatter.Format([], CheckSummary.Of(3, [])).Select(line => line.PlainText).ToArray());
+
+        Assert.Contains(
+            "  Dislanan dosya : 6",
+            DiagnosticCardFormatter.Format([], CheckSummary.Of(3, [], 6)).Select(line => line.PlainText).ToArray());
     }
 
     [Fact]
@@ -72,7 +85,7 @@ public class DiagnosticCardFormatterTests
         string[] lines = Format();
 
         Assert.Contains("Bulgu yok.", lines);
-        Assert.Contains("  Bulgu         : 0", lines);
+        Assert.Contains("  Bulgu          : 0", lines);
     }
 
     [Fact]

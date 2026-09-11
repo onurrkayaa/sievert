@@ -57,6 +57,32 @@ and prints the types and methods it found as a tree, with a summary at the end.
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
 default). Both commands take `--json`. There is only one rule so far, SV001 async void.
 
+Both commands also take `--exclude <pattern>`, and you can pass it more than once. `*`
+matches inside one path segment and `**` matches zero or more segments, so patterns look
+like this:
+
+```bash
+dotnet run --project src/Sievert.Cli -- check . --exclude 'samples/**' --exclude '**/*.Designer.cs'
+```
+
+Quote the pattern. Without quotes your shell expands it before the tool sees it, and
+`samples/**` turns into `samples/Patients`, which matches nothing. A pattern that cannot
+be parsed is a usage error and exits 2, rather than being skipped silently. The summary
+always prints how many files were excluded, so you can tell a working pattern from a typo.
+
+`bin`, `obj`, `.git` and `node_modules` are never scanned at all, so you do not need a
+pattern for them. They are not counted in the excluded number either.
+
+CI runs `check` on this repository itself, right after the tests, so the tool has to pass
+its own rule:
+
+```bash
+dotnet run --project src/Sievert.Cli -- check . --exclude 'samples/**'
+```
+
+`samples/` is excluded because those files are broken on purpose - they are test data the
+test project reads.
+
 Exit codes are the same for both commands:
 
 | Code | Meaning |
@@ -87,7 +113,9 @@ parsing reads a file as structure, and the first rule SV001 runs behind the `che
 command. SV001 was measured on two real repositories (Polly and ShareX) and a 20-line
 sample of its output was checked by hand: precision came out 8/10, with two false
 positives and one false negative that all trace back to the same cause. The numbers and
-what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 has only
-started in the sense that the `IRule` interface exists - there is one rule, and rules are
-not loaded from JSON yet. Nothing from stage 4 onwards (git history, risk scoring, API,
+what I plan to do about them are in `docs/raporlar/asama2-kapanis.md`. Stage 3 has
+started: SV001 now also treats `+= MethodName` in the same file or the same partial class
+as evidence that a method is an event handler (ADR 0008), there is an `--exclude` flag,
+and CI checks this repository with it. There is still only one rule, and rules are not
+loaded from JSON yet. Nothing from stage 4 onwards (git history, risk scoring, API,
 dashboard) has been written.

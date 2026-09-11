@@ -12,10 +12,18 @@ public sealed record RuleCodeCount(string RuleCode, int Count);
 /// Kural koduna gore bulgu sayilari, koda gore alfabetik sirali. Hic bulgu yoksa bos.
 /// Dinamik anahtarli bir nesne yerine dizi: semasi sabit kaliyor, guclu tipli okunabiliyor.
 /// </param>
-public sealed record CheckSummary(int FileCount, int FindingCount, IReadOnlyList<RuleCodeCount> ByRuleCode)
+/// <param name="ExcludedFileCount">
+/// --exclude kaliplariyla elenen dosya sayisi. bin, obj, .git ve node_modules klasorlerinin
+/// icine zaten hic girilmiyor, o dosyalar bu sayiya dahil degil.
+/// </param>
+public sealed record CheckSummary(
+    int FileCount,
+    int FindingCount,
+    IReadOnlyList<RuleCodeCount> ByRuleCode,
+    int ExcludedFileCount = 0)
 {
     /// <summary>Bulgulari sayip ozeti cikarir. Cikti her calistirmada ayni olsun diye kural kodlari siralanir.</summary>
-    public static CheckSummary Of(int fileCount, IReadOnlyList<Finding> findings) =>
+    public static CheckSummary Of(int fileCount, IReadOnlyList<Finding> findings, int excludedFileCount = 0) =>
         new(
             fileCount,
             findings.Count,
@@ -23,5 +31,6 @@ public sealed record CheckSummary(int FileCount, int FindingCount, IReadOnlyList
                 .GroupBy(finding => finding.RuleCode, StringComparer.Ordinal)
                 .OrderBy(group => group.Key, StringComparer.Ordinal)
                 .Select(group => new RuleCodeCount(group.Key, group.Count()))
-                .ToList());
+                .ToList(),
+            excludedFileCount);
 }

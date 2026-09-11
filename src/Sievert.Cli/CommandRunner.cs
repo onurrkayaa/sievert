@@ -46,31 +46,42 @@ public static class CommandRunner
             return ExitCodes.ToolError;
         }
 
-        IReadOnlyList<string> files = SourceFileFinder.Find(options.TargetPath);
+        IReadOnlyList<string> found = SourceFileFinder.Find(options.TargetPath);
 
-        if (files.Count == 0)
+        if (found.Count == 0)
         {
             Console.Error.WriteLine($"Taranacak .cs dosyasi yok: {options.TargetPath}");
             return ExitCodes.ToolError;
         }
 
+        // Kok, eleme kaliplari goreli yola uygulanacagi icin elemeden once hesaplaniyor.
         string root = ScanRoot.Find(options.TargetPath);
+        IReadOnlyList<string> files = ExcludeFilter.Apply(found, root, options.Exclude);
+        int excludedCount = found.Count - files.Count;
+
+        if (files.Count == 0)
+        {
+            // Sessizce 0 donmek tehlikeli olurdu: CI adimi hicbir sey taranmadigi halde
+            // "temiz" derdi. Fazla eleyen bir kalip arac hatasi sayiliyor.
+            Console.Error.WriteLine($"--exclude butun dosyalari eledi ({excludedCount} dosya): {options.TargetPath}");
+            return ExitCodes.ToolError;
+        }
 
         return options switch
         {
-            ScanOptions scan => RunScan(scan, files, root),
-            CheckOptions check => RunCheck(check, files, root),
+            ScanOptions scan => RunScan(scan, files, root, excludedCount),
+            CheckOptions check => RunCheck(check, files, root, excludedCount),
             _ => throw new InvalidOperationException("Bilinmeyen komut turu."),
         };
     }
 
-    private static int RunScan(ScanOptions options, IReadOnlyList<string> files, string root)
+    private static int RunScan(ScanOptions options, IReadOnlyList<string> files, string root, int excludedCount)
     {
         IReadOnlyList<FileAnalysis> analyses = ScanRoot.MakePathsRelative(
             files.Select(FileAnalyzer.AnalyzeFile).ToList(),
             root);
 
-        ScanSummary summary = Summarizer.Summarize(analyses);
+        ScanSummary summary = Summarizer.Summarize(analyses, excludedCount);
         IReadOnlyList<MethodLocation> longest = options.TopCount is int count
             ? Summarizer.LongestMethods(analyses, count)
             : [];
@@ -89,14 +100,14 @@ public static class CommandRunner
         return ExitCodes.Clean;
     }
 
-    private static int RunCheck(CheckOptions options, IReadOnlyList<string> files, string root)
+    private static int RunCheck(CheckOptions options, IReadOnlyList<string> files, string root, int excludedCount)
     {
         // Kural listesi simdilik burada duruyor. Yol haritasinda JSON'dan okumak var.
         RuleRunner runner = new([new AsyncVoidRule()]);
 
         RuleResult result = runner.Run(files, root);
         IReadOnlyList<Finding> findings = result.Findings;
-        CheckSummary summary = CheckSummary.Of(files.Count, findings);
+        CheckSummary summary = CheckSummary.Of(files.Count, findings, excludedCount);
 
         if (options.Json)
         {

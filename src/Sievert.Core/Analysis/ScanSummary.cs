@@ -32,6 +32,10 @@ public sealed record CodeSplit(int ProductionFileCount, int TestFileCount, int P
 /// <param name="FilesWithoutTypes">Okundu ama icinde hic tip cikmayan dosya sayisi.</param>
 /// <param name="BlindSpot">Kapali #if dallarinda kalan kod.</param>
 /// <param name="CodeSplit">Uretim ve test kodunun ayri sayilari.</param>
+/// <param name="ExcludedFileCount">
+/// --exclude kaliplariyla elenen dosya sayisi. bin, obj, .git ve node_modules klasorlerinin
+/// icine zaten hic girilmiyor, o dosyalar bu sayiya dahil degil.
+/// </param>
 public sealed record ScanSummary(
     int FileCount,
     int TypeCount,
@@ -42,7 +46,8 @@ public sealed record ScanSummary(
     int FilesWithParseErrors,
     int FilesWithoutTypes,
     BlindSpot BlindSpot,
-    CodeSplit CodeSplit);
+    CodeSplit CodeSplit,
+    int ExcludedFileCount = 0);
 
 /// <summary>Bir metodun hangi dosyada ve hangi tipin icinde oldugu.</summary>
 public sealed record MethodLocation(string FilePath, string TypeName, SievertMethod Method);

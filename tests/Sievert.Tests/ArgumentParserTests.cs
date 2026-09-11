@@ -27,8 +27,18 @@ public class ArgumentParserTests
     [Fact]
     public void Scan_FlagOrderDoesNotMatter()
     {
-        Assert.Equal(SuccessfulScan(["scan", "src", "--json", "--top", "3"]), SuccessfulScan(["scan", "src", "--top", "3", "--json"]));
+        // Ayarlari record olarak karsilastiramiyorum: Exclude bir liste ve liste esitligi
+        // referansa bakiyor. O yuzden alanlari okunabilir tek bir sekle cevirip bakiyorum.
+        Assert.Equal(
+            Shape(SuccessfulScan(["scan", "src", "--json", "--top", "3", "--exclude", "samples/**"])),
+            Shape(SuccessfulScan(["scan", "src", "--exclude", "samples/**", "--top", "3", "--json"])));
     }
+
+    private static (string Path, bool Json, int? Top, string Exclude) Shape(ScanOptions options) =>
+        (options.TargetPath,
+         options.Json,
+         options.TopCount,
+         string.Join(",", options.Exclude.Select(glob => glob.Text)));
 
     [Theory]
     [InlineData]

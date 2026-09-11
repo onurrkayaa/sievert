@@ -59,6 +59,7 @@ public static class DiagnosticCardFormatter
         List<(string Label, string Value)> rows =
         [
             ("Taranan dosya", summary.FileCount.ToString(CultureInfo.InvariantCulture)),
+            ("Dislanan dosya", summary.ExcludedFileCount.ToString(CultureInfo.InvariantCulture)),
             ("Bulgu", summary.FindingCount.ToString(CultureInfo.InvariantCulture)),
         ];
 

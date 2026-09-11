@@ -17,3 +17,10 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --no-restore
       - run: dotnet test --no-build
+
+      # Sievert kendi koduna kendi kuralini uyguluyor. samples/ disarida birakiliyor
+      # cunku oradaki dosyalar bilerek hatali, testlerin okumasi icin duruyorlar.
+      # Kalip tirnak icinde: tirnaksiz yazilirsa kabuk "samples/**" ifadesini
+      # "samples/Patients" diye acar ve hicbir dosya elenmez.
+      - name: sievert kendi kendini tariyor
+        run: dotnet run --project src/Sievert.Cli --no-build -- check . --exclude 'samples/**'

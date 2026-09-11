@@ -2,6 +2,7 @@ using Sievert.Cli;
 
 namespace Sievert.Tests;
 
+[Collection(ConsoleCollection.Name)]
 public class CommandRunnerTests : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), "sievert-cikis-" + Guid.NewGuid().ToString("N"));

@@ -89,6 +89,29 @@ public class MineCommandTests : IDisposable
     }
 
     [Fact]
+    public void MineStillRejectsTheOldTurkishOverwriteFlag()
+    {
+        // --yeniden-yaz kaldirildi (ADR 0005: CLI yuzeyi Ingilizce). Sessiz uyumluluk yok.
+        using TemporaryRepository repository = new();
+        repository.Commit("a.cs", "class A;", "bir");
+
+        Console.SetError(TextWriter.Null);
+
+        Assert.Equal(ExitCodes.ToolError, Run("mine", repository.Path, "--db", "--yeniden-yaz"));
+    }
+
+    [Fact]
+    public void OverwriteWithoutDb_IsAUsageError()
+    {
+        using TemporaryRepository repository = new();
+        repository.Commit("a.cs", "class A;", "bir");
+
+        Console.SetError(TextWriter.Null);
+
+        Assert.Equal(ExitCodes.ToolError, Run("mine", repository.Path, "--overwrite"));
+    }
+
+    [Fact]
     public void MineWithoutAPath_IsAUsageError()
     {
         Console.SetError(TextWriter.Null);

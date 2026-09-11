@@ -39,7 +39,7 @@ public sealed record CheckOptions(
 /// <param name="Since">--since ile verilen tarih. Verilmediyse null.</param>
 /// <param name="MaxCommits">--max-commits ile verilen sinir. Verilmediyse null.</param>
 /// <param name="Database">--db verildi mi, yani cikti veritabanina da yazilacak mi.</param>
-/// <param name="Rewrite">--yeniden-yaz verildi mi, yani deponun eski kayitlari silinecek mi.</param>
+/// <param name="Rewrite">--overwrite verildi mi, yani deponun eski kayitlari silinecek mi.</param>
 public sealed record MineOptions(
     string TargetPath,
     string? OutputPath,
@@ -78,7 +78,7 @@ public static class ArgumentParser
                                 kodu 1 olur. info / warning / error,
                                 varsayilan warning
 
-          mine <repo-yolu> [--out <dosya>] [--db] [--yeniden-yaz]
+          mine <repo-yolu> [--out <dosya>] [--db] [--overwrite]
                            [--since <tarih>] [--max-commits N]
             git tarihini yurur, commit basina veriyi cikarir
             --out <dosya>       tam veriyi bu dosyaya JSONL yazar: her satir
@@ -88,7 +88,7 @@ public static class ArgumentParser
             --db                veriyi PostgreSQL'e de yazar. Baglanti dizesi
                                 SIEVERT_DB ortam degiskeninden ya da
                                 appsettings.json'dan okunur, koda yazilmaz
-            --yeniden-yaz       --db ile birlikte: deponun mevcut kayitlarini
+            --overwrite         --db ile birlikte: deponun mevcut kayitlarini
                                 silip bastan yazar. Verilmezse zaten kayitli
                                 commit'ler atlanir
             --since <tarih>     bu tarihten onceki commit'leri okuma.
@@ -273,7 +273,7 @@ public static class ArgumentParser
                     database = true;
                     break;
 
-                case "--yeniden-yaz":
+                case "--overwrite":
                     rewrite = true;
                     break;
 
@@ -314,9 +314,9 @@ public static class ArgumentParser
 
         if (rewrite && !database)
         {
-            // Sessizce yok saymak yaniltici olurdu: --yeniden-yaz yazan biri bir seyin
+            // Sessizce yok saymak yaniltici olurdu: --overwrite yazan biri bir seyin
             // silinip yeniden yazilmasini bekliyor.
-            return new ParseResult(null, "--yeniden-yaz sadece --db ile birlikte anlamli.");
+            return new ParseResult(null, "--overwrite sadece --db ile birlikte anlamli.");
         }
 
         return new ParseResult(

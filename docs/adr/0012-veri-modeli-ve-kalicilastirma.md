@@ -82,7 +82,13 @@ yaziliyor. Polly'de olculdu: ikinci kosuda 0 yazildi, 2759 atlandi.
 Varsayilanin "sil ve bastan yaz" olmamasinin sebebi su: normal kullanim, bir repoyu
 gunler sonra tekrar tarayip yeni commit'leri eklemek. Her seferinde silip yazmak, hem
 gereksiz is hem de Adim 3'un `CommitMetrics` tablosunu her tarama sonrasi silerdi
-(basamakli silme). `--yeniden-yaz` bayragi bilerek acik bir tercih olarak duruyor.
+(basamakli silme). `--overwrite` bayragi bilerek acik bir tercih olarak duruyor.
+
+Bu bayrak once `--yeniden-yaz` diye yazilmisti. ADR 0005 kod tanimlayicilarinin ve CLI
+yuzeyinin Ingilizce, ciktinin Turkce olmasini soyluyor; `--out`, `--since`,
+`--max-commits` Ingilizceyken tek bir bayragin Turkce olmasi benim hatamdi. Geriye
+uyumluluk birakmadim: eski yazim "bilinmeyen secenek" hatasi veriyor. Sessizce kabul
+etseydim, eski adi yazan bir betik hicbir sey silmeden basariyla bitmis gorunurdu.
 
 **Islem butunlugu:** yazmanin tamami tek bir transaction icinde. Yarida kesilirse depo
 satiri dahil hicbir sey kalmiyor. Yarim yazilmis bir depo idempotent yazmayi da kalici

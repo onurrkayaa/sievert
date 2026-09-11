@@ -72,7 +72,7 @@ are left out of the data but counted in the summary. Why it works this way is in
 
 With `--db` the same pass also writes to PostgreSQL. Running it twice on the same
 repository does not duplicate anything: commits already stored are skipped, and the
-summary says how many. `--yeniden-yaz` deletes what is there and writes again. Derived
+summary says how many. `--overwrite` deletes what is there and writes again. Derived
 metrics are not computed yet - there is a `CommitMetrics` table but it is empty on
 purpose, stage 4 step 3 fills it. The schema and why it looks like this are in ADR 0012.
 

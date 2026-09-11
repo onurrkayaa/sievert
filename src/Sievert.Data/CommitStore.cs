@@ -25,7 +25,7 @@ public sealed record StoreOptions(
 /// <param name="RepositoryId">Yazilan deponun satir kimligi.</param>
 /// <param name="Written">Bu kosuda eklenen commit sayisi.</param>
 /// <param name="Skipped">Zaten kayitli oldugu icin atlanan commit sayisi.</param>
-/// <param name="Deleted">--yeniden-yaz ile silinen eski commit sayisi.</param>
+/// <param name="Deleted">--overwrite ile silinen eski commit sayisi.</param>
 public sealed record StoreResult(int RepositoryId, int Written, int Skipped, int Deleted);
 
 /// <summary>

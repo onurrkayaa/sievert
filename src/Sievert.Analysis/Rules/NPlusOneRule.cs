@@ -25,6 +25,12 @@ public sealed class NPlusOneRule : IRule
         "Sum", "SumAsync", "Max", "MaxAsync", "Min", "MinAsync",
     ];
 
+    /// <summary>
+    /// Uzerlerindeki <c>Max</c>/<c>Min</c>/<c>Sum</c> LINQ degil, statik yardimci cagrisidir.
+    /// Olcumde SV004'un dort yanlis pozitifinin ikisi <c>Math.Max</c> idi.
+    /// </summary>
+    private static readonly string[] NonQueryReceivers = ["Math"];
+
     /// <summary>Uzerinde cagri yapilan ifadede gecerse veritabani olma ihtimalini artiran parcalar.</summary>
     private static readonly string[] DatabaseHints = ["Context", "Db", "Repo", "Set"];
 
@@ -39,6 +45,7 @@ public sealed class NPlusOneRule : IRule
         {
             if (invocation.Expression is not MemberAccessExpressionSyntax member
                 || !QueryTerminators.Contains(member.Name.Identifier.ValueText, StringComparer.Ordinal)
+                || NonQueryReceivers.Contains(member.Expression.ToString(), StringComparer.Ordinal)
                 || !IsInsideALoopBody(invocation))
             {
                 continue;

@@ -43,6 +43,12 @@ public sealed class MissingAwaitRule : IRule
                 continue;
             }
 
+            if (BehindAnExpressionTree(invocation))
+            {
+                exemptions.Add(ToExemption(invocation, filePath, ExemptionReason.ExpressionTree));
+                continue;
+            }
+
             if (IsInsideTaskRun(statement))
             {
                 exemptions.Add(ToExemption(invocation, filePath, ExemptionReason.FireAndForget));
@@ -97,6 +103,20 @@ public sealed class MissingAwaitRule : IRule
         }
             ? Unwrap(inner)
             : invocation;
+
+    /// <summary>
+    /// Zincirin alicisinda bir lambda var mi. <c>factory.Setup(f => f.AcAsync()).ReturnsAsync(x)</c>
+    /// gibi kurulum ifadelerinde isaretlenen cagri zincirin sonundaki <c>ReturnsAsync</c> oluyor;
+    /// o bir gorev degil kurulum nesnesi donduruyor. Yalnizca aliciya bakiyoruz: cagrinin kendi
+    /// argumanindaki lambda (<c>IsleAsync(x.Select(...))</c>) bunu beklenmemis bir gorev
+    /// olmaktan cikarmaz.
+    /// </summary>
+    private static bool BehindAnExpressionTree(InvocationExpressionSyntax invocation) =>
+        invocation.Expression is MemberAccessExpressionSyntax member
+        && member.Expression
+            .DescendantNodesAndSelf()
+            .OfType<AnonymousFunctionExpressionSyntax>()
+            .Any();
 
     /// <summary>
     /// Cagri <c>Task.Run(...)</c> argumanlarinin icinde mi. Oradaki bir cagri zaten ayri

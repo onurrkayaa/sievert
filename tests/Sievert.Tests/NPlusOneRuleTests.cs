@@ -58,4 +58,27 @@ public class NPlusOneRuleTests
     private static IReadOnlyList<Finding> Findings() => Run().Findings;
 
     private static RuleResult Run() => RuleTestHelper.InspectSample(Rule, "NPlusOne.cs");
+
+    [Fact]
+    public void MathMaxInsideALoop_IsNotAQuery() =>
+        // Olcumde SV004'un dort yanlis pozitifinin ikisi Math.Max idi: LINQ degil,
+        // statik yardimci cagrisi.
+        Assert.Empty(RuleTestHelper.InspectSource(
+            Rule,
+            "src/Ping.cs",
+            """
+            public class Ping
+            {
+                public int EnYuksek(IEnumerable<Oturum> oturumlar)
+                {
+                    var enYuksek = 0;
+                    foreach (var oturum in oturumlar)
+                    {
+                        enYuksek = Math.Max(enYuksek, oturum.Ping);
+                    }
+
+                    return enYuksek;
+                }
+            }
+            """).Findings);
 }

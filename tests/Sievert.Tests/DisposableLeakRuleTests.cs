@@ -64,4 +64,45 @@ public class DisposableLeakRuleTests
     private static IReadOnlyList<Finding> Findings() => Run().Findings;
 
     private static RuleResult Run() => RuleTestHelper.InspectSample(Rule, "Leak.cs");
+
+    [Fact]
+    public void ATypeThatOnlyEndsWithStream_IsNotAssumedDisposable() =>
+        // MediaStream bir veri sinifi. Olcumde SV005'in bes yanlis pozitifinin ucu buydu.
+        Assert.Empty(RuleTestHelper.InspectSource(
+            Rule,
+            "src/Akis.cs",
+            """
+            public class Akis
+            {
+                public void Ekle(List<MediaStream> akislar)
+                {
+                    akislar.Add(new MediaStream());
+                }
+            }
+            """).Findings);
+
+    [Fact]
+    public void ATwoStepAwaitUsing_IsExempt()
+    {
+        // var x = new ...; await using (x...) kalibi. Olcumde iki yanlis pozitif buydu.
+        RuleResult result = RuleTestHelper.InspectSource(
+            Rule,
+            "src/Kopya.cs",
+            """
+            public class Kopya
+            {
+                public async Task YazAsync()
+                {
+                    var memoryStream = new MemoryStream();
+                    await using (memoryStream.ConfigureAwait(false))
+                    {
+                        Kullan(memoryStream);
+                    }
+                }
+            }
+            """);
+
+        Assert.Empty(result.Findings);
+        Assert.Equal(ExemptionReason.UsingScope, result.Exemptions.Single().Reason);
+    }
 }

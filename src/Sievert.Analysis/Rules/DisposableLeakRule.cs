@@ -25,10 +25,9 @@ public sealed class DisposableLeakRule : IRule
         "HttpClient", "SqlConnection", "SqliteConnection", "NpgsqlConnection",
         "StreamReader", "StreamWriter", "BinaryReader", "BinaryWriter",
         "Bitmap", "Image", "Graphics", "Timer", "CancellationTokenSource", "Process",
+        "FileStream", "MemoryStream", "BufferedStream", "GZipStream", "DeflateStream",
+        "CryptoStream", "NetworkStream",
     ];
-
-    /// <summary>Bu ekle biten her tip de listeye dahil: FileStream, MemoryStream, GZipStream...</summary>
-    private static readonly string[] DisposableTypeSuffixes = ["Stream"];
 
     /// <summary>DI kaydi yapan cagrilar. Nesnenin sahibi kap oluyor.</summary>
     private static readonly string[] ContainerRegistrations =
@@ -100,6 +99,10 @@ public sealed class DisposableLeakRule : IRule
                 case LocalDeclarationStatementSyntax local when local.UsingKeyword != default:
                     return ExemptionReason.UsingScope;
 
+                // var x = new ...; await using (x.ConfigureAwait(false)) - iki adimli kalip.
+                case LocalDeclarationStatementSyntax local when IsUsedByALaterUsing(local):
+                    return ExemptionReason.UsingScope;
+
                 // return new ...  - sahiplik cagirana geciyor.
                 case ReturnStatementSyntax:
                 case ArrowExpressionClauseSyntax:
@@ -130,6 +133,26 @@ public sealed class DisposableLeakRule : IRule
     }
 
     /// <summary>
+    /// Bildirilen degisken daha sonra bir <c>using</c> deyimine veriliyor mu. Nesnenin
+    /// olusturulmasi ile atilmasi iki ayri satirda olabiliyor:
+    /// <c>var x = new MemoryStream(); await using (x.ConfigureAwait(false)) { ... }</c>
+    /// </summary>
+    private static bool IsUsedByALaterUsing(LocalDeclarationStatementSyntax local)
+    {
+        HashSet<string> declared = local.Declaration.Variables
+            .Select(variable => variable.Identifier.ValueText)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return local.Parent is not null
+            && local.Parent.DescendantNodes()
+                .OfType<UsingStatementSyntax>()
+                .Any(statement => statement.Expression is not null
+                    && statement.Expression.DescendantNodesAndSelf()
+                        .OfType<IdentifierNameSyntax>()
+                        .Any(name => declared.Contains(name.Identifier.ValueText)));
+    }
+
+    /// <summary>
     /// Atamanin sol tarafi bu tipin bir alani mi. <c>this.X</c> her zaman alan sayiliyor;
     /// duz bir ad ise ayni tipte ayni adda bir alan bildirimi araniyor.
     /// </summary>
@@ -154,9 +177,13 @@ public sealed class DisposableLeakRule : IRule
                 .Any(variable => variable.Identifier.ValueText == identifier.Identifier.ValueText);
     }
 
+    /// <summary>
+    /// Onceden <c>Stream</c> ekiyle biten her tip disposable sayiliyordu. Olcumde SV005'in
+    /// bes yanlis pozitifinin ucu bu yuzden cikti: <c>MediaStream</c> bir veri sinifi, ekine
+    /// bakilip IDisposable sanildi. Artik yalnizca listedeki adlar sayiliyor.
+    /// </summary>
     private static bool IsDisposable(string typeName) =>
-        DisposableTypeNames.Contains(typeName, StringComparer.Ordinal)
-        || DisposableTypeSuffixes.Any(suffix => typeName.EndsWith(suffix, StringComparison.Ordinal));
+        DisposableTypeNames.Contains(typeName, StringComparer.Ordinal);
 
     /// <summary>Tipin nitelendirilmemis adi. <c>new System.Text.StringBuilder()</c> icin StringBuilder.</summary>
     private static string? TypeNameOf(BaseObjectCreationExpressionSyntax creation) =>

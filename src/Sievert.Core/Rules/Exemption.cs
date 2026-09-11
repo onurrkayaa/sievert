@@ -31,6 +31,13 @@ public enum ExemptionReason
     FireAndForget,
 
     /// <summary>
+    /// Cagri bir ifade agacinin arkasinda duruyor: zincirin alicisinda bir lambda var,
+    /// yani ortada calisan bir cagri degil bir kurulum ifadesi (<c>Setup(x => ...)</c>)
+    /// var. SV003 icin: donen sey gorev degil kurulum nesnesi.
+    /// </summary>
+    ExpressionTree,
+
+    /// <summary>
     /// Nesne bir <c>using</c> bildirimi ya da deyimi icinde olusturulmus.
     /// SV005 icin: kapsam bitince atiliyor.
     /// </summary>

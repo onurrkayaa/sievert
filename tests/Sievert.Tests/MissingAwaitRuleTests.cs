@@ -84,4 +84,43 @@ public class MissingAwaitRuleTests
         Assert.All(exemptions, exemption => Assert.Equal("Basla", exemption.MethodName));
         Assert.Equal(2, exemptions.Select(exemption => exemption.Line).Distinct().Count());
     }
+
+    [Fact]
+    public void AFluentSetupCallBehindALambda_IsExempt()
+    {
+        // Olcumde SV003'un bes yanlis pozitifinin besi de bu bicimdeydi: isaretlenen cagri
+        // lambdanin icindeki degil, zincirin sonundaki ReturnsAsync.
+        RuleResult result = RuleTestHelper.InspectSource(
+            Rule,
+            "tests/Kurulum.cs",
+            """
+            public class Kurulum
+            {
+                public void Hazirla()
+                {
+                    factory.Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(context);
+                }
+            }
+            """);
+
+        Assert.Empty(result.Findings);
+        Assert.Equal(ExemptionReason.ExpressionTree, result.Exemptions.Single().Reason);
+    }
+
+    [Fact]
+    public void ALambdaInTheCallsOwnArgument_IsStillAFinding() =>
+        // Muafiyet yalnizca zincirin alicisina bakiyor. Cagrinin kendi argumanindaki lambda
+        // onu beklenmemis bir gorev olmaktan cikarmaz.
+        Assert.Single(RuleTestHelper.InspectSource(
+            Rule,
+            "src/Toplu.cs",
+            """
+            public class Toplu
+            {
+                public void Basla()
+                {
+                    IsleAsync(kayitlar.Select(kayit => kayit.Id));
+                }
+            }
+            """).Findings);
 }

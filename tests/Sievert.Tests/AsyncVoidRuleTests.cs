@@ -150,4 +150,25 @@ public class AsyncVoidRuleTests
 
     private static string SampleFile(string fileName) =>
         Path.Combine(AppContext.BaseDirectory, "Patients", fileName);
+
+    [Fact]
+    public void AnAttributedMethod_IsReportedOnItsSignatureLine()
+    {
+        Finding finding = RuleTestHelper.InspectSource(
+            Rule,
+            "src/Dinleyici.cs",
+            """
+            public class Dinleyici
+            {
+                [Obsolete]
+                public async void Calis()
+                {
+                }
+            }
+            """)
+            .Findings
+            .Single();
+
+        Assert.Equal(4, finding.Line);
+    }
 }

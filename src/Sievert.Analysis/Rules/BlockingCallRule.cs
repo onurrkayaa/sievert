@@ -150,4 +150,12 @@ public sealed class BlockingCallRule : IRule
 
     internal static int LineOf(SyntaxNode node) =>
         node.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+
+    /// <summary>
+    /// Bir metot bildiriminin IMZA satiri. Dugumun kendi konumu oznitelik listesinden
+    /// basliyor, yani <c>[HttpGet]</c> yazan satiri gosteriyor; bulguya tiklayan kisinin
+    /// imzayi gormesi lazim, o yuzden metot adinin bulundugu satiri kullaniyoruz.
+    /// </summary>
+    internal static int LineOf(MethodDeclarationSyntax method) =>
+        method.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 }

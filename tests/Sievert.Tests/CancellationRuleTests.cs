@@ -69,4 +69,30 @@ public class CancellationRuleTests
     private static IReadOnlyList<Finding> Findings() => Run().Findings;
 
     private static RuleResult Run() => RuleTestHelper.InspectSample(Rule, "Cancellation.cs");
+
+    [Fact]
+    public void AnAttributedMethod_IsReportedOnItsSignatureLine()
+    {
+        // Jellyfin olcumunde cikti: oznitelikli metotlarda bulgu satiri oznitelige
+        // dusuyordu, cunku MethodDeclaration'in konumu oznitelik listesinden basliyor.
+        // Satir imzayi gostermeli, yoksa bulguya tiklayan yanlis yere gider.
+        Finding finding = RuleTestHelper.InspectSource(
+            Rule,
+            "src/Denetleyici.cs",
+            """
+            public class Denetleyici
+            {
+                [HttpGet("Ogeler")]
+                [ProducesResponseType(200)]
+                public Task<int> GetirAsync()
+                {
+                    return Task.FromResult(0);
+                }
+            }
+            """)
+            .Findings
+            .Single();
+
+        Assert.Equal(5, finding.Line);
+    }
 }

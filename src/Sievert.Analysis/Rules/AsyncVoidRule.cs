@@ -118,8 +118,12 @@ public sealed class AsyncVoidRule : IRule
     private Exemption ToExemption(MethodDeclarationSyntax method, string filePath, ExemptionReason reason) =>
         new(Code, filePath, LineOf(method), method.Identifier.ValueText, reason);
 
+    /// <summary>
+    /// Metodun IMZA satiri. Dugumun konumu oznitelik listesinden basladigi icin
+    /// dogrudan kullanilamiyor; ayrintisi <see cref="BlockingCallRule.LineOf(MethodDeclarationSyntax)"/>.
+    /// </summary>
     private static int LineOf(MethodDeclarationSyntax method) =>
-        method.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+        BlockingCallRule.LineOf(method);
 
     /// <summary>
     /// Iki parametre alan ve ikincisinin tip adi EventArgs ile biten metotlari event handler

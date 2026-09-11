@@ -51,3 +51,61 @@ Su uc isaretten biri cikarsa:
 Gecis olursa tek seferde olmayacak: once semantic model'in maliyeti olculecek (ayni iki repoda sure ve bellek), sonra sadece ona ihtiyaci olan kurallar tasinacak. SV001'in imza heuristigi gibi ucuz ve yeterince dogru calisan parcalar yerinde kalabilir.
 
 **Sonuc:** Alti kural da calisiyor ve hepsi yanlis pozitif uretebilir. Bu bir kusur degil, bilincli bir takas: dogruluk yerine kapsam ve hiz. Takasin bedeli `docs/sinirliliklar.md`'de 12 maddeye yazildi. Takasi gecerli kilan sey olcum: olculmemis bir heuristik, tahmin edilmis bir heuristikten farksiz. SV001 olculdu, digerleri henuz olculmedi ve bunu README'de de yaziyorum.
+
+## Olculen sonuc (2026-09-11)
+
+Yukarisi olcumden once yazilmisti. Asama 3 Adim 6-8'de alti kural Jellyfin uzerinde
+calistirildi ve her kuraldan bes bulguya elle bakildi. Sonuclar
+`docs/olcumler/asama3-precision.md`'de; burada olcumun bu ADR'deki iddialara ne yaptigi
+yaziyor.
+
+**Esik olcumden once ilan edilmisti ve sonuca gore degistirilmedi.** Yukaridaki "ne zaman
+semantic model'e gecmek gerekir" bolumunde SV004 icin %50 esigi yaziliydi ve o metin
+olcum yapilmadan once yazilmisti. Olcum SV004'u %20 gosterdi, yani esigin altinda. Esigi
+yukaridan asagi cekip kurali kurtarmak ya da "aslinda %20 de kabul edilebilir" demek
+mumkundu; yapmadim. Bir esigin ise yaramasi, olcum hosuma gitmedigi zaman da gecerli
+olmasina bagli.
+
+**Alti kuralin birlikte precision'i %50: 15 dogru, 15 yanlis pozitif.** Dagilim esit degil:
+SV001 ve SV002 %100, SV006 %80, SV004 %20, SV003 ve SV005 %0.
+
+### Uc ayri kuralin yanlis pozitifi tek cinsten cikti
+
+Olcumden once "ad temelli tahmin yanilir" diye yazmistim ama nasil yanilacagini
+bilmiyordum. Elle inceleme sunu gosterdi: uc ayri kuralin uc ayri yanlis pozitifi, ayni
+cumlenin uc ornegi. **Her uculunde de ad, tipin yerine kullanildi.**
+
+| Kural | Gorulen ad | Varsayilan sey | Gercek sey |
+|---|---|---|---|
+| SV003 | `ReturnsAsync` | `Async` ile bitiyor, demek ki `Task` donduruyor | Moq kurulum nesnesi donduruyor; ustelik cagri bir ifade agacinin icinde, hic calismiyor |
+| SV005 | `MediaStream` | `Stream` ile bitiyor, demek ki `IDisposable` | Siradan bir veri sinifi, `IDisposable` degil |
+| SV004 | `Math.Max` | `Max` bir sorgu bitirici, demek ki LINQ | `System.Math` uzerinde statik bir cagri, LINQ ile ilgisi yok |
+
+Ucu de "ad soyle goruniyor, o halde tip soyledir" cikarimi. Ucunde de tip bilgisi olsaydi
+soru bir anda kolay olurdu: `ReturnsAsync`'in donus tipi `Task` mi, `MediaStream`
+`IDisposable` uyguluyor mu, `Math` bir `IEnumerable` mi. Bunlarin hepsi semantic model'in
+tek satirda cevapladigi sorular.
+
+**Semantic model'e gecis gerekcesi artik olcume dayaniyor.** Bu ADR'yi yazarken gerekce
+"ad temelli tahmin yanilabilir" diye teorikti. Simdi 30 bulgunun 15'i yanlis ve bunlarin
+14'u (SV003'un besi, SV005'in besi, SV004'un dordu) dogrudan tip bilgisi eksikliginden
+geliyor. Geriye kalan tek yanlis pozitif (SV006'nin middleware `Invoke`'u) tip bilgisiyle
+degil, cerceve bilgisiyle cozulur.
+
+### Karar: varsayilan kume daraltildi
+
+SV003 ve SV005 varsayilan kural kumesinden cikarildi, `sievert.json` ile acilabiliyorlar.
+SV004 esigin altinda olmasina ragmen acik birakildi, cunku yanlis pozitiflerinin tek ve
+giderilebilir bir kok nedeni var; SV003 ve SV005'inki de oyle ama onlarda oran %0, yani
+duzeltme yazilana kadar kural hicbir dogru bulgu uretmiyor.
+
+Bu, "kuralin ad temelli hali kullanilamaz" sonucunun uygulanmis hali. Kurallar silinmedi;
+olculen halleriyle varsayilan olarak calismiyorlar.
+
+### Duzeltmeler bu adimda yazilmadi
+
+SV003'un ifade agaci muafiyeti, SV005'in tip listesi ve SV004'un `Math` elemesi bilerek
+yazilmadi. Sebep: duzeltme oncesi sayilarin dosyada durmasi gerekiyor. Duzeltme yazilip
+ayni orneklem yeniden olculurse, Asama 2'de ogrenilen tuzaga dusulmus olur - duzeltmenin
+uzerinde tasarlandigi orneklemle olculmesi bir dogrulama degildir. Duzeltmeler ayri bir
+adimda, olcum ise yeni bir orneklemle yapilacak.

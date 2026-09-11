@@ -580,7 +580,7 @@ Suclanan satirin baglami:
        117          return outcome;
 ```
 
-Karar:
+Karar: Belirsiz
 Not:
 
 ### Satir 11 / 30  [ShareX]  [etiketli: EVET]
@@ -672,7 +672,7 @@ Suclanan satirin baglami:
       3442                      lvCustomUploaderHeaders.SelectedItems[0].Text = name;
 ```
 
-Karar:
+Karar: Belirsiz
 Not:
 
 ### Satir 13 / 30  [ShareX]  [etiketli: EVET]
@@ -854,7 +854,7 @@ Suclanan satirin baglami:
        265                  }
 ```
 
-Karar:
+Karar: Belirsiz
 Not:
 
 ### Satir 17 / 30  [ShareX]  [etiketli: HAYIR]
@@ -1205,7 +1205,7 @@ Suclanan satirin baglami:
         41                  onDelete: ReferentialAction.Cascade);
 ```
 
-Karar:
+Karar: Belirsiz
 Not:
 
 ### Satir 23 / 30  [Jellyfin]  [etiketli: EVET]
@@ -1306,7 +1306,7 @@ Suclanan satirin baglami:
       3971                  : baseQuery.WhereNeitherItemNorDescendantMatches(context, hasExtras);
 ```
 
-Karar:
+Karar: Belirsiz
 Not:
 
 ### Satir 25 / 30  [Jellyfin]  [etiketli: EVET]

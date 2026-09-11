@@ -19,3 +19,26 @@ public sealed record SievertTip(
     TipTuru Turu,
     int BaslangicSatiri,
     IReadOnlyList<SievertMetot> Metotlar);
+
+/// <summary>Tip turunun C# anahtar kelimesi. Ekran ve JSON ciktisi ayni yeri kullansin diye burada.</summary>
+public static class TipTuruAdlari
+{
+    public static string AnahtarKelime(this TipTuru turu) => turu switch
+    {
+        TipTuru.Sinif => "class",
+        TipTuru.Record => "record",
+        TipTuru.Struct => "struct",
+        TipTuru.Interface => "interface",
+        _ => throw new ArgumentOutOfRangeException(nameof(turu), turu, "Bilinmeyen tip turu."),
+    };
+
+    /// <summary>Anahtar kelimeden tip turune geri donus. JSON okunurken lazim.</summary>
+    public static TipTuru Cozumle(string anahtarKelime) => anahtarKelime switch
+    {
+        "class" => TipTuru.Sinif,
+        "record" => TipTuru.Record,
+        "struct" => TipTuru.Struct,
+        "interface" => TipTuru.Interface,
+        _ => throw new ArgumentOutOfRangeException(nameof(anahtarKelime), anahtarKelime, "Bilinmeyen tip turu."),
+    };
+}

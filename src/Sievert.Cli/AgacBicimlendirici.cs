@@ -10,8 +10,10 @@ public static class AgacBicimlendirici
     /// <summary>Bu satirdan uzun metotlara uyari isareti konur.</summary>
     public const int UzunMetotEsigi = 40;
 
+    /// <summary>Ekranda bir dosya icin en fazla kac ayristirma hatasi gosterilecegi. JSON ciktisinda hepsi yer alir.</summary>
+    public const int EkrandaGosterilecekHataSayisi = 3;
+
     private const string AsyncEtiketi = "[async]";
-    private const int GosterilecekHataSayisi = 3;
 
     /// <summary>
     /// Dosyalari, tipleri ve metotlari agac halinde yazar; istenirse en uzun metotlari
@@ -20,8 +22,7 @@ public static class AgacBicimlendirici
     public static IReadOnlyList<CiktiSatiri> Bicimlendir(
         IReadOnlyList<DosyaAnalizi> analizler,
         TaramaOzeti ozet,
-        IReadOnlyList<MetotYeri> enUzunMetotlar,
-        string? kokKlasor = null)
+        IReadOnlyList<MetotYeri> enUzunMetotlar)
     {
         int adSutunu = MetotAdiSutunGenisligi(analizler);
         int satirSutunu = SatirSayisiSutunGenisligi(analizler);
@@ -30,7 +31,7 @@ public static class AgacBicimlendirici
 
         foreach (DosyaAnalizi analiz in analizler)
         {
-            satirlar.Add(Satir(new CiktiParcasi(GosterilecekYol(analiz.DosyaYolu, kokKlasor), CiktiRengi.Baslik)));
+            satirlar.Add(Satir(new CiktiParcasi(analiz.DosyaYolu, CiktiRengi.Baslik)));
             satirlar.AddRange(DosyayiYaz(analiz, adSutunu, satirSutunu));
         }
 
@@ -38,7 +39,7 @@ public static class AgacBicimlendirici
         {
             satirlar.Add(BosSatir());
             satirlar.Add(Satir(new CiktiParcasi($"En uzun {enUzunMetotlar.Count} metot", CiktiRengi.Baslik)));
-            satirlar.AddRange(EnUzunlariYaz(enUzunMetotlar, satirSutunu, kokKlasor));
+            satirlar.AddRange(EnUzunlariYaz(enUzunMetotlar, satirSutunu));
         }
 
         satirlar.Add(BosSatir());
@@ -58,7 +59,7 @@ public static class AgacBicimlendirici
             yield return Satir(
                 new CiktiParcasi(sonTip ? "`- " : "+- ", CiktiRengi.Soluk),
                 new CiktiParcasi(tip.Ad, CiktiRengi.Normal),
-                new CiktiParcasi($" ({AnahtarKelime(tip.Turu)})", CiktiRengi.Soluk));
+                new CiktiParcasi($" ({tip.Turu.AnahtarKelime()})", CiktiRengi.Soluk));
 
             for (int j = 0; j < tip.Metotlar.Count; j++)
             {
@@ -85,7 +86,7 @@ public static class AgacBicimlendirici
 
     private static IEnumerable<CiktiSatiri> HatalariYaz(DosyaAnalizi analiz)
     {
-        for (int i = 0; i < Math.Min(GosterilecekHataSayisi, analiz.AyristirmaHatalari.Count); i++)
+        for (int i = 0; i < Math.Min(EkrandaGosterilecekHataSayisi, analiz.AyristirmaHatalari.Count); i++)
         {
             bool sonuncu = i == analiz.AyristirmaHatalari.Count - 1;
             yield return Satir(
@@ -93,7 +94,7 @@ public static class AgacBicimlendirici
                 new CiktiParcasi("! " + analiz.AyristirmaHatalari[i], CiktiRengi.Uyari));
         }
 
-        int kalan = analiz.AyristirmaHatalari.Count - GosterilecekHataSayisi;
+        int kalan = analiz.AyristirmaHatalari.Count - EkrandaGosterilecekHataSayisi;
         if (kalan > 0)
         {
             yield return Satir(
@@ -126,8 +127,7 @@ public static class AgacBicimlendirici
 
     private static IEnumerable<CiktiSatiri> EnUzunlariYaz(
         IReadOnlyList<MetotYeri> enUzunMetotlar,
-        int satirSutunu,
-        string? kokKlasor)
+        int satirSutunu)
     {
         int siraSutunu = enUzunMetotlar.Count.ToString(CultureInfo.InvariantCulture).Length;
         int adSutunu = enUzunMetotlar.Max(yer => $"{yer.TipAdi}.{yer.Metot.Ad}".Length);
@@ -143,7 +143,7 @@ public static class AgacBicimlendirici
                 new CiktiParcasi($"{uzunluk} satir  ", yer.Metot.SatirSayisi > UzunMetotEsigi ? CiktiRengi.Uyari : CiktiRengi.Normal),
                 new CiktiParcasi($"{yer.TipAdi}.{yer.Metot.Ad}".PadRight(adSutunu + 2), CiktiRengi.Normal),
                 new CiktiParcasi(
-                    $"{GosterilecekYol(yer.DosyaYolu, kokKlasor)}:{yer.Metot.BaslangicSatiri}",
+                    $"{yer.DosyaYolu}:{yer.Metot.BaslangicSatiri}",
                     CiktiRengi.Soluk));
         }
     }
@@ -192,17 +192,6 @@ public static class AgacBicimlendirici
             .Select(metot => metot.SatirSayisi.ToString(CultureInfo.InvariantCulture).Length)
             .DefaultIfEmpty(1)
             .Max();
-
-    private static string GosterilecekYol(string dosyaYolu, string? kokKlasor) =>
-        kokKlasor is null ? dosyaYolu : Path.GetRelativePath(kokKlasor, dosyaYolu);
-
-    private static string AnahtarKelime(TipTuru turu) => turu switch
-    {
-        TipTuru.Sinif => "class",
-        TipTuru.Record => "record",
-        TipTuru.Struct => "struct",
-        _ => "interface",
-    };
 
     private static string Sayi(int deger) => deger.ToString(CultureInfo.InvariantCulture);
 

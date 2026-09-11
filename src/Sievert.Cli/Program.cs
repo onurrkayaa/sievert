@@ -45,7 +45,11 @@ if (dosyalar.Count == 0)
     return 1;
 }
 
-List<DosyaAnalizi> analizler = dosyalar.Select(DosyaCozumleyici.DosyayiCozumle).ToList();
+string kok = TaramaKoku.Bul(ayarlar.Yol);
+IReadOnlyList<DosyaAnalizi> analizler = TaramaKoku.YollariGoreliles(
+    dosyalar.Select(DosyaCozumleyici.DosyayiCozumle).ToList(),
+    kok);
+
 TaramaOzeti ozet = Ozetleyici.Ozetle(analizler);
 IReadOnlyList<MetotYeri> enUzunlar = ayarlar.EnUzunKac is int adet
     ? Ozetleyici.EnUzunMetotlar(analizler, adet)
@@ -53,13 +57,12 @@ IReadOnlyList<MetotYeri> enUzunlar = ayarlar.EnUzunKac is int adet
 
 if (ayarlar.Json)
 {
-    Console.Out.WriteLine(JsonBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar));
+    Console.Out.WriteLine(JsonBicimlendirici.Bicimlendir(kok, analizler, ozet, enUzunlar));
     return 0;
 }
 
-string? kokKlasor = Directory.Exists(ayarlar.Yol) ? ayarlar.Yol : null;
 KonsolYazici.Yaz(
-    AgacBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar, kokKlasor),
+    AgacBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar),
     KonsolYazici.RenkKullanilsinMi());
 
 return 0;

@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sievert.Analysis\Sievert.Analysis.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Cli\Sievert.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Sievert.Mining\Sievert.Mining.csproj" />
   </ItemGroup>
 
 </Project>

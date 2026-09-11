@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sievert.Analysis\Sievert.Analysis.csproj" />
+    <ProjectReference Include="..\Sievert.Mining\Sievert.Mining.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -7,6 +7,7 @@ using Sievert.Core;
 using Sievert.Core.Analysis;
 using Sievert.Core.Configuration;
 using Sievert.Core.Rules;
+using Sievert.Mining;
 
 namespace Sievert.Cli;
 
@@ -45,6 +46,13 @@ public static class CommandRunner
         {
             Console.Error.WriteLine($"Bulunamadi: {options.TargetPath}");
             return ExitCodes.ToolError;
+        }
+
+        // mine kod taramiyor, git tarihini okuyor. Dosya arama ve eleme kalibi ona
+        // uygulanmadigi icin akis burada ayriliyor.
+        if (options is MineOptions mine)
+        {
+            return RunMine(mine);
         }
 
         SourceFileSearch search = SourceFileFinder.Search(options.TargetPath);
@@ -213,6 +221,27 @@ public static class CommandRunner
         }
 
         return CheckCommand.ExitCode(findings, options.FailOn);
+    }
+
+    private static int RunMine(MineOptions options)
+    {
+        if (!RepositoryMiner.IsRepository(options.TargetPath))
+        {
+            Console.Error.WriteLine($"Git deposu degil: {options.TargetPath}");
+            return ExitCodes.ToolError;
+        }
+
+        MineResult result = MineCommand.Run(
+            options.TargetPath,
+            new MiningOptions(options.Since, options.MaxCommits),
+            options.JsonPath);
+
+        ConsoleWriter.Write(
+            MineFormatter.Format(result.Summary, result.Elapsed, options.JsonPath),
+            ConsoleWriter.UseColor());
+
+        // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).
+        return ExitCodes.Clean;
     }
 
     private static int WriteBanner()

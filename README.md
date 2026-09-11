@@ -31,7 +31,8 @@ Directory.Build.props         shared build settings for all projects
 global.json                   pins the SDK version
 src/
   Sievert.Core/               shared models and helpers, depends on nothing
-  Sievert.Analysis/           the actual analysis: Roslyn + git history
+  Sievert.Analysis/           code analysis with Roslyn
+  Sievert.Mining/             git history with LibGit2Sharp, separate from Analysis
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
@@ -52,11 +53,21 @@ dotnet test
 dotnet run --project src/Sievert.Cli
 ```
 
-Right now there are two commands. `sievert scan <path>` reads the C# files under a path
+Right now there are three commands. `sievert scan <path>` reads the C# files under a path
 and prints the types and methods it found as a tree, with a summary at the end.
 `sievert check <path>` runs the rules instead and prints each finding as a diagnostic
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
-default). Both commands take `--json`. There are six rules:
+default). Both of those take `--json` as a flag and print to the screen.
+
+`sievert mine <repo-path>` is the third one and it does something different: it walks a
+git repository's history and pulls out what each commit did - author, date, message,
+which files changed and by how many lines. It prints a summary and, if you give it
+`--json <file>`, writes the full data to that file as JSONL, one commit per line.
+`--since <date>` and `--max-commits <n>` limit how much history it reads. Merge commits
+are left out of the data but counted in the summary, and nothing is stored in a database
+yet - that is the next step. Why it works this way is in ADR 0011.
+
+There are six rules:
 
 | Code | Severity | What it looks for |
 |---|---|---|

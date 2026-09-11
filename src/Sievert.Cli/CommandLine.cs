@@ -34,6 +34,17 @@ public sealed record CheckOptions(
     Severity FailOn)
     : CommandOptions(TargetPath, Json, Exclude, ConfigPath);
 
+/// <summary>mine komutunun ayarlari.</summary>
+/// <param name="JsonPath">--json ile verilen dosya yolu. Verilmediyse null, yani sadece ozet basilir.</param>
+/// <param name="Since">--since ile verilen tarih. Verilmediyse null.</param>
+/// <param name="MaxCommits">--max-commits ile verilen sinir. Verilmediyse null.</param>
+public sealed record MineOptions(
+    string TargetPath,
+    string? JsonPath,
+    DateTimeOffset? Since,
+    int? MaxCommits)
+    : CommandOptions(TargetPath, JsonPath is not null, [], null);
+
 /// <summary>Ayristirma sonucu: ya ayarlar ya da kullaniciya gosterilecek bir hata.</summary>
 /// <param name="Options">Basarili ayristirmada dolu olur.</param>
 /// <param name="Error">Basarisiz ayristirmada dolu olur.</param>
@@ -63,7 +74,15 @@ public static class ArgumentParser
                                 kodu 1 olur. info / warning / error,
                                 varsayilan warning
 
-        Iki komutta da gecerli:
+          mine <repo-yolu> [--json <dosya>] [--since <tarih>] [--max-commits N]
+            git tarihini yurur, commit basina veriyi cikarir
+            --json <dosya>      tam veriyi bu dosyaya JSONL yazar: her satir
+                                bir commit. Verilmezse sadece ozet basilir
+            --since <tarih>     bu tarihten onceki commit'leri okuma.
+                                ISO bicimi, ornegin 2025-01-01
+            --max-commits N     en fazla N commit oku (en yeniden eskiye)
+
+        scan ve check icin gecerli:
           --config <yol>      yapilandirma dosyasi. Verilmezse taranan kokteki
                               sievert.json okunur, o da yoksa varsayilanlar calisir
           --exclude <kalip>   bu kaliba uyan dosyalari tarama. Birden fazla kez
@@ -85,7 +104,7 @@ public static class ArgumentParser
 
         string command = args[0];
 
-        if (command is not ("scan" or "check"))
+        if (command is not ("scan" or "check" or "mine"))
         {
             return new ParseResult(null, $"Bilinmeyen komut: {command}");
         }
@@ -95,7 +114,12 @@ public static class ArgumentParser
             return new ParseResult(null, $"{command} komutu bir yol bekliyor.");
         }
 
-        return command == "scan" ? ParseScan(args) : ParseCheck(args);
+        return command switch
+        {
+            "scan" => ParseScan(args),
+            "check" => ParseCheck(args),
+            _ => ParseMine(args),
+        };
     }
 
     private static ParseResult ParseScan(string[] args)
@@ -207,6 +231,78 @@ public static class ArgumentParser
 
         return new ParseResult(new CheckOptions(args[1], json, exclude, configPath, failOn), null);
     }
+
+    private static ParseResult ParseMine(string[] args)
+    {
+        string? jsonPath = null;
+        DateTimeOffset? since = null;
+        int? maxCommits = null;
+
+        for (int i = 2; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "--json":
+                    // scan ve check'te --json bir bayrak, burada yol bekliyor. Sebebi su:
+                    // tam veri buyuk ve satir satir yaziliyor, ekrana basilacak bir sey degil.
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--json bir dosya yolu bekliyor.");
+                    }
+
+                    jsonPath = args[++i];
+                    break;
+
+                case "--since":
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--since bir tarih bekliyor.");
+                    }
+
+                    if (ParseDate(args[i + 1]) is not DateTimeOffset date)
+                    {
+                        return new ParseResult(null, $"--since icin gecersiz tarih: {args[i + 1]}");
+                    }
+
+                    since = date;
+                    i++;
+                    break;
+
+                case "--max-commits":
+                    if (i + 1 >= args.Length)
+                    {
+                        return new ParseResult(null, "--max-commits bir sayi bekliyor.");
+                    }
+
+                    if (!int.TryParse(args[i + 1], out int count) || count < 1)
+                    {
+                        return new ParseResult(null, $"--max-commits icin gecersiz sayi: {args[i + 1]}");
+                    }
+
+                    maxCommits = count;
+                    i++;
+                    break;
+
+                default:
+                    return new ParseResult(null, $"Bilinmeyen secenek: {args[i]}");
+            }
+        }
+
+        return new ParseResult(new MineOptions(args[1], jsonPath, since, maxCommits), null);
+    }
+
+    /// <summary>
+    /// Saat dilimi yazilmamis bir tarih UTC sayiliyor. Yerel saate gore yorumlasaydim
+    /// ayni komut iki makinede farkli commit kumesi okurdu.
+    /// </summary>
+    private static DateTimeOffset? ParseDate(string value) =>
+        DateTimeOffset.TryParse(
+            value,
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+            out DateTimeOffset parsed)
+            ? parsed
+            : null;
 
     /// <summary>
     /// Bir --exclude kalibini okuyup listeye ekler. Sorun varsa hata metnini doner, yoksa null.

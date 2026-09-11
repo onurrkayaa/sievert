@@ -122,6 +122,40 @@ uzatirdi. Baska bir Python dosyasi eklemeyi planlamiyorum.
 - **Etiketler dogrulanmadi.** 272 etiketten hicbiri kaynak koda bakilarak kontrol
   edilmedi. Bu adimda uretilen sey bir etiket kumesi, dogrulanmis bir gercek degil.
 
+## Guncelleme: satir kaymasi ve uc repo
+
+Yukaridaki sayilarin bir kismi eskidi, silmiyorum ama neyin degistigini buraya yaziyorum.
+
+**Bir satirlik kayma duzeltildi.** LibGit2Sharp'in `BlameHunk.FinalStartLineNumber` degeri
+0 tabanli, yamadan cikarilan silinen satir numaralari 1 tabanli; ikisi dogrudan
+karsilastiriliyordu ve SZZ her seferinde bir alttaki satiri sucluyordu. Olcerek bulundu
+(duz `git blame` ile uyum %68,7'den %97,6'ya cikti) ve regresyon testi eklendi.
+Polly'nin etiketi 272'den **261'e** dustu.
+
+**Bosluk esdegerligi olculdu ve gosterilemedi.** Yukaridaki "farkin olculmedigini yazmak
+lazim" cumlesi artik gecerli degil: olculdu. Bizim suzgecimiz `git blame -w` ile
+satirlarin yalnizca %34,0'unda ayni commit'i sucluyor, duz `git blame` ile %97,6'sinda.
+`-w` git'in kendi cevabini satirlarin %63,7'sinde degistiriyor; bizimki cevabi degil,
+sorulan satirlari eliyor. Sayilar `docs/olcumler/asama4-uc-repo.md` dosyasinda.
+
+**Uc repoda calistirildi.** Etiket orani repoya gore cok degisiyor ve ancak birinde
+literaturdeki %10-30 bandina giriyor:
+
+| Repo | Duzeltme | Etiket | Oran |
+|---|---|---|---|
+| Polly | 292 | 261 / 2759 | %9,5 |
+| ShareX | 642 | 1013 / 8490 | %11,9 |
+| Jellyfin | 3047 | 4688 / 22 917 | %20,5 |
+
+Adim 4'te Polly'nin tek basina bandin altinda kalmasi SZZ'nin kusuru gibi gorunuyordu;
+uc repo gorulunce sebebin repo yapisi oldugu anlasildi. Polly'de duzeltmelerin %30,6'si
+hic `.cs` dokunmuyor, Jellyfin'de bu oran %10,9.
+
+**Etiketlerin dogrulama listesi yazildi.** Yukaridaki "etiketler dogrulanmadi" maddesi
+kismen kapandi: 30 satirlik bir liste uc repoya dagitilmis hâlde
+`docs/olcumler/asama4-etiketleme-dogrulama.md` dosyasinda duruyor. E/H isaretlemesi henuz
+yapilmadi, yani etiketlerin dogrulugu hâlâ bilinmiyor; liste o isi yapmak icin hazir.
+
 **Sonuc:** `sievert label <repo-adi>` duzeltme commit'lerinden geriye dogru blame
-calistirip hata getiren commit'leri isaretliyor. Polly'de 2759 commit'in 272'si (%9,9)
-etiketlendi. Asama 5'in hedef degiskeni bu sutun olacak.
+calistirip hata getiren commit'leri isaretliyor. Uc repoda toplam 5962 commit etiketlendi.
+Asama 5'in hedef degiskeni bu sutun olacak.

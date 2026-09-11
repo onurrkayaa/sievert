@@ -265,21 +265,26 @@ sessizce bos sonuc uretmiyor.
 
 **Olcum surumu:** `9592508` (satir kaymasi duzeltilmis).
 
-| Kademe | Polly | ShareX |
-|---|---|---|
-| Duzeltme commit'i (`IsFix`) | 292 | 642 |
-| Islenen (ebeveyni var, dosya sinirini asmiyor) | 288 | 638 |
-| **`.cs` degistiren** | **200 (%69,4)** | **561 (%87,9)** |
-| Silinen `.cs` satiri olan | 180 | - |
-| Birini suclayabilen | 176 (%61,1) | 486 (%76,2) |
-| **Etiketlenen commit** | **261 / 2759 (%9,5)** | **1013 / 8490 (%11,9)** |
-| Blame'e sorulan satir | 5102 | 9450 |
-| Atlanan buyuk duzeltme | 4 | 4 |
+| Kademe | Polly | ShareX | Jellyfin |
+|---|---|---|---|
+| Duzeltme commit'i (`IsFix`) | 292 | 642 | 3047 |
+| Islenen (ebeveyni var, dosya sinirini asmiyor) | 288 | 638 | 3033 |
+| **`.cs` degistiren** | **200 (%69,4)** | **561 (%87,9)** | **2701 (%89,1)** |
+| Silinen `.cs` satiri olan | 180 | - | - |
+| Birini suclayabilen | 176 (%61,1) | 486 (%76,2) | 2400 (%79,1) |
+| **Etiketlenen commit** | **261 / 2759 (%9,5)** | **1013 / 8490 (%11,9)** | **4688 / 22 917 (%20,5)** |
+| Blame'e sorulan satir | 5102 | 9450 | 47 770 |
+| Atlanan buyuk duzeltme | 4 | 4 | 14 |
 
 **Huninin en cok daraldigi yer degisiyor.** Polly'de `.cs` dokunma kademesi duzeltmelerin
-%30,6'sini goturuyor; ShareX'te ayni kademe yalnizca %12,1'ini goturuyor. Tahminim bu
-yondeydi ve tuttu: ShareX neredeyse tamamen C# ve duzeltmelerinin cogu kaynak koda
-dokunuyor.
+%30,6'sini goturuyor; ShareX'te %12,1, Jellyfin'de %10,9. Tahminim bu yondeydi ve tuttu:
+ShareX ve Jellyfin C# agirlikli oldugu icin o kademe cok daha az daraliyor. Polly bir
+kutuphane ve tarihinde dokuman, ornek, yapilandirma commit'leri agir basiyor.
+
+**Etiket orani ancak Jellyfin'de literaturdeki banda girdi.** %10-30 bekleniyordu:
+Polly %9,5 (altinda), ShareX %11,9 (alt ucunda), Jellyfin **%20,5** (ortasinda). Yani
+Adim 4'te Polly'nin %9,9'una bakip "band disinda" demek dogruydu ama sebep SZZ'nin kendisi
+degil, o reponun yapisiymis. Uc repo gormeden bu ayrim yapilamazdi.
 
 Ama **etiket orani tahminim tutmadi.** ShareX icin %6-10 demistim, %11,9 cikti ve
 `IsFix` oraninin (%7,6) UZERINDE. Gerekcem yanlisti: etiket oraninin IsFix oranina yakin
@@ -296,7 +301,7 @@ Her katman, her repo. `/usr/bin/time -l`, Release yapisi, varsayilan GC.
 |---|---|---|---|
 | Madencilik (`mine --db`) | 5,44 sn / 323 MB | 115,59 sn / 479 MB | 55,10 sn / 676 MB |
 | Metrik (`metrics`) | 0,61 sn / 169 MB | 1,55 sn / 179 MB | 2,62 sn / 195 MB |
-| Etiketleme (`label`) | 117,71 sn / 218 MB | 851,77 sn / 442 MB | bitmedi, asagiya bak |
+| Etiketleme (`label`) | 117,71 sn / 218 MB | 851,77 sn / 442 MB | **5456,49 sn / 1105 MB** |
 
 Madencilikte ShareX, Jellyfin'den **uzun** suruyor (115 sn'ye karsi 55 sn) hâlbuki
 commit sayisi ucte biri. Sebep diff'lerin buyuklugu: ShareX'in tarihinde disaridan alinan
@@ -320,57 +325,33 @@ degil o satirin gectigi her dosya icin butun tarihi geriye dogru yuruyor.
 
 34 166 commit = 2759 + 8490 + 22 917. Uc repo tek veritabaninda, kimlik cakismasi yok.
 
-## Jellyfin etiketlemesi: yeni sure tahmini
+## Jellyfin etiketlemesi: tahmin ve sonuc
 
-Ilk tahminim ("20-45 dakika") tutmamisti. Bu kez tahmini olculen iki veriden turettim.
-
-Etiketleme suresi hem duzeltme sayisiyla hem tarih uzunluguyla buyuyor: blame her dosya
-icin butun tarihi geriye yuruyor, yani duzeltme basina sure de repo buyudukce artiyor.
-Iki olcum bunu dogruluyor:
+Ilk tahminim ("20-45 dakika") tutmamisti. Ikinci tahmini olculen iki veriden turettim:
+etiketleme suresi hem duzeltme sayisiyla hem tarih uzunluguyla buyuyor, cunku blame her
+dosya icin tarihi geriye yuruyor.
 
 | Repo | Sure | Duzeltme | Duzeltme basina | Commit | Katsayi (sn / duzeltme / commit) |
 |---|---|---|---|---|---|
 | Polly | 125,04 sn | 288 | 0,434 sn | 2953 | 1,47e-4 |
 | ShareX | 851,77 sn | 638 | 1,335 sn | 9479 | 1,41e-4 |
+| **Jellyfin (olculen)** | **5456,49 sn** | **3033** | **1,799 sn** | **30 004** | **6,00e-5** |
 
-Iki katsayi birbirine cok yakin (%4 fark), yani model tutuyor gorunuyor. Jellyfin icin
-3047 duzeltme ve 30 004 commit ile:
+**Tahmin: 3,7 saat. Gercek: 1,52 saat. Tahmin 2,4 kat fazla.**
 
-**Tahmin: 1,44e-4 x 30 004 x 3047 = yaklasik 13 160 sn, yani 3,7 saat.**
+Iki noktadan cikarilan model tutmadi. Polly ve ShareX'in katsayilari birbirine cok yakindi
+(%4 fark) ve bu beni yanilti; Jellyfin'inki ikisinin de yarisindan az. Yani duzeltme
+basina sure repo commit sayisiyla dogrusal degil - Jellyfin'in commit sayisi ShareX'in
+3,2 kati ama duzeltme basina suresi yalnizca 1,35 kati.
 
-Ilk tahminimin neden bu kadar kotu oldugu da boylece belli: sureyi yalnizca commit
-sayisiyla olceklemistim, oysa carpim iki terimden olusuyor.
+Sebebi olcmedim. Akla gelen aciklama, blame'in maliyetinin deponun tamaminin degil o
+DOSYANIN tarihinin uzunluguna bagli olmasi: Jellyfin'in commit'leri cok daha fazla dosyaya
+yayilmis olabilir. Ama bu bir tahmin; dosya basina commit sayisi olculmedi. **Iki
+olcumden model cikarmanin yetmedigi, ucuncu olcumle anlasildi.**
 
-## Jellyfin etiketlemesi bitmedi
-
-Jellyfin'in etiketlemesi bu oturumda **tamamlanmadi**. Iki kez baslatildi: birincisi
-hatali kodla bir saatten fazla kostu ve kayma hatasi bulununca durduruldu, ikincisi
-duzeltilmis kodla baslatildi ve bir saati askin suredir suruyordu, rapor yazilirken hâlâ
-bitmemisti.
-
-Sebep ADR 0014'te yazili olanin buyuk olcekteki hâli: blame, sorulan satir icin degil o
-satirin gectigi her dosya icin butun tarihi geriye dogru yuruyor. Jellyfin'de 22 917
-commit ve 3047 duzeltme var; ShareX'te 638 duzeltme 852 sn surdugune gore, duzeltme
-basina sure ayni kalsa bile 4000 sn'lik (yaklasik 68 dakika) bir taban var - ve
-Jellyfin'in tarihi ShareX'inkinden uc kat uzun oldugu icin duzeltme basina sure de daha
-yuksek.
-
-**Tahmin tutmadi.** "20-45 dakika" demistim; gercek sure bunun en az iki kati. Tahminde
-commit sayisinin 10 kati artmasinin sureyi 10 kat artiracagini varsaymisim, oysa blame'in
-maliyeti tarihin uzunluguyla da carpiliyor, yani buyume dogrusaldan hizli.
-
-Bu yuzden Jellyfin icin su an elde **etiket sayisi yok**; veritabanindaki
-`IsBugIntroducing` sutunu o repo icin bos. Madencilik, metrikler ve butun saglik
-kontrolleri Jellyfin'de tamamlandi, eksik olan yalnizca etiketleme.
-
-Bir sonraki adimda yapilacak sey belli: etiketlemeyi kosturup sayiyi eklemek, ve
-maliyeti dusurmek icin blame ciktisini dosya basina onbellege almak (ayni dosya birden
-fazla duzeltme tarafindan blame ediliyor; su an her seferinde bastan hesaplaniyor).
-
-**Adim 5b durumu:** kosu duzeltilmis kodla arka planda suruyor, PID 73923, log
-`tasks/bdp5ktbu7.output`. Rapor yazilirken 1 saat 27 dakikadir calisiyordu; yukaridaki
-tahmine gore yaklasik 2,2 saat daha var. Bitince bu dosyadaki Jellyfin satirlari
-tamamlanacak; bitmezse sutun bos kalacak, tahmini sayi yazilmayacak.
+Bellek tarafi da ayrisiyor: Jellyfin'de tepe bellek 1105 MB, digerlerinin iki-bes kati.
+Blame'in hunk koleksiyonu dosya basina birakiliyor ama buyuk dosyalarda tek bir koleksiyon
+bile buyuk oluyor.
 
 ## Ozet
 
@@ -378,9 +359,10 @@ tamamlanacak; bitmezse sutun bos kalacak, tahmini sayi yazilmayacak.
 |---|---|---|---|
 | Commit | 2759 | 8490 | 22 917 |
 | `IsFix` (tam kelime) | 292 (%10,6) | 642 (%7,6) | 3047 (%13,3) |
-| Etiket | 261 (%9,5) | 1013 (%11,9) | olculmedi |
+| Etiket | 261 (%9,5) | 1013 (%11,9) | **4688 (%20,5)** |
 | Madencilik | 5,44 sn | 115,59 sn | 55,10 sn |
 | Metrik | 0,61 sn | 1,55 sn | 2,62 sn |
-| Etiketleme | 117,71 sn | 851,77 sn | bitmedi |
+| Etiketleme | 117,71 sn | 851,77 sn | 5456,49 sn |
 
 Uc repo tek veritabaninda, kimlik cakismasi yok, yedi saglik kontrolunun yedisi de gecti.
+Boru hatti ucunde de uctan uca calisti: veritabaninda 34 166 commit ve 5962 etiket var.

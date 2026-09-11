@@ -101,6 +101,12 @@ turned up: blame line numbers were off by one, so SZZ was blaming the line below
 that changed. It is fixed, there is a regression test, and the old numbers are kept with
 a note saying why they are wrong.
 
+Across the three repositories SZZ labelled 5962 commits. The share varies a lot by
+repository - 9.5% on Polly, 11.9% on ShareX, 20.5% on Jellyfin - and only the last one
+sits in the middle of the 10-30% band the literature reports. The reason is not the
+method but what the repositories look like: on Polly nearly a third of the fix commits
+do not touch C# at all, on Jellyfin about a tenth do.
+
 ### Setting up the database
 
 ```bash

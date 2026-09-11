@@ -25,11 +25,11 @@ Her repodan:
 Secim rastgele (sabit tohum 42), en cok suclanan commit'lerden degil. Her duzeltme
 commit'inden en fazla bir satir aliniyor.
 
-**Jellyfin satirlari nereden geliyor:** Jellyfin'in etiketlemesi veritabaninda henuz
-tamamlanmadi, yani `IsBugIntroducing` sutunu o repo icin bos. Liste satirlari veritabanindan
-degil, ayni SZZ hesabinin dogrudan calistirilmasindan geliyor; bu yuzden Jellyfin'den de
-onar satir secilebildi ve **eksik satir yok**. Satirlar veritabanina yazilacak etiketlerle
-ayni hesaptan cikiyor, farklari yalnizca henuz kaydedilmemis olmalari.
+**Jellyfin satirlari nereden geliyor:** Liste uretildiginde Jellyfin'in etiketlemesi
+veritabaninda henuz tamamlanmamisti. Liste satirlari veritabanindan degil, ayni SZZ
+hesabinin dogrudan calistirilmasindan geliyor, o yuzden Jellyfin'den de onar satir
+secilebildi ve **eksik satir yok**. Etiketleme sonradan tamamlandi (4688 etiket) ve
+satirlar ayni hesaptan cikiyor.
 
 ## Kaynaga karsi kontrol
 

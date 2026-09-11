@@ -22,7 +22,10 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
     {
         builder.Entity<RepositoryRow>(repository =>
         {
-            repository.HasIndex(row => row.Name);
+            // Eslestirme kimlik uzerinden, o yuzden benzersiz.
+            repository.HasIndex(row => row.Identity).IsUnique();
+            repository.Property(row => row.Identity).HasMaxLength(1000);
+            repository.Property(row => row.IdentitySource).HasMaxLength(20);
             repository.Property(row => row.Name).HasMaxLength(400);
             repository.Property(row => row.RemoteUrl).HasMaxLength(1000);
             repository.Property(row => row.ScannedSha).HasMaxLength(40);

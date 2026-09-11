@@ -9,7 +9,20 @@ public sealed class RepositoryRow
 {
     public int Id { get; set; }
 
-    /// <summary>Deponun adi. Su an klasor adi; uzak adres varsa oradan da turetilebilir.</summary>
+    /// <summary>
+    /// Deponun karsilastirilabilir kimligi. Uzak adres varsa ondan normalize edilerek
+    /// uretiliyor (`github.com/app-vnext/polly`), yoksa klasor adina dusuluyor. Ayni
+    /// depo iki farkli klasor adiyla taranirsa tek satir kalsin diye eslestirme buradan.
+    /// </summary>
+    public required string Identity { get; set; }
+
+    /// <summary>
+    /// Kimligin nereden geldigi: <c>remote</c> ya da <c>folder</c>. Klasor adina
+    /// dusuldugunde ciftlenme hala mumkun; bu alan o durumun gorunur olmasi icin var.
+    /// </summary>
+    public required string IdentitySource { get; set; }
+
+    /// <summary>Deponun adi, yani klasor adi. Gosterim icin; eslestirmede kullanilmiyor.</summary>
     public required string Name { get; set; }
 
     /// <summary>origin uzak adresi. Yerel bir depoda uzak yoksa null.</summary>

@@ -7,11 +7,19 @@ using Sievert.Data.Entities;
 namespace Sievert.Data;
 
 /// <summary>Yazma isinin ayarlari.</summary>
-/// <param name="RepositoryName">Depo adi. Ayni ad ikinci kez gelirse ayni satir guncelleniyor.</param>
+/// <param name="Identity">Deponun kimligi; ayni kimlik ikinci kez gelirse ayni satir guncelleniyor.</param>
+/// <param name="IdentitySource">Kimlik nereden geldi: <c>remote</c> ya da <c>folder</c>.</param>
+/// <param name="RepositoryName">Depo adi, gosterim icin.</param>
 /// <param name="RemoteUrl">origin adresi, yoksa null.</param>
 /// <param name="HeadSha">Tarama sirasinda HEAD'in gosterdigi commit.</param>
 /// <param name="Rewrite">true ise deponun mevcut commit'leri silinip bastan yaziliyor.</param>
-public sealed record StoreOptions(string RepositoryName, string? RemoteUrl, string? HeadSha, bool Rewrite);
+public sealed record StoreOptions(
+    string Identity,
+    string IdentitySource,
+    string RepositoryName,
+    string? RemoteUrl,
+    string? HeadSha,
+    bool Rewrite);
 
 /// <summary>Yazma isinin sonucu.</summary>
 /// <param name="RepositoryId">Yazilan deponun satir kimligi.</param>
@@ -95,7 +103,7 @@ public sealed class CommitStore(SievertContext context)
     private RepositoryRow FindOrCreate(StoreOptions options)
     {
         RepositoryRow? found = context.Repositories
-            .FirstOrDefault(row => row.Name == options.RepositoryName);
+            .FirstOrDefault(row => row.Identity == options.Identity);
 
         if (found is not null)
         {
@@ -104,6 +112,8 @@ public sealed class CommitStore(SievertContext context)
 
         RepositoryRow created = new()
         {
+            Identity = options.Identity,
+            IdentitySource = options.IdentitySource,
             Name = options.RepositoryName,
             RemoteUrl = options.RemoteUrl,
             ScannedAt = DateTimeOffset.UtcNow,
@@ -133,6 +143,8 @@ public sealed class CommitStore(SievertContext context)
         RepositoryRow repository = context.Repositories.Single(row => row.Id == repositoryId);
 
         repository.TotalCommits = context.Commits.Count(row => row.RepositoryId == repositoryId);
+        repository.Name = options.RepositoryName;
+        repository.IdentitySource = options.IdentitySource;
         repository.RemoteUrl = options.RemoteUrl;
         repository.ScannedAt = DateTimeOffset.UtcNow;
         repository.ScannedSha = options.HeadSha;

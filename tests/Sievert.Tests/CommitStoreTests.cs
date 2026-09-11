@@ -14,7 +14,7 @@ public class CommitStoreTests(PostgresFixture postgres)
     {
         using SievertContext context = postgres.NewDatabase();
         CommitStore store = new(context);
-        StoreOptions options = new("polly", "https://example.com/polly.git", "abc1234", Rewrite: false);
+        StoreOptions options = Options();
 
         StoreResult first = store.Write(Commits(3), options);
         StoreResult second = store.Write(Commits(3), options);
@@ -33,8 +33,8 @@ public class CommitStoreTests(PostgresFixture postgres)
         using SievertContext context = postgres.NewDatabase();
         CommitStore store = new(context);
 
-        store.Write(Commits(3), new StoreOptions("polly", null, "abc1234", Rewrite: false));
-        StoreResult again = store.Write(Commits(2), new StoreOptions("polly", null, "abc1234", Rewrite: true));
+        store.Write(Commits(3), Options());
+        StoreResult again = store.Write(Commits(2), Options(rewrite: true));
 
         Assert.Equal(3, again.Deleted);
         Assert.Equal(2, again.Written);
@@ -51,7 +51,7 @@ public class CommitStoreTests(PostgresFixture postgres)
         CommitStore store = new(context);
 
         Assert.Throws<InvalidOperationException>(() =>
-            store.Write(FailsAfter(2), new StoreOptions("polly", null, "abc1234", Rewrite: false)));
+            store.Write(FailsAfter(2), Options()));
 
         context.ChangeTracker.Clear();
 
@@ -67,7 +67,7 @@ public class CommitStoreTests(PostgresFixture postgres)
         using SievertContext context = postgres.NewDatabase();
         CommitStore store = new(context);
 
-        store.Write(Commits(3), new StoreOptions("polly", null, "abc1234", Rewrite: false));
+        store.Write(Commits(3), Options());
 
         List<string> paths = [.. context.CommitFiles.Select(row => row.Path)];
 
@@ -82,7 +82,7 @@ public class CommitStoreTests(PostgresFixture postgres)
         using SievertContext context = postgres.NewDatabase();
         CommitStore store = new(context);
 
-        store.Write(Commits(4), new StoreOptions("polly", "https://example.com/polly.git", "abc1234", Rewrite: false));
+        store.Write(Commits(4), Options());
 
         RepositoryRow repository = context.Repositories.Single();
 
@@ -92,6 +92,46 @@ public class CommitStoreTests(PostgresFixture postgres)
         Assert.NotNull(repository.LastCommitDate);
         Assert.True(repository.FirstCommitDate <= repository.LastCommitDate);
     }
+
+    [DockerFact]
+    public void TheSameRepositoryUnderTwoFolderNames_IsOneRow()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        CommitStore store = new(context);
+
+        // Ayni uzak adres, iki farkli klasor adi ve iki farkli yazim bicimi.
+        store.Write(Commits(3), Options(folder: "polly-full", remote: "https://github.com/App-vNext/Polly.git"));
+        StoreResult second = store.Write(Commits(3), Options(folder: "polly", remote: "git@github.com:App-vNext/Polly"));
+
+        Assert.Single(context.Repositories);
+        Assert.Equal(0, second.Written);
+        Assert.Equal(3, second.Skipped);
+        Assert.Equal(3, context.Commits.Count());
+        Assert.Equal("remote", context.Repositories.Single().IdentitySource);
+    }
+
+    [DockerFact]
+    public void WithoutARemote_TheIdentityFallsBackToTheFolderAndSaysSo()
+    {
+        using SievertContext context = postgres.NewDatabase();
+        CommitStore store = new(context);
+
+        store.Write(Commits(2), Options(remote: null));
+
+        Assert.Equal("folder", context.Repositories.Single().IdentitySource);
+    }
+
+    /// <summary>
+    /// CLI'in yaptigi kimlik turetmesinin aynisi: uzak adres varsa normalize edilmis
+    /// hâli, yoksa klasor adi.
+    /// </summary>
+    private static StoreOptions Options(
+        string folder = "polly",
+        string? remote = "https://github.com/App-vNext/Polly.git",
+        bool rewrite = false) =>
+        Sievert.Mining.RemoteIdentity.Normalize(remote) is string identity
+            ? new StoreOptions(identity, "remote", folder, remote, "abc1234", rewrite)
+            : new StoreOptions(folder, "folder", folder, null, "abc1234", rewrite);
 
     /// <summary>Ikinci commit'ten sonra patlayan bir akis; yarida kesilmeyi taklit ediyor.</summary>
     private static IEnumerable<CommitRecord> FailsAfter(int count)

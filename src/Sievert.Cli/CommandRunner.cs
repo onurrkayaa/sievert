@@ -265,7 +265,7 @@ public static class CommandRunner
             context is null ? null : new CommitStore(context),
             context is null
                 ? null
-                : new StoreOptions(identity.Name, identity.RemoteUrl, identity.HeadSha, options.Rewrite));
+                : StoreOptionsFor(identity, options.Rewrite));
 
         ConsoleWriter.Write(
             MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath, shallow, result.Store),
@@ -274,6 +274,15 @@ public static class CommandRunner
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).
         return ExitCodes.Clean;
     }
+
+    /// <summary>
+    /// Depo kimligini uzak adresten turetir. Uzak adres yoksa klasor adina dusuluyor ve
+    /// bu durum kayda geciyor: klasor adiyla eslestirme ciftlenmeye acik, gorunur olsun.
+    /// </summary>
+    private static StoreOptions StoreOptionsFor(RepositoryIdentity identity, bool rewrite) =>
+        RemoteIdentity.Normalize(identity.RemoteUrl) is string fromRemote
+            ? new StoreOptions(fromRemote, "remote", identity.Name, identity.RemoteUrl, identity.HeadSha, rewrite)
+            : new StoreOptions(identity.Name, "folder", identity.Name, null, identity.HeadSha, rewrite);
 
     /// <summary>
     /// Baglanti dizesini bulup baglami acar. Sema eksikse migration'i kendiliginden

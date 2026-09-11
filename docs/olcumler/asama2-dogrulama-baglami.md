@@ -2,7 +2,7 @@
 
 **Tarih:** 2026-09-11  
 **Repo:** [ShareX/ShareX](https://github.com/ShareX/ShareX) @ `b5a397ea6ccf00659cee593c981be4b01ab641fe`  
-**Sievert commit:** `f7dda08`
+**Sievert commit:** `5279968` (yeniden yazma oncesi: `f7dda08`)
 
 [asama2-dogrulama-listesi.md](asama2-dogrulama-listesi.md) dosyasindaki 20 satirin
 her biri icin klondan toplanan olgular. Karar yok, yorum yok; sadece ne yazdigi.

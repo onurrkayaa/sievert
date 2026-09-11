@@ -1,0 +1,148 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e3]:
+    - link "Skip to content" [ref=f1e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=f1e9]:
+      - heading "Navigation Menu" [level=2] [ref=f1e10]
+      - generic [ref=f1e11]:
+        - link "Homepage" [ref=f1e13] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f1e16]:
+          - navigation "Global" [ref=f1e17]:
+            - list [ref=f1e18]:
+              - listitem [ref=f1e19]:
+                - button "Platform" [ref=f1e21] [cursor=pointer]
+              - listitem [ref=f1e24]:
+                - button "Solutions" [ref=f1e26] [cursor=pointer]
+              - listitem [ref=f1e29]:
+                - button "Resources" [ref=f1e31] [cursor=pointer]
+              - listitem [ref=f1e34]:
+                - button "Open Source" [ref=f1e36] [cursor=pointer]
+              - listitem [ref=f1e39]:
+                - button "Enterprise" [ref=f1e41] [cursor=pointer]
+              - listitem [ref=f1e44]:
+                - link "Pricing" [ref=f1e45] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+          - generic [ref=f1e46]:
+            - button "Search or jump to, type / to search" [ref=f1e48] [cursor=pointer]
+            - link "Sign in" [ref=f1e55] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fonurrkayaa%2Fsievert%2Fgraphs%2Fcontributors
+            - link "Sign up" [ref=f1e58] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Frepos%2Finsights%2Fcontributors%2Findex&source=header-repo&source_repo=onurrkayaa%2Fsievert
+            - button "Appearance settings" [ref=f1e61] [cursor=pointer]
+  - main [ref=f1e68]:
+    - generic [ref=f1e69]:
+      - generic [ref=f1e70]:
+        - generic [ref=f1e72]:
+          - link "onurrkayaa" [ref=f1e76] [cursor=pointer]:
+            - /url: /onurrkayaa
+          - generic [ref=f1e77]: /
+          - strong [ref=f1e78]:
+            - link "sievert" [ref=f1e79] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert
+          - generic [ref=f1e80]: Public
+        - generic [ref=f1e81]:
+          - list:
+            - listitem [ref=f1e82]:
+              - link "You must be signed in to change notification settings" [ref=f1e83] [cursor=pointer]:
+                - /url: /login?return_to=%2Fonurrkayaa%2Fsievert
+                - text: Notifications
+            - listitem [ref=f1e86]:
+              - link "Fork 0" [ref=f1e87] [cursor=pointer]:
+                - /url: /login?return_to=%2Fonurrkayaa%2Fsievert
+                - text: Fork
+                - generic "0" [ref=f1e90]
+            - listitem [ref=f1e91]:
+              - link "You must be signed in to star a repository" [ref=f1e93] [cursor=pointer]:
+                - /url: /login?return_to=%2Fonurrkayaa%2Fsievert
+                - text: Star
+                - generic "0 users starred this repository" [ref=f1e96]: "0"
+      - navigation "Repository" [ref=f1e97]:
+        - list [ref=f1e98]:
+          - listitem [ref=f1e99]:
+            - link "Code" [ref=f1e100] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert
+          - listitem [ref=f1e104]:
+            - link "Issues" [ref=f1e105] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/issues
+          - listitem [ref=f1e110]:
+            - link "Pull requests" [ref=f1e111] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/pulls
+          - listitem [ref=f1e115]:
+            - link "Actions" [ref=f1e116] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/actions
+          - listitem [ref=f1e120]:
+            - link "Projects" [ref=f1e121] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/projects
+          - listitem [ref=f1e125]:
+            - link "Security and quality" [ref=f1e126] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/security
+          - listitem [ref=f1e130]:
+            - link "Insights" [ref=f1e131] [cursor=pointer]:
+              - /url: /onurrkayaa/sievert/pulse
+    - generic [ref=f1e136]:
+      - 'heading "Insights: onurrkayaa/sievert" [level=1] [ref=f1e137]'
+      - generic [ref=f1e139]:
+        - navigation "Insights" [ref=f1e141]:
+          - link "Pulse" [ref=f1e142] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/pulse
+          - link "Contributors" [ref=f1e143]:
+            - /url: /onurrkayaa/sievert/graphs/contributors
+          - link "Community standards" [ref=f1e144] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/community
+          - link "Commits" [ref=f1e145] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/graphs/commit-activity
+          - link "Code frequency" [ref=f1e146] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/graphs/code-frequency
+          - link "Dependency graph" [ref=f1e147] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/network/dependencies
+          - link "Network" [ref=f1e148] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/network
+          - link "Forks" [ref=f1e149] [cursor=pointer]:
+            - /url: /onurrkayaa/sievert/forks
+        - generic [ref=f1e153]:
+          - generic [ref=f1e154]:
+            - generic [ref=f1e155]:
+              - heading "Contributors" [level=1] [ref=f1e156]
+              - paragraph [ref=f1e157]: Contributions per week to main, excluding merge commits
+            - generic [ref=f1e158]:
+              - 'button "Period: Last 3 months" [ref=f1e159] [cursor=pointer]'
+              - 'button "Contributions: Commits" [ref=f1e162] [cursor=pointer]'
+          - generic [ref=f1e172]:
+            - generic [ref=f1e173]: Loading
+            - paragraph [ref=f1e179]: Crunching the latest data, just for you. Hang tight…
+  - contentinfo [ref=f1e180]:
+    - heading "Footer" [level=2] [ref=f1e181]
+    - generic [ref=f1e182]:
+      - generic [ref=f1e183]:
+        - link "GitHub Homepage" [ref=f1e184] [cursor=pointer]:
+          - /url: https://github.com
+        - generic [ref=f1e187]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=f1e188]:
+        - heading "Footer navigation" [level=3] [ref=f1e189]
+        - list "Footer navigation" [ref=f1e190]:
+          - listitem [ref=f1e191]:
+            - link "Terms" [ref=f1e192] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=f1e193]:
+            - link "Privacy" [ref=f1e194] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=f1e195]:
+            - link "Security" [ref=f1e196] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=f1e197]:
+            - link "Status" [ref=f1e198] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=f1e199]:
+            - link "Community" [ref=f1e200] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=f1e201]:
+            - link "Docs" [ref=f1e202] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=f1e203]:
+            - link "Contact" [ref=f1e204] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=f1e205]:
+            - button "Manage cookies" [ref=f1e207] [cursor=pointer]
+          - listitem [ref=f1e208]:
+            - button "Do not share my personal information" [ref=f1e210] [cursor=pointer]

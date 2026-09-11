@@ -3,7 +3,7 @@
 **Tarih:** 2026-09-11
 **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly)
 **Polly commit:** `2247db2407713fa221d57011814e4be446361b1f` (2026-09-08)
-**Sievert commit:** `c142311`
+**Sievert commit:** `79544b1` (yeniden yazma oncesi: `c142311`)
 **Komut:** `sievert check <polly>` ve `sievert check <polly> --json` (Release derlemesi)
 
 Asama 1'de scan ettigim repoyu, ayni commit'te, bu sefer check ile taradim.

@@ -1,7 +1,7 @@
 # Asama 2 kapanis raporu
 
 **Tarih:** 2026-09-11
-**Kapsam:** `7eac257` ... `b60e07e`
+**Kapsam:** `6fde0c3` (yeniden yazma oncesi: `7eac257`) ... `889fbef` (yeniden yazma oncesi: `b60e07e`)
 
 Asama 2'nin amaci ilk kurali yazmak ve onu gercek kod uzerinde olcmekti. Risk
 skoru, git gecmisi ve veritabani bu asamanin disindaydi, hicbiri yazilmadi.
@@ -119,7 +119,7 @@ yapilacaktir.
 
 ### Sayilar onceki halleriyle
 
-| Olcum | Asama 1 sonu (`ae049e2`) | Asama 2 sonu (`b60e07e`) |
+| Olcum | Asama 1 sonu (`4c8b5dc`, yeniden yazma oncesi `ae049e2`) | Asama 2 sonu (`889fbef`, yeniden yazma oncesi `b60e07e`) |
 |---|---|---|
 | Kural sayisi | 0 | 1 |
 | Komut | `scan` | `scan`, `check` |

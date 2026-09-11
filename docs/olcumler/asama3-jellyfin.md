@@ -2,7 +2,7 @@
 
 **Tarih:** 2026-09-11
 **Repo:** [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) @ `1d7b6d97844c8cc848ed3fb5c4b48bb9cdd5b139`
-**Sievert:** `5fc4846`
+**Sievert:** `f8906a4` (yeniden yazma oncesi: `5fc4846`)
 **Komut:** `sievert check <klon>` ve `sievert scan <klon> --json`
 
 Ucuncu repo. Polly bir kutuphane, ShareX bir masaustu uygulamasi; Jellyfin ise sunucu

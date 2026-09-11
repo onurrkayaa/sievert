@@ -1,6 +1,6 @@
 # Ilk gercek repo taramasi
 
-> **Not (2026-09-11):** JSON anahtarlari 7eac257 commit'inde Ingilizceye cevrildi.
+> **Not (2026-09-11):** JSON anahtarlari 6fde0c3 (yeniden yazma oncesi: 7eac257) commit'inde Ingilizceye cevrildi.
 > Asagidaki ornek ciktilar ve sayilar olcumu aldigim tarihteki halini gosteriyor,
 > bilerek degistirmedim.
 
@@ -18,12 +18,12 @@ Ayni repoyu iki kez taradim. Ilk tarama enum/delegate desteginden ve kor nokta
 olcumunden onceydi; ikinci tarama bunlar eklendikten sonra. Eski sayilari
 silmiyorum, ikisi yan yana dursun ki neyin degistigi gorunsun.
 
-- **Once:** Sievert `6211c80` (fix: cikti tutarliligi ve json sozlesmesi)
-- **Sonra:** Sievert `5b1f5ce` (feat: enum, kor nokta olcumu, dagilim istatistikleri)
+- **Once:** Sievert `1c1ab97` (yeniden yazma oncesi: `6211c80`) (fix: cikti tutarliligi ve json sozlesmesi)
+- **Sonra:** Sievert `53c3b7c` (yeniden yazma oncesi: `5b1f5ce`) (feat: enum, kor nokta olcumu, dagilim istatistikleri)
 
 ## Sonuclar
 
-| Olcum | Once (`6211c80`) | Sonra (`5b1f5ce`) | Not |
+| Olcum | Once (`1c1ab97`, yeniden yazma oncesi `6211c80`) | Sonra (`53c3b7c`, yeniden yazma oncesi `5b1f5ce`) | Not |
 |---|---|---|---|
 | Dosya | 797 | 797 | degismedi |
 | Tip | 880 | **897** | +17: 15 enum, 2 delegate |

@@ -2,8 +2,8 @@
 
 **Tarih:** 2026-09-11
 **Repo:** [ShareX/ShareX](https://github.com/ShareX/ShareX) @ `b5a397ea6ccf00659cee593c981be4b01ab641fe`
-**Once:** Sievert `16058bd` (Asama 2 sonu, abonelik kaniti yok)
-**Sonra:** Sievert `215c0ad` + satir duzeltmesi (Kademe 1 var)
+**Once:** Sievert `ba43b97` (yeniden yazma oncesi: `16058bd`) (Asama 2 sonu, abonelik kaniti yok)
+**Sonra:** Sievert `6bbc389` (yeniden yazma oncesi: `215c0ad`) + satir duzeltmesi (Kademe 1 var)
 
 Asama 2'de SV001'in iki yanlis pozitif urettigi olculmustu ve ikisinin de sebebi ayniydi:
 metot gercekten bir olaya abone ama ozel delegate imzasi yuzunden istisnaya giremiyordu.
@@ -21,7 +21,7 @@ commit, sadece SV001 acik (digerleri `sievert.json` ile kapatildi).
 
 ## Sayilar yan yana
 
-| Olcum | Once (`16058bd`) | Sonra (`215c0ad`) |
+| Olcum | Once (`ba43b97`, yeniden yazma oncesi `16058bd`) | Sonra (`6bbc389`, yeniden yazma oncesi `215c0ad`) |
 |---|---|---|
 | Taranan dosya | 1138 | 1138 |
 | `async void` aday | 106 | 106 |
@@ -106,8 +106,8 @@ Ayni repo, ayni komut, uc kosu. Isinma kosusu sayilmadi.
 
 | Surum | Kosu 1 | Kosu 2 | Kosu 3 |
 |---|---|---|---|
-| Once (`16058bd`) | 1,90 sn | 1,84 sn | 1,76 sn |
-| Sonra (`215c0ad`) | 1,82 sn | 1,75 sn | 1,98 sn |
+| Once (`ba43b97`, yeniden yazma oncesi `16058bd`) | 1,90 sn | 1,84 sn | 1,76 sn |
+| Sonra (`6bbc389`, yeniden yazma oncesi `215c0ad`) | 1,82 sn | 1,75 sn | 1,98 sn |
 
 **Sure artmadi.** Asama 2'de ayni repo icin 1,93-2,02 sn olculmustu; simdiki araliklar
 onunla ayni yerde. Kademe 1 ilk yazildiginda kural partial parcalari diskten kendisi
@@ -134,8 +134,8 @@ Ayni repoda once/sonra karsilastirmasi (ShareX, sadece SV001):
 
 | Surum | Tepe bellek |
 |---|---|
-| Once (`16058bd`) | 98-99 MB |
-| Sonra (`215c0ad`) | 169-170 MB |
+| Once (`ba43b97`, yeniden yazma oncesi `16058bd`) | 98-99 MB |
+| Sonra (`6bbc389`, yeniden yazma oncesi `215c0ad`) | 169-170 MB |
 
 Ayni is icin tepe bellek **%72 artti**. Uc repoya bakilinca egilim kabaca dogrusal:
 .NET calisma zamaninin kendi tabani yaklasik 85 MB, onun ustune dosya basina 60-77 KB

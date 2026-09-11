@@ -3,7 +3,7 @@
 **Tarih:** 2026-09-11
 **Repo:** [ShareX/ShareX](https://github.com/ShareX/ShareX)
 **ShareX commit:** `b5a397ea6ccf00659cee593c981be4b01ab641fe` (2026-09-10)
-**Sievert commit:** `3a81e84`
+**Sievert commit:** `2963802` (yeniden yazma oncesi: `3a81e84`)
 **Komut:** `sievert check <sharex>` ve `sievert check <sharex> --json` (Release derlemesi)
 
 Polly taramasi hic bulgu vermemisti, cunku Polly bir kutuphane ve `async void`

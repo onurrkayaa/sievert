@@ -1,7 +1,7 @@
 # Asama 1 kapanis raporu
 
 **Tarih:** 2026-09-11
-**Kapsam:** `1a7f116` ... `ae049e2`
+**Kapsam:** `8aed65d` (yeniden yazma oncesi: `1a7f116`) ... `4c8b5dc` (yeniden yazma oncesi: `ae049e2`)
 
 Asama 1'in amaci bir C# dosyasini Roslyn ile okuyup icindekileri sayabilmekti.
 Risk skoru, git gecmisi ve kural motoru bu asamanin disindaydi, hicbiri
@@ -28,7 +28,7 @@ Hepsi tek bir repoda, App-vNext/Polly'nin `2247db24` commit'inde olculdu.
 Baska repolarda farkli cikar; buradaki sayilar Polly hakkinda, C# hakkinda
 degil.
 
-| Olcum | `6211c80` | `ae049e2` |
+| Olcum | `1c1ab97` (yeniden yazma oncesi: `6211c80`) | `4c8b5dc` (yeniden yazma oncesi: `ae049e2`) |
 |---|---|---|
 | Dosya | 797 | 797 |
 | Tip | 880 | 897 |

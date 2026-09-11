@@ -2,7 +2,7 @@
 
 **Tarih:** 2026-09-11
 **Repo:** [ShareX/ShareX](https://github.com/ShareX/ShareX) @ `b5a397ea6ccf00659cee593c981be4b01ab641fe`
-**Sievert commit:** `3a81e84`
+**Sievert commit:** `2963802` (yeniden yazma oncesi: `3a81e84`)
 
 SV001'in ShareX uzerindeki ciktisindan alinmis bir orneklem. Amac her satiri
 elle acip bakmak ve kuralin dogru davranip davranmadigini isaretlemek.

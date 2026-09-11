@@ -35,7 +35,7 @@ src/
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
-samples/Hastalar/             sample repositories to test against
+samples/Patients/             sample repositories to test against
 docs/adr/                     short notes on why things were decided this way
 ```
 

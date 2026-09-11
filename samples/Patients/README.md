@@ -10,6 +10,6 @@ gorursen normal.
 - `Normal.cs` - gecerli C#. Icinde partial sinif, ic ice sinif, async metotlar,
   ifade govdeli metot, yerel fonksiyon, constructor ve property var. Her birinin
   dogru sayilip sayilmadigini test ediyorum.
-- `Bozuk.cs` - **bilerek hatali**. Kapanmayan parantez ve eksik noktali virgul
+- `Broken.cs` - **bilerek hatali**. Kapanmayan parantez ve eksik noktali virgul
   var. Amaci, sozdizimi bozuk bir dosyada cozumleyicinin exception firlatmadigini
   ve cozebildigi kadarini dondurdugunu dogrulamak.

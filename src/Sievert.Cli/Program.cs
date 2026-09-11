@@ -4,65 +4,65 @@ using System.Runtime.InteropServices;
 using Sievert.Analysis;
 using Sievert.Cli;
 using Sievert.Core;
-using Sievert.Core.Cozumleme;
+using Sievert.Core.Analysis;
 
-AyristirmaSonucu sonuc = ArgumanAyristirici.Ayristir(args);
+ParseResult result = ArgumentParser.Parse(args);
 
-if (sonuc.Ayarlar is null)
+if (result.Options is null)
 {
     if (args.Length == 0)
     {
-        string surum = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
-        KonsolYazici.Yaz(
-            Banner.Render(surum, RuntimeInformation.FrameworkDescription)
-                .Select(satir => new CiktiSatiri([new CiktiParcasi(satir.Text, satir.IsTitle ? CiktiRengi.Baslik : CiktiRengi.Soluk)]))
+        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+        ConsoleWriter.Write(
+            Banner.Render(version, RuntimeInformation.FrameworkDescription)
+                .Select(line => new OutputLine([new OutputSpan(line.Text, line.IsTitle ? OutputColor.Heading : OutputColor.Dim)]))
                 .ToList(),
-            KonsolYazici.RenkKullanilsinMi());
+            ConsoleWriter.UseColor());
         Console.WriteLine();
-        Console.WriteLine(ArgumanAyristirici.YardimMetni);
+        Console.WriteLine(ArgumentParser.HelpText);
         return 0;
     }
 
-    Console.Error.WriteLine(sonuc.Hata);
+    Console.Error.WriteLine(result.Error);
     Console.Error.WriteLine();
-    Console.Error.WriteLine(ArgumanAyristirici.YardimMetni);
+    Console.Error.WriteLine(ArgumentParser.HelpText);
     return 1;
 }
 
-TaramaArgumanlari ayarlar = sonuc.Ayarlar;
+ScanOptions options = result.Options;
 
-if (!File.Exists(ayarlar.Yol) && !Directory.Exists(ayarlar.Yol))
+if (!File.Exists(options.TargetPath) && !Directory.Exists(options.TargetPath))
 {
-    Console.Error.WriteLine($"Bulunamadi: {ayarlar.Yol}");
+    Console.Error.WriteLine($"Bulunamadi: {options.TargetPath}");
     return 1;
 }
 
-IReadOnlyList<string> dosyalar = KaynakDosyaBulucu.Bul(ayarlar.Yol);
+IReadOnlyList<string> files = SourceFileFinder.Find(options.TargetPath);
 
-if (dosyalar.Count == 0)
+if (files.Count == 0)
 {
-    Console.Error.WriteLine($"Taranacak .cs dosyasi yok: {ayarlar.Yol}");
+    Console.Error.WriteLine($"Taranacak .cs dosyasi yok: {options.TargetPath}");
     return 1;
 }
 
-string kok = TaramaKoku.Bul(ayarlar.Yol);
-IReadOnlyList<DosyaAnalizi> analizler = TaramaKoku.YollariGoreliles(
-    dosyalar.Select(DosyaCozumleyici.DosyayiCozumle).ToList(),
-    kok);
+string root = ScanRoot.Find(options.TargetPath);
+IReadOnlyList<FileAnalysis> analyses = ScanRoot.MakePathsRelative(
+    files.Select(FileAnalyzer.AnalyzeFile).ToList(),
+    root);
 
-TaramaOzeti ozet = Ozetleyici.Ozetle(analizler);
-IReadOnlyList<MetotYeri> enUzunlar = ayarlar.EnUzunKac is int adet
-    ? Ozetleyici.EnUzunMetotlar(analizler, adet)
+ScanSummary summary = Summarizer.Summarize(analyses);
+IReadOnlyList<MethodLocation> longest = options.TopCount is int count
+    ? Summarizer.LongestMethods(analyses, count)
     : [];
 
-if (ayarlar.Json)
+if (options.Json)
 {
-    Console.Out.WriteLine(JsonBicimlendirici.Bicimlendir(kok, analizler, ozet, enUzunlar));
+    Console.Out.WriteLine(JsonFormatter.Format(root, analyses, summary, longest));
     return 0;
 }
 
-KonsolYazici.Yaz(
-    AgacBicimlendirici.Bicimlendir(analizler, ozet, enUzunlar),
-    KonsolYazici.RenkKullanilsinMi());
+ConsoleWriter.Write(
+    TreeFormatter.Format(analyses, summary, longest),
+    ConsoleWriter.UseColor());
 
 return 0;

@@ -1,0 +1,22 @@
+using Sievert.Core.Analysis;
+
+namespace Sievert.Tests;
+
+/// <summary>Testlerde elle analiz nesnesi kurmak icin kisa yollar.</summary>
+internal static class Samples
+{
+    public static SievertMethod Method(string name, int lineCount = 1, bool isAsync = false, int startLine = 1) =>
+        new(name, startLine, lineCount, isAsync, ParameterCount: 0, ReturnType: "void");
+
+    public static SievertType Type(string name, params SievertMethod[] methods) =>
+        new(name, SievertTypeKind.Class, StartLine: 1, methods);
+
+    public static FileAnalysis Sample(string path, params SievertType[] types) =>
+        new(path, types, TotalLineCount: 100, ParseErrors: []);
+
+    public static FileAnalysis BrokenSample(string path, params string[] errors) =>
+        new(path, [], TotalLineCount: 10, errors);
+
+    public static FileAnalysis TypelessSample(string path) =>
+        new(path, [], TotalLineCount: 5, ParseErrors: []);
+}

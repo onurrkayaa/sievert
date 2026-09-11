@@ -1,12 +1,12 @@
 // Test verisi. Sozdizimi bilerek bozuk: kapanmayan parantez ve eksik noktali virgul var.
-namespace Hastane;
+namespace Clinic;
 
-public class BozukServis
+public class BrokenService
 {
-    public int Topla(int a, int b)
+    public int Add(int a, int b)
     {
         return a + b
     }
 
-    public void Eksik(
+    public void Missing(
 }

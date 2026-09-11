@@ -37,6 +37,7 @@ tests/
   Sievert.Tests/              xUnit tests
 samples/Patients/             sample repositories to test against
 docs/adr/                     short notes on why things were decided this way
+docs/proje-notlari.md         working notes: goal, technical decisions, conventions
 ```
 
 ## Getting started

@@ -57,11 +57,19 @@ and prints the types and methods it found as a tree, with a summary at the end.
 card; it exits with 1 if it finds anything at or above the `--fail-on` level (warning by
 default). Both commands take `--json`. There is only one rule so far, SV001 async void.
 
+Exit codes are the same for both commands:
+
+| Code | Meaning |
+|---|---|
+| 0 | ran fine, nothing at or above the `--fail-on` level |
+| 1 | ran fine, found something at or above that level |
+| 2 | the tool could not run: path not found, bad flag, unexpected error |
+
 ## Roadmap
 
 0. Project scaffolding, CI, ADRs — done
-1. Roslyn syntax tree traversal: read a C# file as structure, not text
-2. First detector: SV001 async void
+1. Roslyn syntax tree traversal: read a C# file as structure, not text — done
+2. First detector: SV001 async void — done
 3. Detector catalogue: 6 .NET-specific defect patterns behind an IRule
    plugin interface, rules loaded from JSON
 4. Git history mining with LibGit2Sharp: churn, ownership, past fixes,
@@ -74,5 +82,8 @@ default). Both commands take `--json`. There is only one rule so far, SV001 asyn
 
 ## Status
 
-Early development, v0.1.0. Stage 0 is done, which means the project builds and the tests
-run - not that it does anything useful yet.
+Early development, v0.1.0. Stages 0, 1 and 2 are done: the project builds with CI, Roslyn
+parsing reads a file as structure, and the first rule SV001 runs behind the `check`
+command. Stage 3 has only started in the sense that the `IRule` interface exists - there
+is one rule, and rules are not loaded from JSON yet. Nothing from stage 4 onwards (git
+history, risk scoring, API, dashboard) has been written.

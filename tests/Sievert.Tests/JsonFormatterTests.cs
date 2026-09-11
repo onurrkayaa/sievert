@@ -132,8 +132,32 @@ public class JsonFormatterTests
 
         Assert.Equal(3, summary.GetProperty("fileCount").GetInt32());
         Assert.Equal(2, summary.GetProperty("findingCount").GetInt32());
-        Assert.Equal(1, summary.GetProperty("byRuleCode").GetProperty("SV001").GetInt32());
-        Assert.Equal(1, summary.GetProperty("byRuleCode").GetProperty("SV002").GetInt32());
+        JsonElement byRuleCode = summary.GetProperty("byRuleCode");
+
+        Assert.Equal(2, byRuleCode.GetArrayLength());
+        Assert.Equal("SV001", byRuleCode[0].GetProperty("ruleCode").GetString());
+        Assert.Equal(1, byRuleCode[0].GetProperty("count").GetInt32());
+        Assert.Equal("SV002", byRuleCode[1].GetProperty("ruleCode").GetString());
+        Assert.Equal(1, byRuleCode[1].GetProperty("count").GetInt32());
+    }
+
+    [Fact]
+    public void Check_ByRuleCodeIsSortedAndDeterministic()
+    {
+        // Bulgular karisik sirada geliyor, cikti yine kural koduna gore alfabetik.
+        Finding[] findings = [Found(ruleCode: "SV003"), Found(ruleCode: "SV001"), Found(ruleCode: "SV002"), Found(ruleCode: "SV001")];
+
+        string[] codes = ParseCheck(findings)
+            .GetProperty("summary")
+            .GetProperty("byRuleCode")
+            .EnumerateArray()
+            .Select(entry => entry.GetProperty("ruleCode").GetString()!)
+            .ToArray();
+
+        Assert.Equal(["SV001", "SV002", "SV003"], codes);
+        Assert.Equal(
+            JsonFormatter.FormatCheck("/kok", findings, CheckSummary.Of(3, findings)),
+            JsonFormatter.FormatCheck("/kok", findings, CheckSummary.Of(3, findings)));
     }
 
     [Fact]
@@ -143,7 +167,7 @@ public class JsonFormatterTests
 
         Assert.Equal(0, json.GetProperty("findings").GetArrayLength());
         Assert.Equal(0, json.GetProperty("summary").GetProperty("findingCount").GetInt32());
-        Assert.Empty(json.GetProperty("summary").GetProperty("byRuleCode").EnumerateObject());
+        Assert.Equal(0, json.GetProperty("summary").GetProperty("byRuleCode").GetArrayLength());
     }
 
     private static JsonElement ParseCheck(Finding[] findings, string root = "/kok") =>

@@ -62,8 +62,8 @@ public static class DiagnosticCardFormatter
             ("Bulgu", summary.FindingCount.ToString(CultureInfo.InvariantCulture)),
         ];
 
-        rows.AddRange(summary.ByRuleCode.Select(pair =>
-            (pair.Key, pair.Value.ToString(CultureInfo.InvariantCulture))));
+        rows.AddRange(summary.ByRuleCode.Select(entry =>
+            (entry.RuleCode, entry.Count.ToString(CultureInfo.InvariantCulture))));
 
         int labelColumn = rows.Max(row => row.Label.Length);
 

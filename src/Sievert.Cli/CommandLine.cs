@@ -35,15 +35,15 @@ public sealed record CheckOptions(
     : CommandOptions(TargetPath, Json, Exclude, ConfigPath);
 
 /// <summary>mine komutunun ayarlari.</summary>
-/// <param name="JsonPath">--json ile verilen dosya yolu. Verilmediyse null, yani sadece ozet basilir.</param>
+/// <param name="OutputPath">--out ile verilen dosya yolu. Verilmediyse null, yani sadece ozet basilir.</param>
 /// <param name="Since">--since ile verilen tarih. Verilmediyse null.</param>
 /// <param name="MaxCommits">--max-commits ile verilen sinir. Verilmediyse null.</param>
 public sealed record MineOptions(
     string TargetPath,
-    string? JsonPath,
+    string? OutputPath,
     DateTimeOffset? Since,
     int? MaxCommits)
-    : CommandOptions(TargetPath, JsonPath is not null, [], null);
+    : CommandOptions(TargetPath, OutputPath is not null, [], null);
 
 /// <summary>Ayristirma sonucu: ya ayarlar ya da kullaniciya gosterilecek bir hata.</summary>
 /// <param name="Options">Basarili ayristirmada dolu olur.</param>
@@ -74,10 +74,12 @@ public static class ArgumentParser
                                 kodu 1 olur. info / warning / error,
                                 varsayilan warning
 
-          mine <repo-yolu> [--json <dosya>] [--since <tarih>] [--max-commits N]
+          mine <repo-yolu> [--out <dosya>] [--since <tarih>] [--max-commits N]
             git tarihini yurur, commit basina veriyi cikarir
-            --json <dosya>      tam veriyi bu dosyaya JSONL yazar: her satir
-                                bir commit. Verilmezse sadece ozet basilir
+            --out <dosya>       tam veriyi bu dosyaya JSONL yazar: her satir
+                                bir commit. Verilmezse sadece ozet basilir.
+                                scan ve check'teki --json bayragiyla
+                                karistirilmasin, bu bir dosya yolu bekliyor
             --since <tarih>     bu tarihten onceki commit'leri okuma.
                                 ISO bicimi, ornegin 2025-01-01
             --max-commits N     en fazla N commit oku (en yeniden eskiye)
@@ -234,7 +236,7 @@ public static class ArgumentParser
 
     private static ParseResult ParseMine(string[] args)
     {
-        string? jsonPath = null;
+        string? outputPath = null;
         DateTimeOffset? since = null;
         int? maxCommits = null;
 
@@ -242,15 +244,16 @@ public static class ArgumentParser
         {
             switch (args[i])
             {
-                case "--json":
-                    // scan ve check'te --json bir bayrak, burada yol bekliyor. Sebebi su:
-                    // tam veri buyuk ve satir satir yaziliyor, ekrana basilacak bir sey degil.
+                case "--out":
+                    // Bayragin adi bilerek --json degil: scan ve check'te --json bir bayrak
+                    // ve cikti ekrana gidiyor. Ayni adin iki anlami olsaydi bu komutlari
+                    // birlikte cagiran betikler sessizce yanlis is yapardi.
                     if (i + 1 >= args.Length)
                     {
-                        return new ParseResult(null, "--json bir dosya yolu bekliyor.");
+                        return new ParseResult(null, "--out bir dosya yolu bekliyor.");
                     }
 
-                    jsonPath = args[++i];
+                    outputPath = args[++i];
                     break;
 
                 case "--since":
@@ -288,7 +291,7 @@ public static class ArgumentParser
             }
         }
 
-        return new ParseResult(new MineOptions(args[1], jsonPath, since, maxCommits), null);
+        return new ParseResult(new MineOptions(args[1], outputPath, since, maxCommits), null);
     }
 
     /// <summary>

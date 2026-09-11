@@ -62,7 +62,10 @@ default). Both of those take `--json` as a flag and print to the screen.
 `sievert mine <repo-path>` is the third one and it does something different: it walks a
 git repository's history and pulls out what each commit did - author, date, message,
 which files changed and by how many lines. It prints a summary and, if you give it
-`--json <file>`, writes the full data to that file as JSONL, one commit per line.
+`--out <file>`, writes the full data to that file as JSONL, one commit per line. That
+flag is deliberately not called `--json`: on the other two commands `--json` is a flag
+that changes what gets printed, and one name meaning two things is the kind of thing
+that breaks a script quietly.
 `--since <date>` and `--max-commits <n>` limit how much history it reads. Merge commits
 are left out of the data but counted in the summary, and nothing is stored in a database
 yet - that is the next step. Why it works this way is in ADR 0011.

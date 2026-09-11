@@ -19,7 +19,7 @@ public class MineCommandTests : IDisposable
 
         try
         {
-            Assert.Equal(ExitCodes.Clean, Run("mine", repository.Path, "--json", output));
+            Assert.Equal(ExitCodes.Clean, Run("mine", repository.Path, "--out", output));
 
             string[] lines = File.ReadAllLines(output);
 
@@ -61,6 +61,20 @@ public class MineCommandTests : IDisposable
         {
             Directory.Delete(directory);
         }
+    }
+
+    [Fact]
+    public void MineStillRejectsTheOldJsonFlag()
+    {
+        // --json artik mine'da yok. Sessiz uyumluluk birakmadim: eski bayragi yazan bir
+        // betik hata almali, yoksa ciktiyi hic yazmadan basariyla bitmis gorunur.
+        using TemporaryRepository repository = new();
+        repository.Commit("a.cs", "class A;", "bir");
+
+        Console.SetError(TextWriter.Null);
+
+        Assert.Equal(ExitCodes.ToolError, Run("mine", repository.Path, "--json", "cikti.jsonl"));
+        Assert.False(File.Exists("cikti.jsonl"));
     }
 
     [Fact]

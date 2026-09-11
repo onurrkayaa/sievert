@@ -7,7 +7,7 @@ namespace Sievert.Cli;
 /// <summary>mine komutunun ekran ciktisi. Tam veri ekrana degil dosyaya gidiyor.</summary>
 public static class MineFormatter
 {
-    public static IReadOnlyList<OutputLine> Format(MiningSummary summary, TimeSpan elapsed, string? jsonPath)
+    public static IReadOnlyList<OutputLine> Format(MiningSummary summary, TimeSpan elapsed, string? outputPath)
     {
         List<OutputLine> lines =
         [
@@ -22,9 +22,9 @@ public static class MineFormatter
             Row("sure", elapsed.TotalSeconds.ToString("0.00", CultureInfo.InvariantCulture) + " sn"),
         ];
 
-        lines.Add(jsonPath is null
-            ? Line("Tam veri yazilmadi. Istiyorsan --json <dosya> ver.", OutputColor.Dim)
-            : Line($"Tam veri yazildi: {jsonPath} (her satir bir commit)", OutputColor.Dim));
+        lines.Add(outputPath is null
+            ? Line("Tam veri yazilmadi. Istiyorsan --out <dosya> ver.", OutputColor.Dim)
+            : Line($"Tam veri yazildi: {outputPath} (her satir bir commit)", OutputColor.Dim));
 
         return lines;
     }

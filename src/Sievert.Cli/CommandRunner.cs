@@ -234,10 +234,10 @@ public static class CommandRunner
         MineResult result = MineCommand.Run(
             options.TargetPath,
             new MiningOptions(options.Since, options.MaxCommits),
-            options.JsonPath);
+            options.OutputPath);
 
         ConsoleWriter.Write(
-            MineFormatter.Format(result.Summary, result.Elapsed, options.JsonPath),
+            MineFormatter.Format(result.Summary, result.Elapsed, options.OutputPath),
             ConsoleWriter.UseColor());
 
         // mine kural calistirmiyor, o yuzden bulgu uretemez; basariliysa hep 0 (ADR 0006).

@@ -133,13 +133,21 @@ Yani buyuyen sey tutulan veri degil, henuz toplanmamis cop: cop toplayici bol be
 toplamiyor, sinir koyunca topluyor. Bu bir sizinti degil ama "tepe bellek sabit" de diyemem.
 Projeye bir GC ayari koymadim; olcum ortada dursun, gerekirse sonraki asamada karar veririm.
 
-## mine komutunun --json'i digerlerinden farkli
+## mine ciktisini --out aliyor, --json degil
 
-`scan` ve `check` komutlarinda `--json` bir bayrak ve cikti ekrana gidiyor. `mine`'da
-`--json` bir dosya yolu bekliyor. Tutarsiz oldugunun farkindayim. Sebebi su: tam veri
-ekrana basilacak bir sey degil, Polly'nin tarihi 2759 satir ve 3,9 MB. Bayrak yapip
-ekrana bassaydim kimse o ciktiyi dogrudan kullanamaz, herkes yonlendirme yazardi.
-Alternatif bir ad (`--out`) daha durust olurdu; simdilik istenen bicimde birakiyorum.
+Bu bayrak once `--json <dosya>` diye yazilmisti ve `scan`/`check` komutlarindaki `--json`
+bayragiyla ayni adi tasiyordu, ama ayni sey demiyordu: orada bir bayrak ve cikti ekrana
+gidiyor, burada bir dosya yolu bekleniyordu. Ayni adin iki anlami olmasi, uc komutu birlikte
+cagiran bir betikte sessiz hataya cikar - `mine ... --json` yazan biri ciktinin ekrana
+gelmesini bekler, oysa bir sonraki argumani dosya adi sanilir.
+
+Bayrak `--out <dosya>` olarak degistirildi. `--json` **kabul edilmiyor**, uyumluluk icin
+sessizce kabul de edilmiyor: eski yazimi kullanan bir betik "bilinmeyen secenek" hatasi ve
+cikis kodu 2 aliyor. Sessiz kabul en kotusu olurdu, cunku komut basariyla biter ve dosya
+hic yazilmaz.
+
+Tam verinin neden ekrana degil dosyaya gittigi ayri bir konu: Polly'nin tarihi 2759 satir
+ve 3,9 MB, ekrana basilacak bir sey degil.
 
 **Sonuc:** `sievert mine <repo-yolu>` calisiyor. Ekranda ozet, `--json <dosya>` ile tam
 veri. `--since` ve `--max-commits` tarihin ne kadarinin okunacagini sinirliyor. Veritabani

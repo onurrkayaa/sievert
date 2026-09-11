@@ -17,17 +17,17 @@ public sealed record MineResult(MiningSummary Summary, TimeSpan Elapsed);
 /// </summary>
 public static class MineCommand
 {
-    public static MineResult Run(string repositoryPath, MiningOptions options, string? jsonPath)
+    public static MineResult Run(string repositoryPath, MiningOptions options, string? outputPath)
     {
         Stopwatch clock = Stopwatch.StartNew();
 
         RepositoryMiner miner = new();
         MiningTally tally = new(RepositoryMiner.RenameSimilarityThreshold);
 
-        // Dosya yoksa yazici da yok; --json verilmediginde sadece ozet hesaplaniyor.
-        using StreamWriter? writer = jsonPath is null
+        // Dosya yoksa yazici da yok; --out verilmediginde sadece ozet hesaplaniyor.
+        using StreamWriter? writer = outputPath is null
             ? null
-            : new StreamWriter(jsonPath, append: false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            : new StreamWriter(outputPath, append: false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
         foreach (CommitRecord commit in miner.Read(repositoryPath, options))
         {

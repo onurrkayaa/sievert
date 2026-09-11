@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Yerel calisma notlari, repoya girmiyor
+CLAUDE.md

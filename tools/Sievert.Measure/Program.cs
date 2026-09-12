@@ -66,6 +66,18 @@ if (args[0] == "calibration")
     return CalibrationCommand.Run(args);
 }
 
+// Adim 4: duyarlilik deneyleri. args: sensitivity <veri-klasoru> <commit>
+if (args[0] == "sensitivity")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure sensitivity <veri-klasoru> <commit>");
+        return 2;
+    }
+
+    return SensitivityCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.Extensions.Logging.Abstractions;
+
 using Npgsql;
 
 using Sievert.Data;
@@ -28,7 +30,15 @@ public sealed class PostgresFixture : IAsyncLifetime
         }
 
         // Gelistirme konteyneriyle ayni surum: postgres:17.
-        container = new PostgreSqlBuilder("postgres:17").Build();
+        //
+        // Gunluk susturuluyor. Testcontainers varsayilan olarak Console'a yaziyor ve
+        // Console bu sureçte paylasilan bir kaynak: ConsoleCollection'daki testler
+        // Console.Out'u kendilerine cevirip ciktiyi JSON olarak ayristiriyor. Iki
+        // koleksiyon paralel kostugu icin konteyner gunlugunun bir satiri o tamponun
+        // icine dusebiliyor ve JSON ayristirmasi kiriliyor. CI'da tam olarak bu oldu.
+        container = new PostgreSqlBuilder("postgres:17")
+            .WithLogger(NullLogger.Instance)
+            .Build();
         await container.StartAsync();
         AdminConnectionString = container.GetConnectionString();
     }

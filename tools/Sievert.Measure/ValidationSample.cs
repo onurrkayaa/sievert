@@ -3,6 +3,8 @@ using System.Text;
 
 using LibGit2Sharp;
 
+using Sievert.Data.Metrics;
+
 using Sievert.Modeling;
 
 namespace Sievert.Measure;
@@ -250,10 +252,21 @@ public static class ValidationSample
         text.Append("Sonraki commit'lerin hicbiri \"ilgili duzeltme\" diye isaretlenmedi.\n\n");
         text.Append("---\n\n");
 
+        // Her repo icin tek bir kronolojik gecis: .cs degisiklikleri bir kez okunup
+        // butun ornekler ondan cevaplaniyor. LibGit2Sharp'in dosya gecmisi sorgusu
+        // (QueryBy(path)) bu depolarda istisna firlattigi icin boyle yazildi.
+        Dictionary<string, IReadOnlyList<CommitChanges>> histories = new(StringComparer.Ordinal);
+
+        foreach (string identity in rows.Select(row => row.Identity).Distinct(StringComparer.Ordinal))
+        {
+            Console.WriteLine($"  {identity}: .cs gecmisi okunuyor...");
+            histories[identity] = ReadHistory(clones[identity]);
+        }
+
         foreach (ValidationRow row in rows)
         {
             SnapshotRow metrics = byKey[row.Identity + " " + row.Sha];
-            text.Append(Section(row, metrics, clones[row.Identity]));
+            text.Append(Section(row, metrics, clones[row.Identity], histories[row.Identity]));
         }
 
         File.WriteAllText(materialPath, text.ToString(), new UTF8Encoding(false));
@@ -261,7 +274,11 @@ public static class ValidationSample
         Console.WriteLine($"malzeme: {materialPath}");
     }
 
-    private static string Section(ValidationRow row, SnapshotRow metrics, string clonePath)
+    private static string Section(
+        ValidationRow row,
+        SnapshotRow metrics,
+        string clonePath,
+        IReadOnlyList<CommitChanges> history)
     {
         using Repository repository = new(clonePath);
         Commit commit = repository.Lookup<Commit>(row.Sha);
@@ -341,39 +358,7 @@ public static class ValidationSample
         foreach (PatchEntryChanges change in csharp)
         {
             text.Append(CultureInfo.InvariantCulture, $"- `{change.Path}`\n");
-
-            List<LogEntry> later = [];
-
-            foreach (LogEntry entry in repository.Commits.QueryBy(
-                change.Path,
-                new CommitFilter { SortBy = CommitSortStrategies.Time }))
-            {
-                if (entry.Commit.Author.When.ToUniversalTime() > metrics.AuthorDateUtc)
-                {
-                    later.Add(entry);
-                }
-            }
-
-            later.Reverse();
-
-            if (later.Count == 0)
-            {
-                text.Append("  - Gozlem araliginda sonraki degisiklik yok\n");
-                continue;
-            }
-
-            foreach (LogEntry entry in later.Take(MaximumFollowUps))
-            {
-                text.Append(CultureInfo.InvariantCulture, $"  - `{entry.Commit.Sha[..12]}` ");
-                text.Append(CultureInfo.InvariantCulture, $"{Date(entry.Commit.Author.When.ToUniversalTime())} ");
-                text.Append(CultureInfo.InvariantCulture, $"{Escape(Subject(entry.Commit))}\n");
-                text.Append(CultureInfo.InvariantCulture, $"    https://{row.Identity}/commit/{entry.Commit.Sha}\n");
-
-                if (!string.Equals(entry.Path, change.Path, StringComparison.Ordinal))
-                {
-                    text.Append(CultureInfo.InvariantCulture, $"    yol: `{change.Path}` -> `{entry.Path}`\n");
-                }
-            }
+            text.Append(FollowUps(row.Identity, change.Path, metrics.AuthorDateUtc, row.Sha, history));
         }
 
         text.Append("\nKarar:\n\n");
@@ -383,6 +368,123 @@ public static class ValidationSample
         text.Append("---\n\n");
 
         return text.ToString();
+    }
+
+    /// <summary>Bir commit'in .cs degisiklikleri; kronolojik gecis icin.</summary>
+    private sealed record CommitChanges(
+        string Sha,
+        DateTimeOffset Date,
+        string Subject,
+        IReadOnlyList<(string Path, string? OldPath, bool IsRename)> CsFiles);
+
+    /// <summary>
+    /// Deponun butun commit'lerini kronolojik sirada okuyup yalnizca .cs degisikliklerini
+    /// tutar. Sira ana boru hattiyla ayni kural (CommitOrdering): tarih artan, esitlikte
+    /// madencilik sirasi.
+    /// </summary>
+    private static IReadOnlyList<CommitChanges> ReadHistory(string clonePath)
+    {
+        using Repository repository = new(clonePath);
+
+        List<(DateTimeOffset Date, string Sha, string Subject, List<(string, string?, bool)> Files, int Sequence)> read = [];
+
+        foreach (Commit commit in repository.Commits.QueryBy(new CommitFilter { SortBy = CommitSortStrategies.Time }))
+        {
+            // sievert:disable SV004 Parents bellekteki koleksiyon, veritabani sorgusu degil
+            if (commit.Parents.Count() > 1)
+            {
+                continue;
+            }
+
+            // sievert:disable SV004 her commit'in kendi ebeveynine bakiliyor; dongunun disina alinamaz
+            Tree? parent = commit.Parents.FirstOrDefault()?.Tree;
+            using Patch patch = repository.Diff.Compare<Patch>(parent, commit.Tree, RenameAware);
+
+            List<(string, string?, bool)> files = [];
+
+            foreach (PatchEntryChanges change in patch)
+            {
+                if (change.Path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                {
+                    bool rename = change.Status == ChangeKind.Renamed;
+                    files.Add((change.Path, rename ? change.OldPath : null, rename));
+                }
+            }
+
+            if (files.Count > 0)
+            {
+                read.Add((commit.Author.When.ToUniversalTime(), commit.Sha, Subject(commit), files, read.Count));
+            }
+        }
+
+        return
+        [
+            .. CommitOrdering.Apply(read, entry => entry.Date, entry => entry.Sequence)
+                .Select(entry => new CommitChanges(entry.Sha, entry.Date, entry.Subject, entry.Files))
+        ];
+    }
+
+    private static readonly LibGit2Sharp.CompareOptions RenameAware = new()
+    {
+        Similarity = new SimilarityOptions
+        {
+            RenameDetectionMode = RenameDetectionMode.Renames,
+            RenameThreshold = 50,
+        },
+    };
+
+    /// <summary>
+    /// Bir yolun, verilen commit'ten SONRAKI en fazla uc degisikligi. Ad degisimi ileri
+    /// dogru takip ediliyor: dosya yeniden adlandirilirsa yeni yol izlenmeye devam ediyor.
+    /// </summary>
+    private static string FollowUps(
+        string identity,
+        string path,
+        DateTimeOffset after,
+        string sha,
+        IReadOnlyList<CommitChanges> history)
+    {
+        StringBuilder text = new();
+        string tracked = path;
+        int shown = 0;
+
+        foreach (CommitChanges commit in history)
+        {
+            if (commit.Date <= after || string.Equals(commit.Sha, sha, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            foreach ((string current, string? old, bool rename) in commit.CsFiles)
+            {
+                bool touches = string.Equals(current, tracked, StringComparison.Ordinal)
+                    || (rename && string.Equals(old, tracked, StringComparison.Ordinal));
+
+                if (!touches)
+                {
+                    continue;
+                }
+
+                text.Append(CultureInfo.InvariantCulture, $"  - `{commit.Sha[..12]}` {Date(commit.Date)} {Escape(commit.Subject)}\n");
+                text.Append(CultureInfo.InvariantCulture, $"    https://{identity}/commit/{commit.Sha}\n");
+
+                if (rename && string.Equals(old, tracked, StringComparison.Ordinal))
+                {
+                    text.Append(CultureInfo.InvariantCulture, $"    yol: `{tracked}` -> `{current}`\n");
+                    tracked = current;
+                }
+
+                shown++;
+                break;
+            }
+
+            if (shown >= MaximumFollowUps)
+            {
+                break;
+            }
+        }
+
+        return shown == 0 ? "  - Gozlem araliginda sonraki degisiklik yok\n" : text.ToString();
     }
 
     private static string Subject(Commit commit)

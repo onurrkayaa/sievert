@@ -16,6 +16,12 @@ public static class ApiError
 
     public const string ModelProfileNotFound = "MODEL_PROFILE_NOT_FOUND";
 
+    /// <summary>
+    /// Kaldirilan <c>?profile=</c> parametresi hala gonderiliyor. Sessizce yok saymak,
+    /// istegin sahibine istedigi profille skorlandigini dusundururdu.
+    /// </summary>
+    public const string ProfileSelectionNotSupported = "PROFILE_SELECTION_NOT_SUPPORTED";
+
     /// <summary>Depo uc egitim reposundan biri degil. Varsayilan profil SECILMIYOR.</summary>
     public const string UnknownRepositoryModel = "UNKNOWN_REPOSITORY_MODEL";
 

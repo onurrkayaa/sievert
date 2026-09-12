@@ -157,19 +157,38 @@ public sealed class ApiRiskTests(PostgresFixture postgres)
         Assert.Equal("UNKNOWN_REPOSITORY_MODEL", body.GetProperty("errorCode").GetString());
     }
 
+    /// <summary>
+    /// Adim 2'de bu parametre vardi ve kaldirildi (risk sozlesmesi surum 1.1). Sessizce
+    /// yok sayilmiyor: istegin sahibi sectigi profille skorlandigini sanardi.
+    /// </summary>
     [DockerFact]
-    public async Task AProfileFromAnotherRepository_IsMarkedAsExternal()
+    public async Task TheRemovedProfileParameterIsRefusedInsteadOfIgnored()
     {
         (SievertApiFactory factory, int known, int _) = Setup();
         using SievertApiFactory owner = factory;
         using HttpClient client = factory.CreateClient();
 
-        JsonElement body = await Read(
-            client,
+        using HttpResponseMessage response = await client.GetAsync(
             $"/api/v1/repositories/{known}/commits/{ApiSeed.ShaFor(0)}/risk?profile=sharex");
 
-        Assert.Equal("sharex", body.GetProperty("modelProfile").GetString());
-        Assert.Contains(
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        JsonElement body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+        Assert.Equal("PROFILE_SELECTION_NOT_SUPPORTED", body.GetProperty("errorCode").GetString());
+    }
+
+    [DockerFact]
+    public async Task AKnownRepositoryAlwaysGetsItsOwnProfile()
+    {
+        (SievertApiFactory factory, int known, int _) = Setup();
+        using SievertApiFactory owner = factory;
+        using HttpClient client = factory.CreateClient();
+
+        JsonElement body = await Read(client, $"/api/v1/repositories/{known}/commits/{ApiSeed.ShaFor(2)}/risk");
+
+        Assert.Equal("polly", body.GetProperty("modelProfile").GetString());
+        Assert.DoesNotContain(
             "EXTERNAL_MODEL_PROFILE",
             body.GetProperty("warnings").EnumerateArray().Select(warning => warning.GetString()));
     }

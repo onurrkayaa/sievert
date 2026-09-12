@@ -85,7 +85,19 @@ public static class RiskEndpoints
                     ApiError.CommitMetricsMissing);
             }
 
-            if (registry.ForRepository(repository.Identity) is not ModelProfile owner)
+            if (context.Request.Query.ContainsKey("profile"))
+            {
+                // Adim 2'de vardi, Adim 3'te kaldirildi (risk sozlesmesi surum 1.1).
+                // Sessizce yok saymiyorum: istegin sahibi sectigi profille skorlandigini
+                // sanardi.
+                return Problems.BadRequest(
+                    context,
+                    "profile parametresi kaldirildi. Model profilini depo kimligi belirliyor; "
+                    + "bilinen depo kendi profilini kullanir, bilinmeyen depo skorlanmaz.",
+                    ApiError.ProfileSelectionNotSupported);
+            }
+
+            if (registry.ForRepository(repository.Identity) is not ModelProfile profile)
             {
                 // Sessiz varsayilan yok: bilinmeyen depo icin bir profil secmek, olculmemis
                 // bir aktarimi olculmus gibi gostermek olurdu.
@@ -94,22 +106,6 @@ public static class RiskEndpoints
                     RiskWarning.Text(RiskWarning.UnknownRepositoryModel)
                     + $" Egitilmis profiller: {string.Join(", ", registry.Profiles.Select(item => item.ProfileCode))}.",
                     ApiError.UnknownRepositoryModel);
-            }
-
-            string? requested = context.Request.Query["profile"].FirstOrDefault();
-            ModelProfile profile = owner;
-
-            if (!string.IsNullOrWhiteSpace(requested))
-            {
-                if (registry.Find(requested) is not ModelProfile chosen)
-                {
-                    return Problems.NotFound(
-                        context,
-                        $"Boyle bir model profili yok: {requested}",
-                        ApiError.ModelProfileNotFound);
-                }
-
-                profile = chosen;
             }
 
             if (registry.StatusOf(profile.ProfileCode) == ModelStatus.ChecksumMismatch)
@@ -152,7 +148,7 @@ public static class RiskEndpoints
                     ApiError.ModelExplanationMismatch);
             }
 
-            return Results.Ok(Assess(repository, commit, metric, profile, owner, explanation, distribution));
+            return Results.Ok(Assess(repository, commit, metric, profile, explanation, distribution));
         })
         .WithName("CommitRisk")
         .WithSummary("Tek bir commit icin ham model skoru, kararlar, goreli endeks ve katkilar")
@@ -168,7 +164,6 @@ public static class RiskEndpoints
         CommitRow commit,
         CommitMetricRow metric,
         ModelProfile profile,
-        ModelProfile owner,
         ModelExplanation explanation,
         ScoreDistribution distribution)
     {
@@ -182,11 +177,6 @@ public static class RiskEndpoints
         if (explanation.AnyOutsideTrainRange)
         {
             warnings.Add(RiskWarning.OutsideTrainRange);
-        }
-
-        if (!string.Equals(profile.ProfileCode, owner.ProfileCode, StringComparison.Ordinal))
-        {
-            warnings.Add(RiskWarning.ExternalModelProfile);
         }
 
         List<FeatureContribution> positive = Rank(explanation.Effects, above: true);

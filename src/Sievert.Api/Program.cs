@@ -30,6 +30,17 @@ if (!File.Exists(options.ModelResultsPath) || !File.Exists(options.ScoreReferenc
 
 builder.Services.AddSingleton(options);
 
+// Kimlik dogrulama yok; varsayilan loopback. Disari acmak acik bir ayar istiyor.
+string? listenAddresses = builder.Configuration["urls"];
+
+if (RemoteAccessGuard.Check(listenAddresses, Environment.GetEnvironmentVariable(
+    RemoteAccessGuard.EnvironmentVariable)) is string refusal)
+{
+    Console.Error.WriteLine(refusal);
+
+    return 2;
+}
+
 // Baglanti dizesi SIEVERT_DB'den okunuyor; koda yazilmiyor ve gunluge basilmiyor.
 builder.Services.AddSingleton(DatabaseSettings.Resolve(builder.Environment.ContentRootPath));
 
@@ -61,6 +72,13 @@ builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
+
+if (!string.IsNullOrWhiteSpace(listenAddresses)
+    && RemoteAccessGuard.IsAllowed(Environment.GetEnvironmentVariable(RemoteAccessGuard.EnvironmentVariable)))
+{
+    // Ayar verilmis olsa bile sessiz gecmiyor: acilista gunlukte duruyor.
+    app.Logger.LogWarning("{Warning}", RemoteAccessGuard.RemoteWarning);
+}
 
 // Beklenmeyen hatada istisnanin kendisi cevaba girmiyor; sunucu gunlugunde kaliyor.
 app.UseExceptionHandler(handler => handler.Run(async context =>

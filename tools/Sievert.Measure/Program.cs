@@ -126,6 +126,19 @@ if (args[0] == "decomposition")
     return GeneralizationDecomposition.Run(args);
 }
 
+// Adim 5b: kor dogrulama orneklemi. args: validation-sample <veri> <commit> <malzeme.md> <kimlik=yol;...>
+if (args[0] == "validation-sample")
+{
+    if (args.Length < 5)
+    {
+        Console.Error.WriteLine(
+            "Kullanim: measure validation-sample <veri-klasoru> <commit> <malzeme.md> <kimlik=yol;...>");
+        return 2;
+    }
+
+    return ValidationSample.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

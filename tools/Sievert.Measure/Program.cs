@@ -8,7 +8,8 @@ using Sievert.Mining;
 // docs/olcumler/ altindaki dosyalara giriyor.
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>");
+    Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>\n"
+        + "         measure snapshot <cikti-dosyasi>");
     return 2;
 }
 
@@ -29,6 +30,13 @@ if (string.IsNullOrWhiteSpace(connection))
 
 using SievertContext context = SievertContextBuilder.Create(connection);
 MetricsRunner runner = new(context);
+
+// Snapshot butun repolari birden disari aktariyor, tek bir depo adi almiyor;
+// o yuzden depo aramasindan once ele aliniyor. args[1] cikti dosyasi.
+if (args[0] == "snapshot")
+{
+    return Snapshot.Write(context, args[1]);
+}
 
 if (runner.FindRepository(args[1]) is not { } repository)
 {

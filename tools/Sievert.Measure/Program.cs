@@ -102,6 +102,18 @@ if (args[0] == "rename")
     return RenameSensitivity.Run(args);
 }
 
+// Adim 5b: sentetik gurultuyu taban oranindan ayir. args: noise-normalized <veri> <commit>
+if (args[0] == "noise-normalized")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure noise-normalized <veri-klasoru> <commit>");
+        return 2;
+    }
+
+    return NoiseNormalizedCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

@@ -90,9 +90,9 @@ makro F1 0,3088 > 0,2999; mikro PR-AUC 0,4775 > 0,2611.
 **Polly'de model F1'i tabanin altinda** (0,2500 / 0,2667). "Model her repoda daha iyi"
 denemez.
 
-**En guclu uc katsayi uc repoda da ayni:** `CsFilesChanged` (+), `FilesChanged` (−),
+**En guclu uc katsayi uc repoda da ayni:** `CsFilesChanged` (+), `FilesChanged` (-),
 `LinesAdded` (+). **`PriorFixes` hicbir repoda ilk ucte degil** ve isareti degisiyor
-(Polly −0,4180, ShareX +0,0299, Jellyfin +0,4511).
+(Polly -0,4180, ShareX +0,0299, Jellyfin +0,4511).
 
 Katsayilar **nedensellik degil**: `FilesChanged` ile `Entropy` uc repoda da 0,89'un
 uzerinde korelasyonlu (Jellyfin'de 0,9831); boyle ciftlerde isaret ve buyukluk veriye
@@ -106,10 +106,10 @@ Kaynak: `asama5-kalibrasyon.md` 5. bolum, `bootstrap-results.json` (`5acd9b44…
 | Kume | Delta F1 [p2,5 – p97,5] | Delta PR-AUC [p2,5 – p97,5] |
 |---|---|---|
 | **Mikro** | **[0,0485 – 0,0823]** | **[0,1818 – 0,2513]** |
-| Makro | **[−0,0296 – 0,0563]** | [−0,0155 – 0,1216] |
-| Polly | [−0,1241 – 0,1140] | [−0,1193 – 0,2949] |
-| ShareX | [−0,0055 – 0,0775] | [−0,0075 – 0,0453] |
-| Jellyfin | [−0,0088 – 0,0257] | [0,0329 – 0,0729] |
+| Makro | **[-0,0296 – 0,0563]** | [-0,0155 – 0,1216] |
+| Polly | [-0,1241 – 0,1140] | [-0,1193 – 0,2949] |
+| ShareX | [-0,0055 – 0,0775] | [-0,0075 – 0,0453] |
+| Jellyfin | [-0,0088 – 0,0257] | [0,0329 – 0,0729] |
 
 > **Model, hacim agirlikli mikro karsilastirmada LinesAdded tabaninin uzerinde kaldi;
 > repo basina esit agirlik veren makro F1 araligi fark yok degerini icerdi.**
@@ -153,7 +153,7 @@ Kaynak: `asama5-duyarlilik.md`, `sensitivity-results.json` (`9b0c4706…27915266
 |---|---|---|---|
 | **Bot** | F1 Polly 0,2500 / Jellyfin 0,4895 | botsuz yeniden egitim | Polly F1 **ayni**, Jellyfin'de **tek bir tahmin** degisti (FP 1090 → 1089), ShareX'te bot **0** |
 | **90 gun** | Polly 0,2500 / ShareX 0,1868 / Jellyfin 0,4895 | olgun alt kume | uc repoda da pozitif oran, F1 ve PR-AUC **daha yuksek** (F1 +0,0045 / +0,0447 / +0,0201) |
-| **C# uygunlugu** | 15 oznitelik | ablasyon ve yalniz C# | `CsFilesChanged = 0` olan **8607 / 34 166** commit'in pozitifi **0**; ablasyon Jellyfin −0,0266, ShareX −0,0096, **Polly +0,0109** |
+| **C# uygunlugu** | 15 oznitelik | ablasyon ve yalniz C# | `CsFilesChanged = 0` olan **8607 / 34 166** commit'in pozitifi **0**; ablasyon Jellyfin -0,0266, ShareX -0,0096, **Polly +0,0109** |
 | **Aralik disi** | — | grup ayrimi | Polly **620 / 828**, ShareX **2411 / 2547**, Jellyfin **2308 / 6876**; tasmalarin hepsi **ust yonlu** |
 | **Ad degisimi** | esik 50 | 40 ve 60 | v2 esik 50 ana veriyle **512 490 / 512 490 hucre** esti; model sonuclari az degisti (en buyuk F1 farki Polly'de 0,0289), metrigi degisen commit sayilari buyuk (Jellyfin 2757 ve 2514) |
 | **Sentetik gurultu** | — | %5 / %10 / %20 | mutlak F1 ve PR-AUC yukseldi; tabanlara fark da yukseldi, ama **Jellyfin'de PR-AUC lift 0,3608 → 0,3277 dustu** |
@@ -178,8 +178,8 @@ Kaynak: `asama5-genelleme.md`, `generalization-results.json` (`515f561c…301415
 
 - Alti tek kaynakli aktarimin **3 / 6'si** ayni-repo F1'inin **ustunde**, 3'u altinda.
 - Leave-one-out'un **1 / 3'u** ayni-repo F1'inin ustunde.
-- **LORO uc hedefte de en iyi tek kaynakli aktarimin altinda** (−0,1412 / −0,0700 /
-  −0,0187), ama yayilimi daha dar (korunan F1 0,852–1,137'ye karsi 0,768–1,500).
+- **LORO uc hedefte de en iyi tek kaynakli aktarimin altinda** (-0,1412 / -0,0700 /
+  -0,0187), ama yayilimi daha dar (korunan F1 0,852–1,137'ye karsi 0,768–1,500).
 - **PR-AUC korunup F1'in en az 0,05 dustugu 2 / 9 deney** (ikisinde de hedef Jellyfin).
 - **0,5 esigi kaynak esiginden iyi olan 5 / 9.**
 - **Ortalama tahmin hedef orandan yuksek 6 / 9, dusuk 3 / 9.**
@@ -306,7 +306,7 @@ Tam liste `docs/sinirliliklar.md` icinde; ozet:
 
 **2) Belirsizlik sonucu.** Mikro delta F1 araligi [0,0485, 0,0823] ve mikro delta PR-AUC
 araligi [0,1818, 0,2513] tabanin ustunde kaldi. **Makro delta F1 araligi
-[−0,0296, 0,0563] fark yok degerini iceriyor.** Bu bootstrap egitim belirsizligini
+[-0,0296, 0,0563] fark yok degerini iceriyor.** Bu bootstrap egitim belirsizligini
 kapsamiyor.
 
 **3) Repo-arasi sonuc.** Alti tek kaynakli aktarimin 3'u ayni-repo F1'inin ustunde, 3'u
@@ -350,7 +350,7 @@ populasyon iddiasi degil.
    gunden az olgun 207 commit var ve hicbiri pozitif degil; test pozitif orani %13,0'ten
    %1,21'e dusuyor.
 3. **Mikro ve makro ayni yonu gostermiyor.** Mikro delta F1 araligi [0,0485, 0,0823]
-   tabanin ustunde, makro delta F1 araligi [−0,0296, 0,0563] sifiri iceriyor. Tek bir
+   tabanin ustunde, makro delta F1 araligi [-0,0296, 0,0563] sifiri iceriyor. Tek bir
    toplama yontemi secilseydi sonuc ya fazla iyimser ya fazla karamsar yazilirdi.
 4. **Siralama aktarilabiliyor, esik aktarilamiyor.** ShareX → Jellyfin'de PR-AUC 0,4941
    (ayni-reponun %95'i) ama 0,5 esiginde F1 0,0785.

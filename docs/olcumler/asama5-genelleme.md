@@ -162,7 +162,7 @@ Sonuc dosyasi `data/asama5/generalization-decomposition.json`, ozeti
 
 **"Belirgin dusus" siniri sonuc gormeden sabitlendi:** mutlak F1 farki `<= -0,05`.
 
-| Kaynak → Hedef | ΔPR-AUC | ΔF1 (kaynak esigi) | ΔF1 (0,5) | Ort tahmin | Hedef orani | Mutlak fark | Kaynak train orani | Kaynak − hedef |
+| Kaynak → Hedef | ΔPR-AUC | ΔF1 (kaynak esigi) | ΔF1 (0,5) | Ort tahmin | Hedef orani | Mutlak fark | Kaynak train orani | Kaynak - hedef |
 |---|---|---|---|---|---|---|---|---|
 | polly → jellyfin | -0.0313 | -0.0027 | -0.1393 | 0.1063 | 0.1348 | 0.0285 | 0.1300 | -0.0048 |
 | polly → sharex | +0.0120 | +0.0443 | +0.0318 | 0.1064 | 0.0506 | 0.0557 | 0.1300 | +0.0793 |

@@ -102,6 +102,19 @@ if (args[0] == "rename")
     return RenameSensitivity.Run(args);
 }
 
+// Asama 6 Adim 2: goreli risk endeksi icin egitim skor dagilimi.
+// args: score-reference <veri-klasoru> <commit> <cikti.json>
+if (args[0] == "score-reference")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure score-reference <veri-klasoru> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return ScoreReferenceCommand.Run(args);
+}
+
 // Adim 5b: sentetik gurultuyu taban oranindan ayir. args: noise-normalized <veri> <commit>
 if (args[0] == "noise-normalized")
 {

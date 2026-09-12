@@ -35,7 +35,7 @@ src/
   Sievert.Mining/             git history with LibGit2Sharp, separate from Analysis
   Sievert.Data/               PostgreSQL with EF Core, separate from Mining
   Sievert.Modeling/           feature transform, logistic regression, model registry
-  Sievert.Api/                read-only ASP.NET Core Web API over the trained models
+  Sievert.Api/                ASP.NET Core Web API: read-only endpoints + background jobs
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
@@ -328,9 +328,9 @@ Numbers and their sources: `docs/raporlar/asama5-kapanis.md`.
 
 ### Stage 6 so far
 
-Steps 0 to 2 of stage 6 are done: the product-language contract, a read-only Web API and
-the commit risk endpoint. The dashboard, background jobs and the static analysis endpoint
-are **not** written. The roadmap is in `docs/planlar/asama6-api-ve-panel.md`.
+Steps 0 to 3 of stage 6 are done: the product-language contract, a read-only Web API, the
+commit risk endpoint, and persistent background jobs with progress and cancellation. The
+dashboard is **not** written. The roadmap is in `docs/planlar/asama6-api-ve-panel.md`.
 
 ## The API
 
@@ -341,6 +341,11 @@ there is no write operation, no repository cloning and no long-running job yet.
 export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=..."
 dotnet run --project src/Sievert.Api
 ```
+
+There is **no authentication**. Because of that the API only listens on loopback by
+default: if you point it at `0.0.0.0`, `*` or a real address it refuses to start and tells
+you why. You can open it with `SIEVERT_ALLOW_REMOTE=true`, but anyone who can reach the
+address can then use every endpoint, so that is experimental and unsafe.
 
 It listens on the ASP.NET Core default ports and serves an OpenAPI document at
 `/openapi/v1.json`.
@@ -359,6 +364,12 @@ request; you can point it somewhere else with `Sievert:ArtifactRoot`.
 | `GET /api/v1/repositories/{id}` | one repository with its label counts |
 | `GET /api/v1/repositories/{id}/commits` | commits, newest first, paged |
 | `GET /api/v1/repositories/{id}/commits/{sha}/risk` | model assessment for one commit |
+| `POST /api/v1/repositories/{id}/analyses` | start a background job |
+| `GET /api/v1/analyses/{jobId}` | job status and progress |
+| `GET /api/v1/repositories/{id}/analyses` | a repository's jobs, paged |
+| `POST /api/v1/analyses/{jobId}/cancel` | cancel a job |
+| `GET /api/v1/analyses/{jobId}/findings` | a static scan job's findings |
+| `GET /api/v1/analyses/{jobId}/risks` | a risk scoring job's commit assessments |
 
 ### What the risk endpoint does and does not say
 
@@ -392,3 +403,55 @@ This gate fires on 11 of 34 166 commits; the reason and what I did not do about 
 `docs/olcumler/asama6-api-temel.md`.
 
 The full contract is `docs/urun/risk-sozlesmesi.md` and the reasoning is in ADR 0023.
+
+Feature contributions are checked against the model's own logit before they are returned,
+with a tolerance that scales with the size of the terms being summed rather than a fixed
+absolute number — the reason is in `docs/urun/model-aciklama-sayisal-tolerans.md`. Over
+all 34 166 commits the check now passes everywhere, and a deliberately corrupted
+explanation is still rejected by a wide margin.
+
+There is no way to ask for a different model profile. The repository decides: a known
+repository gets its own profile, an unknown one is not scored at all.
+
+### Background jobs
+
+Two things take too long for a single request: scanning a repository's working tree, and
+scoring every commit in it. Both run as background jobs.
+
+```bash
+# start a job
+curl -i -X POST http://127.0.0.1:5000/api/v1/repositories/2/analyses \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: my-key-1" \
+  -d '{"kind":"static-scan"}'
+
+# follow it (the Location header from the response above)
+curl http://127.0.0.1:5000/api/v1/analyses/<jobId>
+
+# cancel it
+curl -X POST http://127.0.0.1:5000/api/v1/analyses/<jobId>/cancel
+
+# results
+curl "http://127.0.0.1:5000/api/v1/analyses/<jobId>/findings?pageSize=100"
+curl "http://127.0.0.1:5000/api/v1/analyses/<jobId>/risks?order=highest-risk"
+```
+
+`kind` is either `static-scan` or `risk-score-all`. Starting a job returns `202` with a
+`Location` header; sending the same `Idempotency-Key` again returns the same job with
+`200` instead of opening a second one.
+
+The job itself lives in the database, not in the queue. If the process dies while a job is
+running, the job does not silently resume on the next start: it is marked `failed` with
+`PROCESS_INTERRUPTED`, because we do not know where it stopped and finishing a half-done
+job as if it were complete is worse than failing it. Jobs that were still queued are put
+back on the queue.
+
+A cancelled or failed job keeps the rows it already wrote, but they are never presented as
+a complete result: the response carries `isResultComplete: false`, `partial: true` and a
+warning saying so.
+
+The path to scan comes from the repository record, not from the request body. There is no
+endpoint that takes a filesystem path, because there is no authentication either.
+
+The reasoning behind all of this is in ADR 0024, and the measurements are in
+`docs/olcumler/asama6-arka-plan-isleri.md`.

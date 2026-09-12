@@ -1,7 +1,7 @@
 # Asama 6 yol haritasi: API ve panel
 
 **Tarih:** 2026-09-12
-**Durum:** Adim 0, 1 ve 2 bu turda yapildi. Geri kalan adimlar **yapilmadi**.
+**Durum:** Adim 0, 1, 2 ve 3 yapildi. Geri kalan adimlar **yapilmadi**.
 
 Asama 5 bir model birakti ve o modelin ne olup ne olmadigini olctu. Asama 6 o modeli
 kullanilabilir hale getiriyor. Isin buyuk kismi teknik degil: **modelin ne soyleyip ne
@@ -75,20 +75,31 @@ ayrinti ve acik karar `docs/olcumler/asama6-api-temel.md` bolum 7'de.
 **Yapilmayanlar.** Statik analiz calistirilmiyor, birlesik skor yok, bilinmeyen repo
 skorlanmiyor.
 
-### 3. Arka plan analiz isleri ve iptal — **yapilmadi**
+### 3. Arka plan analiz isleri ve iptal — **yapildi**
 
-**Amac.** Uzun suren islemleri (madencilik, metrik hesabi, etiketleme) istek disina
-tasimak; ilerleme ve iptal.
+**Amac.** Uzun suren islemleri istek disina tasimak; ilerleme ve iptal.
 
-**Uretilecek.** Is kuyrugu, is durumu endpoint'leri, iptal jetonu, is kayitlari.
+**Uretilen.** Uc tablo (`AnalysisJobs`, `StaticAnalysisFindings`, `CommitRiskSnapshots`),
+durum makinesi, sinirli kapasiteli kuyruk, worker, yeniden baslatma kurtarmasi, iki
+**gercek** is turu (`static-scan`, `risk-score-all`), alti uc ve iptal.
 
 **Basari olcutu.** Bir is baslatilip iptal edilebiliyor, durum sorgulanabiliyor, API
 istegi bloke olmuyor.
 
-**Yapilmayanlar.** Dagitik kuyruk, birden fazla islemci.
+**Olculen.** `docs/olcumler/asama6-arka-plan-isleri.md`. Yirmi beklentinin yirmisi tuttu:
+static-scan uc repoda da CLI ile 0 fark, risk-score-all 300 commit'te risk ucuyle bit
+duzeyinde ayni, 22 917 commit'lik iste 18 ilerleme yazimi ve 1 model yuklemesi.
+
+**Ayrica bu turda.** Aciklama toleransi surum 2.0'a cekildi
+(`docs/urun/model-aciklama-sayisal-tolerans.md`), risk sozlesmesi surum 1.1 oldu,
+`?profile=` kaldirildi ve uzak erisim kapatildi.
+
+**Yapilmayanlar.** Git klonlama, tarih madenciligi, metrik hesabi ve SZZ etiketleme is
+olarak yazilmadi. Dagitik kuyruk, is onceligi, zaman asimi ve otomatik yeniden deneme yok.
 
 **Devralinan risk.** Uzun isler model dosyalarina ve veritabanina ayni anda dokunuyor;
-dondurulmus kanit dosyalari bu islerden **etkilenmemeli**.
+dondurulmus kanit dosyalari bu islerden **etkilenmedi** - is sonuclari kendi tablolarinda
+duruyor ve Asama 5/6 kanit dosyalari yalnizca okunuyor.
 
 ### 4. Blazor panel iskeleti — **yapilmadi**
 
@@ -127,10 +138,10 @@ kapanis raporu.
 - [x] Adim 0 — urun dili, risk sozlesmesi, beklentiler, ADR 0023
 - [x] Adim 1 — read-only API ve model kayit defteri
 - [x] Adim 2 — commit risk skoru ve aciklama
-- [ ] Adim 3 — arka plan isleri
+- [x] Adim 3 — arka plan isleri, iptal ve sonuc saklama
 - [ ] Adim 4 — Blazor panel
 - [ ] Adim 5 — isi haritasi ve zaman cizelgesi
 - [ ] Adim 6 — rapor ve demo
 - [ ] Adim 7 — kullanilabilirlik ve kapanis
 
-**Asama 6 tamamlanmadi.** Sonraki nokta Adim 3: arka plan analiz isleri ve iptal.
+**Asama 6 tamamlanmadi.** Sonraki nokta Adim 4: Blazor panel iskeleti.

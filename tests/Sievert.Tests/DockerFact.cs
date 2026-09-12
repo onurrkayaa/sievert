@@ -53,3 +53,15 @@ public sealed class DockerFactAttribute : FactAttribute
         }
     }
 }
+
+/// <summary>Docker yoksa atlanan kuramsal test. Atlama sebebi test ciktisinda gorunuyor.</summary>
+public sealed class DockerTheoryAttribute : TheoryAttribute
+{
+    public DockerTheoryAttribute()
+    {
+        if (!Docker.Available)
+        {
+            Skip = Docker.SkipReason;
+        }
+    }
+}

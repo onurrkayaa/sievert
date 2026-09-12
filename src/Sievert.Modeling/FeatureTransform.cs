@@ -74,11 +74,23 @@ public sealed class FeatureScaler
     /// <summary>Standartlastirilan 14 surekli oznitelik. IsFix burada yok.</summary>
     public IReadOnlyList<FeatureStatistics> Statistics => [.. statistics.Values];
 
-    public static FeatureScaler Fit(string identity, IReadOnlyList<SnapshotRow> train)
+    /// <summary>
+    /// Kullanilan oznitelik adlari, <see cref="ModelFeatures.Candidates"/> sirasinda.
+    /// Ana modelde 15'in hepsi; ablasyon deneyinde bir tanesi cikarilmis hali.
+    /// </summary>
+    public IReadOnlyList<string> Features { get; private init; } = ModelFeatures.Candidates;
+
+    public static FeatureScaler Fit(string identity, IReadOnlyList<SnapshotRow> train) =>
+        Fit(identity, train, ModelFeatures.Candidates);
+
+    public static FeatureScaler Fit(
+        string identity,
+        IReadOnlyList<SnapshotRow> train,
+        IReadOnlyList<string> features)
     {
         Dictionary<string, FeatureStatistics> learned = new(StringComparer.Ordinal);
 
-        foreach (string name in Continuous())
+        foreach (string name in Continuous(features))
         {
             double[] values = new double[train.Count];
 
@@ -90,17 +102,17 @@ public sealed class FeatureScaler
             learned[name] = Describe(identity, name, values);
         }
 
-        return new FeatureScaler(identity, learned);
+        return new FeatureScaler(identity, learned) { Features = features };
     }
 
-    /// <summary>15 oznitelik, <see cref="ModelFeatures.Candidates"/> ile ayni sirada.</summary>
+    /// <summary>Kullanilan oznitelikler, <see cref="Features"/> ile ayni sirada.</summary>
     public float[] Apply(SnapshotRow row)
     {
-        float[] features = new float[ModelFeatures.Candidates.Count];
+        float[] features = new float[Features.Count];
 
         for (int index = 0; index < features.Length; index++)
         {
-            string name = ModelFeatures.Candidates[index];
+            string name = Features[index];
 
             if (string.Equals(name, FeatureTransform.FlagFeature, StringComparison.Ordinal))
             {
@@ -162,8 +174,10 @@ public sealed class FeatureScaler
         return outside;
     }
 
-    private static IEnumerable<string> Continuous() =>
-        [.. FeatureTransform.LogFeatures, FeatureTransform.RawContinuousFeature];
+    private IEnumerable<string> Continuous() => Continuous(Features);
+
+    private static IEnumerable<string> Continuous(IReadOnlyList<string> features) =>
+        [.. features.Where(name => !string.Equals(name, FeatureTransform.FlagFeature, StringComparison.Ordinal))];
 
     private static double Value(SnapshotRow row, string name)
     {

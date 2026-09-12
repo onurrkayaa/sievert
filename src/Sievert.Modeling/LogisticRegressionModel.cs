@@ -7,7 +7,7 @@ namespace Sievert.Modeling;
 /// <summary>ML.NET'e verilen satir. Yalnizca 15 oznitelik ve etiket var.</summary>
 public sealed class ModelInput
 {
-    /// <summary>15 oznitelik, <see cref="ModelFeatures.Candidates"/> ile ayni sirada.</summary>
+    /// <summary>Oznitelik vektoru. Boyutu calisma zamaninda sema ile veriliyor.</summary>
     [VectorType(15)]
     public float[] Features { get; set; } = new float[15];
 
@@ -68,9 +68,12 @@ public static class LogisticRegressionModel
     /// <summary>Tek is parcacigi: paralel gradyan toplamasinin sirasi kosudan kosuya degisebilir.</summary>
     public const int NumberOfThreads = 1;
 
-    public static RepositoryModel Train(RepositorySplit split)
+    public static RepositoryModel Train(RepositorySplit split) =>
+        Train(split, ModelFeatures.Candidates);
+
+    public static RepositoryModel Train(RepositorySplit split, IReadOnlyList<string> features)
     {
-        FeatureScaler scaler = FeatureScaler.Fit(split.Identity, split.Train);
+        FeatureScaler scaler = FeatureScaler.Fit(split.Identity, split.Train, features);
         MLContext context = new(seed: Seed);
 
         ITransformer transformer = Fit(context, Rows(split.Train, scaler));
@@ -86,11 +89,14 @@ public static class LogisticRegressionModel
     }
 
     /// <summary>Egitip diske yazar; yuklenen modelin ayni tahminleri verdigi sinaniyor.</summary>
-    public static void Save(RepositorySplit split, string path)
+    public static void Save(RepositorySplit split, string path) =>
+        Save(split, path, ModelFeatures.Candidates);
+
+    public static void Save(RepositorySplit split, string path, IReadOnlyList<string> features)
     {
-        FeatureScaler scaler = FeatureScaler.Fit(split.Identity, split.Train);
+        FeatureScaler scaler = FeatureScaler.Fit(split.Identity, split.Train, features);
         MLContext context = new(seed: Seed);
-        IDataView data = context.Data.LoadFromEnumerable(Rows(split.Train, scaler));
+        IDataView data = Load(context, Rows(split.Train, scaler));
         ITransformer transformer = Fit(context, Rows(split.Train, scaler));
 
         context.Model.Save(transformer, data.Schema, path);
@@ -117,6 +123,19 @@ public static class LogisticRegressionModel
         return inputs;
     }
 
+    /// <summary>
+    /// Oznitelik sayisi calisma zamaninda degisebildigi icin sema elle kuruluyor;
+    /// <c>VectorType</c> nitelikteki sabit boyut ablasyon deneyinde yetmiyor.
+    /// </summary>
+    private static IDataView Load(MLContext context, IReadOnlyList<ModelInput> rows)
+    {
+        SchemaDefinition schema = SchemaDefinition.Create(typeof(ModelInput));
+        schema[nameof(ModelInput.Features)].ColumnType =
+            new VectorDataViewType(NumberDataViewType.Single, rows[0].Features.Length);
+
+        return context.Data.LoadFromEnumerable(rows, schema);
+    }
+
     private static ITransformer Fit(MLContext context, IReadOnlyList<ModelInput> rows)
     {
         LbfgsLogisticRegressionBinaryTrainer.Options options = new()
@@ -133,7 +152,7 @@ public static class LogisticRegressionModel
         return context.BinaryClassification
             .Trainers
             .LbfgsLogisticRegression(options)
-            .Fit(context.Data.LoadFromEnumerable(rows));
+            .Fit(Load(context, rows));
     }
 
     private static IReadOnlyList<double> Probabilities(
@@ -141,7 +160,7 @@ public static class LogisticRegressionModel
         ITransformer transformer,
         IReadOnlyList<ModelInput> rows)
     {
-        IDataView scored = transformer.Transform(context.Data.LoadFromEnumerable(rows));
+        IDataView scored = transformer.Transform(Load(context, rows));
         List<double> probabilities = new(rows.Count);
 
         foreach (ModelOutput output in context.Data.CreateEnumerable<ModelOutput>(scored, reuseRowObject: false))

@@ -19,9 +19,21 @@ Iki girdi de dondurulmus; bu adim ikisini de yalnizca **okudu**.
 | Bolme manifesti | `data/asama5/split-manifest.csv` |
 | Manifest SHA-256 | `01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb` |
 | Sonuc dosyasi | `data/asama5/baseline-results.json` |
-| Sonuc SHA-256 | `eaebcf67605bff679e30ecbb50f9bd649e571ee0a6167c22c7eba290a73aa7b2` |
-| Ureten commit | `0e20959` (`tools/Sievert.Measure`, `baseline` komutu) |
+| Sonuc SHA-256 (v2, gecerli) | `dd62daa7ca7a077645c2053732bcf93291b3459cd1e958797f66cd10f6f38d65` |
+| Ureten commit (v2) | `15fc80f` (`tools/Sievert.Measure`, `baseline` komutu) |
 | Metrik sozlesmesi | surum 1.0 |
+
+Sonuc dosyasinin iki surumu var ve eskisi silinmedi, git gecmisinde duruyor:
+
+| Surum | SHA-256 | Ureten commit | Fark |
+|---|---|---|---|
+| v1 | `eaebcf67605bff679e30ecbb50f9bd649e571ee0a6167c22c7eba290a73aa7b2` | `0e20959` | rastgele tabanin makro F1'i eksik |
+| **v2** | `dd62daa7ca7a077645c2053732bcf93291b3459cd1e958797f66cd10f6f38d65` | `15fc80f` | makro F1 eklendi |
+
+Iki dosya `macroF1` ve `codeCommit` disinda **birebir ayni**: v1 ile v2 alan alan
+karsilastirildi, baska hicbir sayi degismedi. Makro F1 depo F1'lerinden turetiliyor,
+fazladan rastgele sayi cekmiyor; rastgele tabanin tohumu, tekrar sayisi, repo ve satir
+sirasi, p degerleri aynen korundu.
 
 Bolme manifestten okundu, yeniden hesaplanmadi. Sayilar Adim 1'dekiyle birebir ayni;
 farkli ciksaydi arac sonucu yazmadan duracakti.
@@ -86,6 +98,20 @@ rastgele akis her tekrarda depolar ordinal sirada, satirlar manifest sirasinda t
 | **Mikro** | her repo kendi orani | 0,1133 (0,1022 - 0,1254) | 0,2230 | 0,1502 (0,1356 - 0,1661) | 0,1045 |
 
 Medyanlar: Polly F1 0,0190, ShareX 0,0757, Jellyfin 0,1707, mikro 0,1501.
+
+**Makro F1 dagilimi.** Her tekrarda uc reponun F1'i ayri hesaplanip basit ortalamasi
+alindi; asagidaki sayilar o 1000 ortalamanin dagilimi.
+
+| Olcu | Deger |
+|---|---|
+| Ortalama | 0,0907 |
+| p2,5 | 0,0746 |
+| Medyan | 0,0900 |
+| p97,5 | 0,1088 |
+
+Mikro ile karistirilmamali: mikro ortalama 0,1502, makro ortalama 0,0907. Mikro'da
+Jellyfin (test satirlarinin %67,1'i ve uc repo icinde en yuksek p'ye sahip olan) sonucu
+yukari cekiyor; makro Polly'nin dusuk F1'ini de esit agirlikla sayiyor.
 
 Tahmin edilen pozitif sayisi:
 
@@ -170,7 +196,7 @@ uretiyor. Ama bu bir tahmin; ayrica sag sansurun payi olabilir ve o ayrim yapilm
 | Taban | Mikro F1 | Makro F1 |
 |---|---|---|
 | Her seye negatif | 0,0000 | 0,0000 |
-| Rastgele (1000 tekrar ortalamasi) | 0,1502 | — |
+| Rastgele (1000 tekrar ortalamasi) | 0,1502 | 0,0907 |
 | LinesAdded esigi | 0,3754 | 0,2999 |
 
 Mikro ve makro ayni sey degil. Mikro'da Jellyfin tek basina test satirlarinin
@@ -178,9 +204,11 @@ Mikro ve makro ayni sey degil. Mikro'da Jellyfin tek basina test satirlarinin
 esit sayiyor ve Polly ile ShareX'in dusuk F1'leri sayiyi asagi cekiyor: 0,3754'e karsi
 0,2999.
 
-Rastgele taban icin makro F1 yazilmadi: o taban tek bir sayi degil 1000 tekrarlik bir
-dagilim uretiyor ve uc dagilimin ortalamasini tek bir "makro" olarak yazmak, dagilim
-bilgisini gizlerdi.
+Rastgele tabanin makro sutunu 1000 tekrarin **ortalamasi**; dagilimin tamami yukarida
+(p2,5 0,0746, medyan 0,0900, p97,5 0,1088). Tek bir sayi olarak okunmamali.
+
+LinesAdded tabaninin makro F1'i (0,2999) rastgele tabanin makro dagiliminin p97,5
+degerinin (0,1088) uzerinde.
 
 **LinesAdded tabani her repoda rastgele tabanin ustunde.** Test F1'leri: Polly 0,2667'ye
 karsi rastgele ortalama 0,0257 (rastgele p97,5 = 0,0672), ShareX 0,1520'ye karsi 0,0755
@@ -217,19 +245,51 @@ cikti; ama bunun taban oranin yuksekliginden mi (test %13,48, digerlerinin iki-o
 geldigini olcmedim.
 
 **Kural farki, ayrica yaziyorum:** beklenti dosyasi kurali `LinesAdded > esik` diye
-yazmisti, bu adimda `LinesAdded >= esik` kullanildi. Aday esikler egitimde gorulen
-degerler oldugu icin iki yazim ayni aileyi tariyor (bir degerde `>=`, bir alttaki degerde
-`>` ile ayni bolmeyi verir), yani bant karsilastirmasini bozmuyor. Yine de ayni cumle
-degiller ve bunu sonradan fark ettim.
+yazmisti, bu adimda `LinesAdded >= esik` kullanildi. Ana sonuc `>=` protokoluyle kaldi:
+olcumden once, Adim 2'nin promptunda ilan edilen uygulama budur.
+
+Iki yazimin ayni tahminleri uretip uretmedigi **gercek veride sayildi**. Her repo icin
+secilen `>=` esigine karsilik gelen `>` esigi, egitimde gorulen ve esikten kucuk en buyuk
+deger olarak alindi; sonra iki tahmin vektoru satir satir karsilastirildi.
+
+| Repo | Uygulanan | Esdeger `>` esigi | Train farkli tahmin | Test farkli tahmin |
+|---|---|---|---|---|
+| Polly | `>= 126` | `> 125` | 0 / 1931 | 0 / 828 |
+| ShareX | `>= 35` | `> 34` | 0 / 5943 | 0 / 2547 |
+| Jellyfin | `>= 25` | `> 24` | 0 / 16 041 | 0 / 6876 |
+| **Toplam** | | | **0 / 23 915** | **0 / 10 251** |
+
+Tek bir satirda bile fark yok, yani bu veride iki operator ayni siniflandiriciyi
+uretiyor ve bant karsilastirmasi bundan etkilenmiyor.
+
+Bunu bir sonuc olarak degil bir **hipotez** olarak kontrol ettim ve sonuc hipotezle ayni
+cikti. Fark cikabilecek yer testte egitimde hic gorulmemis bir `LinesAdded` degerinin iki
+esigin arasina dusmesiydi; uc repoda da oyle bir deger yok. Bunun sebebi `LinesAdded`'in
+tam sayi olmasi ve esiklerin etrafinda yogun olmasi: esdeger `>` esikleri uc repoda da
+`esik - 1` cikti, yani arada bosluk kalmadi. Bu bir olcum, garanti degil; baska bir esikte
+ya da baska bir oznitelikte ayni sonucun cikacagi gosterilmedi.
 
 ### Her seye negatif tabani
 
 Beklenti: recall tam olarak 0, precision tanimsiz. **Ikisi de tuttu:** recall 0 (0 / 1066),
 precision N/A (0 / 0).
 
-**Bir fark:** beklenti dosyasi bu durumda F1 icin de "N/A" yazmisti; bu adimin metrik
-sozlesmesi F1 = 0 diyor. Sozlesme adimin basinda, olcumden once yazildi ve gerekcesi
-orada duruyor. Beklenti dosyasi degistirilmedi, fark burada duruyor.
+**Bir tanim farki var ve bu bir beklenti sapmasi degil.** Iki dokuman da sonuc
+gorulmeden yazildi ve ayni durum icin farkli sey soyluyorlar:
+
+- `asama5-beklenti.md` (3. madde): precision'in paydasi 0 iken F1 de **N/A**.
+- `asama5-metrik-sozlesmesi.md` surum 1.0: precision **N/A**, recall **0**, F1 **0**.
+
+**Uygulanan sonuc F1 = 0 sozlesmesidir.** Sozlesme bu adimin metrik tanimi ve koddan once
+yazildi; gerekcesi orada duruyor.
+
+Farkin kaynagi veri degil: olculen sayilarin hicbiri iki tanim arasinda degismiyor
+(TP 0, FP 0, FN 1066, TN 9185 her iki tanimda da ayni). Degisen yalnizca bos hucreye ne
+yazildigi. Bu yuzden bunu "beklenti tutmadi" satirina koymuyorum; onceden yazilmis iki
+dokuman arasindaki bir tanim farki.
+
+**Eski beklenti silinmedi**, `asama5-beklenti.md` degistirilmedi. Metrik kodu da
+degistirilmedi.
 
 Beklenti ayrica accuracy icin bant vermisti (Jellyfin %81-92, Polly %91-97). **Accuracy
 bu adimda hesaplanmadi**, o yuzden o beklentinin tutup tutmadigi olculmedi.
@@ -263,11 +323,11 @@ bandin altinda cikti.
 - **Tek bolme, tek esik.** LinesAdded tabani icin guven araligi yok: esik bir kez secildi
   ve bir kez uygulandi. Rastgele tabanda dagilim var cunku orada rastgelelik kaynagi biziz;
   esikli tabanda tekrar edilecek bir sey yok.
-- **Esitlik kurallari pratikte devreye giremiyor.** Tek oznitelikli monoton bir esikte,
-  iki esik ayni F1'i veriyorsa daha dusuk esigin precision'i hicbir zaman daha yuksek
-  olamaz; cebiri ADR 0017'de. Yani ikinci ve ucuncu secim kurali yazili ve test edilmis
-  olmasina ragmen gercek veride sonucu degistiremez. Kurallari yine de birakiyorum, cunku
-  ileride baska bir oznitelik ya da monoton olmayan bir kural gelirse gerekecekler.
+- **Esitlik kurallari gercek veride sonucu degistirmedi.** Tek oznitelikli monoton bir
+  esikte, iki esik ayni F1'i veriyorsa daha dusuk esigin precision'i hicbir zaman daha
+  yuksek olamaz; cebiri ADR 0017'de. Kurallar yine de duruyor, cunku secim algoritmasinin
+  deterministik ve her durumda tanimli olmasi gerekiyor; ayrica ileride monoton olmayan
+  bir kural ya da baska bir oznitelik gelirse gerekecekler.
 - **Sabit skorlu PR-AUC yorumlanamaz.** Her seye negatif tabaninin PR-AUC'si kumenin
   pozitif orani; yontemin degil verinin ozelligi.
 - **Mikro toplam Jellyfin agirlikli.** Test satirlarinin %67,1'i (6876 / 10 251) Jellyfin'den.

@@ -113,9 +113,43 @@ esigin precision'i yuksek olsun istersek `TP2/k2 > TP1/k1` gerekir; yerine koyun
 yuksek precision veremez. `TP1 = 0` hali de kapali: o zaman iki F1 de 0 olur, ama en
 yuksek F1 hicbir zaman 0 olamaz cunku en dusuk esik butun pozitifleri yakalar.
 
-Kurallari yine de yaziyorum ve test ediyorum: ileride monoton olmayan bir kural ya da
-baska bir oznitelik gelirse gerekecekler, ve bir secim kuralinin yazili olmamasi
-sonradan "hangi esigi neden sectik" sorusunu cevapsiz birakirdi.
+Kurallar yine de duruyor. Gercek veride ikinci ve ucuncu tie-break sonucu degistirmedi;
+korunmalarinin sebebi secim algoritmasinin **deterministik ve toplam tanimli** olmasi:
+her aday kumesi icin tek bir cevap uretmeli ve o cevap girdi sirasindan bagimsiz olmali.
+Ayrica ileride monoton olmayan bir kural ya da baska bir oznitelik gelirse gerekecekler,
+ve bir secim kuralinin yazili olmamasi sonradan "hangi esigi neden sectik" sorusunu
+cevapsiz birakirdi.
+
+## Protokol farki: `>` ve `>=`
+
+`asama5-beklenti.md` kurali `LinesAdded > esik` diye yazmisti; Adim 2'nin promptunda ilan
+edilen ve uygulanan protokol `LinesAdded >= esik`. Ana sonuc `>=` ile kaldi: olcumden
+once ilan edilen uygulama budur ve sonuca bakarak protokol degistirilmez.
+
+Iki yazimin ayni tahminleri uretip uretmedigi gercek veride sayildi. Her repo icin
+secilen `>=` esigine karsilik gelen `>` esigi, egitimde gorulen ve esikten kucuk en buyuk
+deger olarak alindi. Uc repoda da esdeger esik `esik - 1` cikti (126/125, 35/34, 25/24) ve
+**train ile testte toplam 0 satirda** farkli tahmin uretildi (0 / 23 915 ve 0 / 10 251).
+
+Yani bu veri kumesinde iki operator ayni siniflandiriciyi veriyor. Bu bir olcum, genel bir
+garanti degil: fark cikabilecek yer, testte egitimde hic gorulmemis bir degerin iki esigin
+arasina dusmesi; `LinesAdded` tam sayi oldugu ve esiklerin etrafinda yogun oldugu icin bu
+veride oyle bir bosluk kalmadi.
+
+## Tanim farki: precision N/A iken F1
+
+Ayni durum icin sonuc gorulmeden yazilmis iki dokuman farkli sey soyluyor:
+
+- `asama5-beklenti.md` (3. madde): precision'in paydasi 0 iken F1 de **N/A**.
+- `asama5-metrik-sozlesmesi.md` surum 1.0: precision **N/A**, recall **0**, F1 **0**.
+
+Uygulanan sonuc **F1 = 0 sozlesmesidir**; sozlesme bu adimin metrik tanimi ve koddan once
+yazildi.
+
+Bu bir beklenti sapmasi degil, iki onceden yazilmis dokuman arasindaki tanim farki:
+olculen sayilarin hicbiri iki tanim arasinda degismiyor (TP 0, FP 0, FN 1066, TN 9185),
+degisen yalnizca bos hucreye ne yazildigi. Eski beklenti silinmedi ve `asama5-beklenti.md`
+degistirilmedi.
 
 ## Mikro ve makro F1 farki
 

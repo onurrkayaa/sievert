@@ -341,10 +341,9 @@ public static class RenameSensitivity
             }
 
             // sievert:disable SV004 her commit'in kendi ebeveynine bakiliyor; dongunun disina alinamaz
-            using Patch patch = repository.Diff.Compare<Patch>(
-                commit.Parents.FirstOrDefault()?.Tree,
-                commit.Tree,
-                compare);
+            Tree? parent = commit.Parents.FirstOrDefault()?.Tree;
+
+            using Patch patch = repository.Diff.Compare<Patch>(parent, commit.Tree, compare);
 
             List<FileForMetrics> files = [];
 

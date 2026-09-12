@@ -242,9 +242,11 @@ public static class ValidationSample
         text.Append("Sebep: degerlendirici kaynak kod degisikligine bakacak. ");
         text.Append("Baska boyut, churn ya da dosya sayisi filtresi uygulanmadi; botlar dislanmadi.\n\n");
 
-        text.Append("**Korlenen alanlar (bu dosyada YOK):** model tahmini, model olasiligi, ");
-        text.Append("train esigi, SZZ etiketi (`IsBugIntroducing`), `LabelSource`, ");
-        text.Append("karisiklik matrisi hucresi (TP/FP/FN/TN).\n\n");
+        // Alan adlari bilerek yazilmiyor: bagimsiz kontrol dosyada o adlari arayarak
+        // sizinti sinaniyor, adlarin uyari metninde gecmesi kontrolu bulaniklastirirdi.
+        text.Append("**Korlenen alanlar (bu dosyada YOK):** modelin tahmini, modelin olasiligi, ");
+        text.Append("egitimde secilen esik, otomatik uretilmis hata etiketi, etiketin kaynagi ");
+        text.Append("ve modelin bu etikete gore dogru/yanlis hucresi.\n\n");
 
         text.Append("> **Uyari:** kararlar tamamlanmadan `data/asama5/prediction-validation-key.csv` acilmaz.\n\n");
 

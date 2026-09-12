@@ -1,0 +1,1286 @@
+{
+  "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+  "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+  "modelPredictionsSha256": "21b6987790610530d1d42f43b9d595236864f95a09b6a8ccdbed61d23810ee4f",
+  "codeCommit": "403b270",
+  "note": "ana model ve ana bolme degistirilmedi",
+  "botSensitivity": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "trainBots": 297,
+      "trainRows": 1931,
+      "testBots": 557,
+      "testRows": 828,
+      "A": {
+        "rows": 828,
+        "positives": 10,
+        "threshold": 0.23811133205890656,
+        "tp": 7,
+        "fp": 39,
+        "fn": 3,
+        "tn": 779,
+        "precision": 0.15217391304347827,
+        "recall": 0.7,
+        "f1": 0.25,
+        "prAuc": 0.303279472237008,
+        "brier": 0.013229432082571895,
+        "ece": 0.029155558472539183,
+        "meanPrediction": 0.040528787545404836
+      },
+      "B": {
+        "rows": 271,
+        "positives": 10,
+        "threshold": 0.23811133205890656,
+        "tp": 7,
+        "fp": 39,
+        "fn": 3,
+        "tn": 222,
+        "precision": 0.15217391304347827,
+        "recall": 0.7,
+        "f1": 0.25,
+        "prAuc": 0.3044338541011283,
+        "brier": 0.039776936806395824,
+        "ece": 0.06635255863219053,
+        "meanPrediction": 0.10110176037511585
+      },
+      "C": {
+        "rows": 271,
+        "positives": 10,
+        "threshold": 0.2304161936044693,
+        "tp": 7,
+        "fp": 39,
+        "fn": 3,
+        "tn": 222,
+        "precision": 0.15217391304347827,
+        "recall": 0.7,
+        "f1": 0.25,
+        "prAuc": 0.3045657683848877,
+        "brier": 0.03875979644634158,
+        "ece": 0.06895156980773977,
+        "meanPrediction": 0.09980685025457005
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "trainBots": 107,
+      "trainRows": 16041,
+      "testBots": 821,
+      "testRows": 6876,
+      "A": {
+        "rows": 6876,
+        "positives": 927,
+        "threshold": 0.31998512148857117,
+        "tp": 654,
+        "fp": 1091,
+        "fn": 273,
+        "tn": 4858,
+        "precision": 0.37478510028653295,
+        "recall": 0.7055016181229773,
+        "f1": 0.48952095808383234,
+        "prAuc": 0.5199459583907894,
+        "brier": 0.09984755571147351,
+        "ece": 0.08102012175260107,
+        "meanPrediction": 0.21583687567930263
+      },
+      "B": {
+        "rows": 6055,
+        "positives": 926,
+        "threshold": 0.31998512148857117,
+        "tp": 654,
+        "fp": 1090,
+        "fn": 272,
+        "tn": 4039,
+        "precision": 0.375,
+        "recall": 0.7062634989200864,
+        "f1": 0.4898876404494382,
+        "prAuc": 0.5203812648366285,
+        "brier": 0.11312263829511285,
+        "ece": 0.0892263043915672,
+        "meanPrediction": 0.24215776599354905
+      },
+      "C": {
+        "rows": 6055,
+        "positives": 926,
+        "threshold": 0.32076478004455566,
+        "tp": 654,
+        "fp": 1089,
+        "fn": 272,
+        "tn": 4040,
+        "precision": 0.37521514629948366,
+        "recall": 0.7062634989200864,
+        "f1": 0.49007118771075303,
+        "prAuc": 0.520537736869804,
+        "brier": 0.1131976283204191,
+        "ece": 0.08965461500996419,
+        "meanPrediction": 0.24258607661194603
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "trainBots": 0,
+      "trainRows": 5943,
+      "testBots": 0,
+      "testRows": 2547,
+      "A": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.2169155329465866,
+        "tp": 44,
+        "fp": 298,
+        "fn": 85,
+        "tn": 2120,
+        "precision": 0.1286549707602339,
+        "recall": 0.34108527131782945,
+        "f1": 0.18683651804670912,
+        "prAuc": 0.11916415080328081,
+        "brier": 0.055856073839294584,
+        "ece": 0.06248053095775307,
+        "meanPrediction": 0.11312835192359524
+      },
+      "B": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.2169155329465866,
+        "tp": 44,
+        "fp": 298,
+        "fn": 85,
+        "tn": 2120,
+        "precision": 0.1286549707602339,
+        "recall": 0.34108527131782945,
+        "f1": 0.18683651804670912,
+        "prAuc": 0.11916415080328081,
+        "brier": 0.055856073839294584,
+        "ece": 0.06248053095775307,
+        "meanPrediction": 0.11312835192359524
+      },
+      "C": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.2169155329465866,
+        "tp": 44,
+        "fp": 298,
+        "fn": 85,
+        "tn": 2120,
+        "precision": 0.1286549707602339,
+        "recall": 0.34108527131782945,
+        "f1": 0.18683651804670912,
+        "prAuc": 0.11916415080328081,
+        "brier": 0.055856073839294584,
+        "ece": 0.06248053095775307,
+        "meanPrediction": 0.11312835192359524
+      }
+    }
+  ],
+  "maturitySensitivity": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "removedRows": 99,
+      "removedPositives": 0,
+      "ana": {
+        "rows": 828,
+        "positives": 10,
+        "threshold": 0.23811133205890656,
+        "tp": 7,
+        "fp": 39,
+        "fn": 3,
+        "tn": 779,
+        "precision": 0.15217391304347827,
+        "recall": 0.7,
+        "f1": 0.25,
+        "prAuc": 0.303279472237008,
+        "brier": 0.013229432082571895,
+        "ece": 0.029155558472539183,
+        "meanPrediction": 0.040528787545404836
+      },
+      "olgun": {
+        "rows": 729,
+        "positives": 10,
+        "threshold": 0.23811133205890656,
+        "tp": 7,
+        "fp": 38,
+        "fn": 3,
+        "tn": 681,
+        "precision": 0.15555555555555556,
+        "recall": 0.7,
+        "f1": 0.2545454545454545,
+        "prAuc": 0.30532484983646185,
+        "brier": 0.01471239656025092,
+        "ece": 0.03012671731184052,
+        "meanPrediction": 0.04304445897484842
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "removedRows": 559,
+      "removedPositives": 40,
+      "ana": {
+        "rows": 6876,
+        "positives": 927,
+        "threshold": 0.31998512148857117,
+        "tp": 654,
+        "fp": 1091,
+        "fn": 273,
+        "tn": 4858,
+        "precision": 0.37478510028653295,
+        "recall": 0.7055016181229773,
+        "f1": 0.48952095808383234,
+        "prAuc": 0.5199459583907894,
+        "brier": 0.09984755571147351,
+        "ece": 0.08102012175260107,
+        "meanPrediction": 0.21583687567930263
+      },
+      "olgun": {
+        "rows": 6317,
+        "positives": 887,
+        "threshold": 0.31998512148857117,
+        "tp": 623,
+        "fp": 935,
+        "fn": 264,
+        "tn": 4495,
+        "precision": 0.3998716302952503,
+        "recall": 0.7023675310033822,
+        "f1": 0.5096114519427403,
+        "prAuc": 0.5507884653380267,
+        "brier": 0.09631636590595562,
+        "ece": 0.0704529113683236,
+        "meanPrediction": 0.21086766520717115
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "removedRows": 683,
+      "removedPositives": 13,
+      "ana": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.2169155329465866,
+        "tp": 44,
+        "fp": 298,
+        "fn": 85,
+        "tn": 2120,
+        "precision": 0.1286549707602339,
+        "recall": 0.34108527131782945,
+        "f1": 0.18683651804670912,
+        "prAuc": 0.11916415080328081,
+        "brier": 0.055856073839294584,
+        "ece": 0.06248053095775307,
+        "meanPrediction": 0.11312835192359524
+      },
+      "olgun": {
+        "rows": 1864,
+        "positives": 116,
+        "threshold": 0.2169155329465866,
+        "tp": 39,
+        "fp": 182,
+        "fn": 77,
+        "tn": 1566,
+        "precision": 0.17647058823529413,
+        "recall": 0.33620689655172414,
+        "f1": 0.23145400593471813,
+        "prAuc": 0.15351956691478677,
+        "brier": 0.06059254923853909,
+        "ece": 0.04628776428975776,
+        "meanPrediction": 0.10851952394641011
+      }
+    }
+  ],
+  "csharpCoverage": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "csZeroRows": 1628,
+      "csZeroPositives": 0,
+      "csNonZeroRows": 1131,
+      "csNonZeroPositives": 261,
+      "A": {
+        "rows": 828,
+        "positives": 10,
+        "threshold": 0.23811133205890656,
+        "tp": 7,
+        "fp": 39,
+        "fn": 3,
+        "tn": 779,
+        "precision": 0.15217391304347827,
+        "recall": 0.7,
+        "f1": 0.25,
+        "prAuc": 0.303279472237008,
+        "brier": 0.013229432082571895,
+        "ece": 0.029155558472539183,
+        "meanPrediction": 0.040528787545404836
+      },
+      "B": {
+        "rows": 828,
+        "positives": 10,
+        "threshold": 0.2076420933008194,
+        "tp": 6,
+        "fp": 30,
+        "fn": 4,
+        "tn": 788,
+        "precision": 0.16666666666666666,
+        "recall": 0.6,
+        "f1": 0.2608695652173913,
+        "prAuc": 0.3194481359162335,
+        "brier": 0.01222099699002433,
+        "ece": 0.038725641812535294,
+        "meanPrediction": 0.047754332261241
+      },
+      "C": {
+        "rows": 151,
+        "positives": 10,
+        "threshold": 0.25832799077033997,
+        "tp": 7,
+        "fp": 36,
+        "fn": 3,
+        "tn": 105,
+        "precision": 0.16279069767441862,
+        "recall": 0.7,
+        "f1": 0.2641509433962264,
+        "prAuc": 0.2840816212762032,
+        "brier": 0.07267505598760597,
+        "ece": 0.13288286332016355,
+        "meanPrediction": 0.1887311294354153
+      },
+      "csharpSubsetBaseline": {
+        "threshold": 107,
+        "f1": 0.2978723404255319,
+        "prAuc": 0.27500520005777307,
+        "tp": 7,
+        "fp": 30,
+        "fn": 3,
+        "tn": 111
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "csZeroRows": 5669,
+      "csZeroPositives": 0,
+      "csNonZeroRows": 17248,
+      "csNonZeroPositives": 4688,
+      "A": {
+        "rows": 6876,
+        "positives": 927,
+        "threshold": 0.31998512148857117,
+        "tp": 654,
+        "fp": 1091,
+        "fn": 273,
+        "tn": 4858,
+        "precision": 0.37478510028653295,
+        "recall": 0.7055016181229773,
+        "f1": 0.48952095808383234,
+        "prAuc": 0.5199459583907894,
+        "brier": 0.09984755571147351,
+        "ece": 0.08102012175260107,
+        "meanPrediction": 0.21583687567930263
+      },
+      "B": {
+        "rows": 6876,
+        "positives": 927,
+        "threshold": 0.24704262614250183,
+        "tp": 708,
+        "fp": 1424,
+        "fn": 219,
+        "tn": 4525,
+        "precision": 0.3320825515947467,
+        "recall": 0.7637540453074434,
+        "f1": 0.46289637136319056,
+        "prAuc": 0.4941117572867906,
+        "brier": 0.1017964766523599,
+        "ece": 0.08437089768113824,
+        "meanPrediction": 0.21918765160783982
+      },
+      "C": {
+        "rows": 4222,
+        "positives": 927,
+        "threshold": 0.32753804326057434,
+        "tp": 670,
+        "fp": 1185,
+        "fn": 257,
+        "tn": 2110,
+        "precision": 0.3611859838274933,
+        "recall": 0.7227615965480043,
+        "f1": 0.48166786484543495,
+        "prAuc": 0.5201503873272239,
+        "brier": 0.16482488051457575,
+        "ece": 0.13090267835457578,
+        "meanPrediction": 0.35046686594339627
+      },
+      "csharpSubsetBaseline": {
+        "threshold": 25,
+        "f1": 0.5123110151187905,
+        "prAuc": 0.5014769711227813,
+        "tp": 593,
+        "fp": 795,
+        "fn": 334,
+        "tn": 2500
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "csZeroRows": 1310,
+      "csZeroPositives": 0,
+      "csNonZeroRows": 7180,
+      "csNonZeroPositives": 1013,
+      "A": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.2169155329465866,
+        "tp": 44,
+        "fp": 298,
+        "fn": 85,
+        "tn": 2120,
+        "precision": 0.1286549707602339,
+        "recall": 0.34108527131782945,
+        "f1": 0.18683651804670912,
+        "prAuc": 0.11916415080328081,
+        "brier": 0.055856073839294584,
+        "ece": 0.06248053095775307,
+        "meanPrediction": 0.11312835192359524
+      },
+      "B": {
+        "rows": 2547,
+        "positives": 129,
+        "threshold": 0.1913093626499176,
+        "tp": 56,
+        "fp": 447,
+        "fn": 73,
+        "tn": 1971,
+        "precision": 0.11133200795228629,
+        "recall": 0.43410852713178294,
+        "f1": 0.17721518987341775,
+        "prAuc": 0.10226963530978915,
+        "brier": 0.0580653995974048,
+        "ece": 0.07884215760075104,
+        "meanPrediction": 0.1294899785665932
+      },
+      "C": {
+        "rows": 2011,
+        "positives": 129,
+        "threshold": 0.20726187527179718,
+        "tp": 47,
+        "fp": 340,
+        "fn": 82,
+        "tn": 1542,
+        "precision": 0.12144702842377261,
+        "recall": 0.3643410852713178,
+        "f1": 0.1821705426356589,
+        "prAuc": 0.11779182175349727,
+        "brier": 0.07044778938951926,
+        "ece": 0.07818611184077652,
+        "meanPrediction": 0.14233330229328772
+      },
+      "csharpSubsetBaseline": {
+        "threshold": 35,
+        "f1": 0.1704211557296768,
+        "prAuc": 0.12474193598933488,
+        "tp": 87,
+        "fp": 805,
+        "fn": 42,
+        "tn": 1077
+      }
+    }
+  ],
+  "outOfRange": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "testRows": 828,
+      "rowsOutside": 620,
+      "rowsInside": 208,
+      "features": [
+        {
+          "feature": "AuthorCommitCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 591,
+          "total": 591,
+          "percentOfTest": 71.3768
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "CsFilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "belowMinimum": 0,
+          "aboveMaximum": 2,
+          "total": 2,
+          "percentOfTest": 0.2415
+        },
+        {
+          "feature": "Entropy",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesAdded",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 42,
+          "total": 42,
+          "percentOfTest": 5.0725
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 3,
+          "total": 3,
+          "percentOfTest": 0.3623
+        },
+        {
+          "feature": "PriorChanges",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "PriorFixes",
+          "belowMinimum": 0,
+          "aboveMaximum": 2,
+          "total": 2,
+          "percentOfTest": 0.2415
+        },
+        {
+          "feature": "SubsystemCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 1,
+          "total": 1,
+          "percentOfTest": 0.1208
+        }
+      ],
+      "aralik-disi": {
+        "rows": 620,
+        "positives": 1,
+        "threshold": 0.23811133205890656,
+        "tp": 1,
+        "fp": 13,
+        "fn": 0,
+        "tn": 606,
+        "precision": 0.07142857142857142,
+        "recall": 1,
+        "f1": 0.13333333333333333,
+        "prAuc": 0.25,
+        "brier": 0.004844283293798337,
+        "ece": 0.022646453171487776,
+        "meanPrediction": 0.024259356397294228
+      },
+      "aralik-ici": {
+        "rows": 208,
+        "positives": 9,
+        "threshold": 0.23811133205890656,
+        "tp": 6,
+        "fp": 26,
+        "fn": 3,
+        "tn": 173,
+        "precision": 0.1875,
+        "recall": 0.6666666666666666,
+        "f1": 0.29268292682926833,
+        "prAuc": 0.35704377212066934,
+        "brier": 0.03822362558756996,
+        "ece": 0.05337658292662057,
+        "meanPrediction": 0.08902420731381146
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "testRows": 6876,
+      "rowsOutside": 2308,
+      "rowsInside": 4568,
+      "features": [
+        {
+          "feature": "AuthorCommitCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "CsFilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "belowMinimum": 0,
+          "aboveMaximum": 5,
+          "total": 5,
+          "percentOfTest": 0.0727
+        },
+        {
+          "feature": "Entropy",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesAdded",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 2296,
+          "total": 2296,
+          "percentOfTest": 33.3915
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 1266,
+          "total": 1266,
+          "percentOfTest": 18.4119
+        },
+        {
+          "feature": "PriorChanges",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "PriorFixes",
+          "belowMinimum": 0,
+          "aboveMaximum": 2,
+          "total": 2,
+          "percentOfTest": 0.0291
+        },
+        {
+          "feature": "SubsystemCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        }
+      ],
+      "aralik-disi": {
+        "rows": 2308,
+        "positives": 436,
+        "threshold": 0.31998512148857117,
+        "tp": 377,
+        "fp": 678,
+        "fn": 59,
+        "tn": 1194,
+        "precision": 0.35734597156398107,
+        "recall": 0.8646788990825688,
+        "f1": 0.505700871898055,
+        "prAuc": 0.6098748955394097,
+        "brier": 0.1453464419755695,
+        "ece": 0.16256784606850938,
+        "meanPrediction": 0.35147599164909865
+      },
+      "aralik-ici": {
+        "rows": 4568,
+        "positives": 491,
+        "threshold": 0.31998512148857117,
+        "tp": 277,
+        "fp": 413,
+        "fn": 214,
+        "tn": 3664,
+        "precision": 0.40144927536231884,
+        "recall": 0.5641547861507128,
+        "f1": 0.4690939881456393,
+        "prAuc": 0.45342015571149596,
+        "brier": 0.0768590641402085,
+        "ece": 0.039817812706822504,
+        "meanPrediction": 0.14730467785568416
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "testRows": 2547,
+      "rowsOutside": 2411,
+      "rowsInside": 136,
+      "features": [
+        {
+          "feature": "AuthorCommitCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 2306,
+          "total": 2306,
+          "percentOfTest": 90.5379
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "belowMinimum": 0,
+          "aboveMaximum": 5,
+          "total": 5,
+          "percentOfTest": 0.1963
+        },
+        {
+          "feature": "CsFilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "belowMinimum": 0,
+          "aboveMaximum": 6,
+          "total": 6,
+          "percentOfTest": 0.2356
+        },
+        {
+          "feature": "Entropy",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesAdded",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 1253,
+          "total": 1253,
+          "percentOfTest": 49.1951
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "belowMinimum": 0,
+          "aboveMaximum": 468,
+          "total": 468,
+          "percentOfTest": 18.3746
+        },
+        {
+          "feature": "PriorChanges",
+          "belowMinimum": 0,
+          "aboveMaximum": 5,
+          "total": 5,
+          "percentOfTest": 0.1963
+        },
+        {
+          "feature": "PriorFixes",
+          "belowMinimum": 0,
+          "aboveMaximum": 4,
+          "total": 4,
+          "percentOfTest": 0.157
+        },
+        {
+          "feature": "SubsystemCount",
+          "belowMinimum": 0,
+          "aboveMaximum": 0,
+          "total": 0,
+          "percentOfTest": 0
+        }
+      ],
+      "aralik-disi": {
+        "rows": 2411,
+        "positives": 120,
+        "threshold": 0.2169155329465866,
+        "tp": 42,
+        "fp": 291,
+        "fn": 78,
+        "tn": 2000,
+        "precision": 0.12612612612612611,
+        "recall": 0.35,
+        "f1": 0.18543046357615892,
+        "prAuc": 0.11612520868689714,
+        "brier": 0.05587586062304018,
+        "ece": 0.0651287566299118,
+        "meanPrediction": 0.11490063551833982
+      },
+      "aralik-ici": {
+        "rows": 136,
+        "positives": 9,
+        "threshold": 0.2169155329465866,
+        "tp": 2,
+        "fp": 7,
+        "fn": 7,
+        "tn": 120,
+        "precision": 0.2222222222222222,
+        "recall": 0.2222222222222222,
+        "f1": 0.2222222222222222,
+        "prAuc": 0.22927856756070616,
+        "brier": 0.055505294900980384,
+        "ece": 0.046626489249962,
+        "meanPrediction": 0.08170941260793958
+      }
+    }
+  ],
+  "syntheticNoise": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "rate": 0.05,
+      "repeats": 100,
+      "trainCandidates": 729,
+      "testCandidates": 141,
+      "f1": {
+        "mean": 0.2707139134638797,
+        "p2_5": 0.20512820512820512,
+        "median": 0.27027027027027023,
+        "p97_5": 0.34146341463414637
+      },
+      "prAuc": {
+        "mean": 0.2776386817696192,
+        "p2_5": 0.22149998219057257,
+        "median": 0.2672371243095502,
+        "p97_5": 0.38991941522088797
+      },
+      "brier": {
+        "mean": 0.02073069362986665,
+        "p2_5": 0.01748804104317301,
+        "median": 0.020540232670678452,
+        "p97_5": 0.02511390323055292
+      },
+      "ece": {
+        "mean": 0.03100157156771851,
+        "p2_5": 0.023391595698981922,
+        "median": 0.030607643781793932,
+        "p97_5": 0.03863326117998396
+      },
+      "threshold": {
+        "mean": 0.26578125566244126,
+        "p2_5": 0.22963406145572662,
+        "median": 0.2648540437221527,
+        "p97_5": 0.30337631702423096
+      },
+      "syntheticTestPositives": {
+        "mean": 16.89,
+        "p2_5": 13,
+        "median": 17,
+        "p97_5": 22
+      }
+    },
+    {
+      "repository": "github.com/app-vnext/polly",
+      "rate": 0.1,
+      "repeats": 100,
+      "trainCandidates": 729,
+      "testCandidates": 141,
+      "f1": {
+        "mean": 0.2984387696705251,
+        "p2_5": 0.21212121212121213,
+        "median": 0.29213483146067415,
+        "p97_5": 0.3953488372093023
+      },
+      "prAuc": {
+        "mean": 0.29034572196958247,
+        "p2_5": 0.2089902227939485,
+        "median": 0.28200369725665964,
+        "p97_5": 0.4421323518513636
+      },
+      "brier": {
+        "mean": 0.02744564906054585,
+        "p2_5": 0.022172865540468188,
+        "median": 0.02720470424878708,
+        "p97_5": 0.03313692552587715
+      },
+      "ece": {
+        "mean": 0.033626961167531985,
+        "p2_5": 0.024060963264063054,
+        "median": 0.03354400298814065,
+        "p97_5": 0.04354825217188515
+      },
+      "threshold": {
+        "mean": 0.28438598319888114,
+        "p2_5": 0.21575872600078583,
+        "median": 0.28608858585357666,
+        "p97_5": 0.3399805426597595
+      },
+      "syntheticTestPositives": {
+        "mean": 23.53,
+        "p2_5": 18,
+        "median": 23,
+        "p97_5": 30
+      }
+    },
+    {
+      "repository": "github.com/app-vnext/polly",
+      "rate": 0.2,
+      "repeats": 100,
+      "trainCandidates": 729,
+      "testCandidates": 141,
+      "f1": {
+        "mean": 0.3882322326176618,
+        "p2_5": 0.3035714285714286,
+        "median": 0.3893805309734513,
+        "p97_5": 0.4776119402985074
+      },
+      "prAuc": {
+        "mean": 0.3518635282924459,
+        "p2_5": 0.26229429207823346,
+        "median": 0.3462452895350824,
+        "p97_5": 0.44656499414813805
+      },
+      "brier": {
+        "mean": 0.03973187127557205,
+        "p2_5": 0.03366109410718611,
+        "median": 0.0394903880856732,
+        "p97_5": 0.046716391358410395
+      },
+      "ece": {
+        "mean": 0.04054618195859839,
+        "p2_5": 0.024923914777320824,
+        "median": 0.04049993200204561,
+        "p97_5": 0.05229929681359239
+      },
+      "threshold": {
+        "mean": 0.255053678303957,
+        "p2_5": 0.14808860421180725,
+        "median": 0.2585318386554718,
+        "p97_5": 0.34863123297691345
+      },
+      "syntheticTestPositives": {
+        "mean": 38.39,
+        "p2_5": 29,
+        "median": 39,
+        "p97_5": 47
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "rate": 0.05,
+      "repeats": 100,
+      "trainCandidates": 9265,
+      "testCandidates": 3295,
+      "f1": {
+        "mean": 0.4922622220375245,
+        "p2_5": 0.48364779874213837,
+        "median": 0.4927536231884057,
+        "p97_5": 0.5006273525721455
+      },
+      "prAuc": {
+        "mean": 0.5194043384289837,
+        "p2_5": 0.5114391589123856,
+        "median": 0.5187740848159208,
+        "p97_5": 0.5264484663322226
+      },
+      "brier": {
+        "mean": 0.11254277079151236,
+        "p2_5": 0.11059235582661839,
+        "median": 0.11258780923397914,
+        "p97_5": 0.11453211669546881
+      },
+      "ece": {
+        "mean": 0.07745849583028917,
+        "p2_5": 0.07145854362946273,
+        "median": 0.07739373431070395,
+        "p97_5": 0.0830909236668844
+      },
+      "threshold": {
+        "mean": 0.2930282515287399,
+        "p2_5": 0.2610671818256378,
+        "median": 0.29689234495162964,
+        "p97_5": 0.30952754616737366
+      },
+      "syntheticTestPositives": {
+        "mean": 1090.72,
+        "p2_5": 1071,
+        "median": 1089,
+        "p97_5": 1117
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "rate": 0.1,
+      "repeats": 100,
+      "trainCandidates": 9265,
+      "testCandidates": 3295,
+      "f1": {
+        "mean": 0.5095898813831177,
+        "p2_5": 0.4983534577387486,
+        "median": 0.5092327698309493,
+        "p97_5": 0.5208333333333334
+      },
+      "prAuc": {
+        "mean": 0.5276907383389924,
+        "p2_5": 0.5153366317102739,
+        "median": 0.5276455296865314,
+        "p97_5": 0.5372226780728234
+      },
+      "brier": {
+        "mean": 0.12374402139883689,
+        "p2_5": 0.12127308281652202,
+        "median": 0.12364519530760688,
+        "p97_5": 0.12677466671531326
+      },
+      "ece": {
+        "mean": 0.07473772106536317,
+        "p2_5": 0.06690775822772096,
+        "median": 0.07479190319891064,
+        "p97_5": 0.0821955559997643
+      },
+      "threshold": {
+        "mean": 0.2876449829339981,
+        "p2_5": 0.2618319094181061,
+        "median": 0.28587666153907776,
+        "p97_5": 0.32263702154159546
+      },
+      "syntheticTestPositives": {
+        "mean": 1254.84,
+        "p2_5": 1226,
+        "median": 1253,
+        "p97_5": 1286
+      }
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "rate": 0.2,
+      "repeats": 100,
+      "trainCandidates": 9265,
+      "testCandidates": 3295,
+      "f1": {
+        "mean": 0.5535355138753523,
+        "p2_5": 0.539553752535497,
+        "median": 0.5527027027027027,
+        "p97_5": 0.5665271966527197
+      },
+      "prAuc": {
+        "mean": 0.5579945707797777,
+        "p2_5": 0.5442088624679225,
+        "median": 0.5576712161465505,
+        "p97_5": 0.5725290763597388
+      },
+      "brier": {
+        "mean": 0.1414074860000375,
+        "p2_5": 0.13835327460818883,
+        "median": 0.14139267790134097,
+        "p97_5": 0.14403285395976814
+      },
+      "ece": {
+        "mean": 0.07088313573716144,
+        "p2_5": 0.06282748393424323,
+        "median": 0.07006427409741632,
+        "p97_5": 0.07908351767217046
+      },
+      "threshold": {
+        "mean": 0.2763690631091595,
+        "p2_5": 0.24783161282539368,
+        "median": 0.2770288288593292,
+        "p97_5": 0.3031744062900543
+      },
+      "syntheticTestPositives": {
+        "mean": 1583.2,
+        "p2_5": 1537,
+        "median": 1585,
+        "p97_5": 1628
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "rate": 0.05,
+      "repeats": 100,
+      "trainCandidates": 4285,
+      "testCandidates": 1882,
+      "f1": {
+        "mean": 0.2249902804912757,
+        "p2_5": 0.20151133501259444,
+        "median": 0.22564102564102567,
+        "p97_5": 0.24615384615384617
+      },
+      "prAuc": {
+        "mean": 0.15584489681120134,
+        "p2_5": 0.13913601003907983,
+        "median": 0.15558830021099224,
+        "p97_5": 0.17242301975140376
+      },
+      "brier": {
+        "mean": 0.085612766621942,
+        "p2_5": 0.08062639854963095,
+        "median": 0.08555354563226811,
+        "p97_5": 0.09124387964342578
+      },
+      "ece": {
+        "mean": 0.060177030358628515,
+        "p2_5": 0.051362669443477435,
+        "median": 0.06017123765583085,
+        "p97_5": 0.06854469473817443
+      },
+      "threshold": {
+        "mean": 0.20861946657299996,
+        "p2_5": 0.18794693052768707,
+        "median": 0.20870333909988403,
+        "p97_5": 0.22760282456874847
+      },
+      "syntheticTestPositives": {
+        "mean": 221.95,
+        "p2_5": 204,
+        "median": 221,
+        "p97_5": 245
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "rate": 0.1,
+      "repeats": 100,
+      "trainCandidates": 4285,
+      "testCandidates": 1882,
+      "f1": {
+        "mean": 0.2734112401365624,
+        "p2_5": 0.24557956777996073,
+        "median": 0.2739018087855297,
+        "p97_5": 0.3014705882352941
+      },
+      "prAuc": {
+        "mean": 0.19671265776151028,
+        "p2_5": 0.17694899546265855,
+        "median": 0.19554157642099682,
+        "p97_5": 0.21384252175663832
+      },
+      "brier": {
+        "mean": 0.11255256640429773,
+        "p2_5": 0.10712451096728393,
+        "median": 0.11265284790297149,
+        "p97_5": 0.11844024668562779
+      },
+      "ece": {
+        "mean": 0.057391357409847715,
+        "p2_5": 0.04516032482004675,
+        "median": 0.056606206215455875,
+        "p97_5": 0.06961645425624946
+      },
+      "threshold": {
+        "mean": 0.2237285356223583,
+        "p2_5": 0.2004784792661667,
+        "median": 0.22401049733161926,
+        "p97_5": 0.25735628604888916
+      },
+      "syntheticTestPositives": {
+        "mean": 315.54,
+        "p2_5": 294,
+        "median": 315,
+        "p97_5": 341
+      }
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "rate": 0.2,
+      "repeats": 100,
+      "trainCandidates": 4285,
+      "testCandidates": 1882,
+      "f1": {
+        "mean": 0.3850249647400554,
+        "p2_5": 0.3601720958819914,
+        "median": 0.3854848304580607,
+        "p97_5": 0.4130314743235782
+      },
+      "prAuc": {
+        "mean": 0.2807265692776144,
+        "p2_5": 0.2565839338592535,
+        "median": 0.27758596641205796,
+        "p97_5": 0.3089447424254978
+      },
+      "brier": {
+        "mean": 0.1579405753724866,
+        "p2_5": 0.15102813058007047,
+        "median": 0.15794237153327514,
+        "p97_5": 0.16472855690023533
+      },
+      "ece": {
+        "mean": 0.05563418628450197,
+        "p2_5": 0.04156497773943995,
+        "median": 0.0554787195969591,
+        "p97_5": 0.07503147049403695
+      },
+      "threshold": {
+        "mean": 0.23124524131417273,
+        "p2_5": 0.19108709692955017,
+        "median": 0.23583781719207764,
+        "p97_5": 0.25933605432510376
+      },
+      "syntheticTestPositives": {
+        "mean": 504.05,
+        "p2_5": 468,
+        "median": 505,
+        "p97_5": 543
+      }
+    }
+  ]
+}

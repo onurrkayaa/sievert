@@ -146,6 +146,53 @@ tutarli: `PriorFixes`, `PriorChanges` ile yuksek korelasyonlu (ShareX 0,9336, Je
 **Nedensellik iddiasi kurulmuyor.** Bunlar modelde tasinan iliskiler; "su oznitelik hataya
 neden olur" denmiyor.
 
+## 5b. Betimsel ayristirma
+
+Yeni model egitilmedi, yeni esik secilmedi, hedef testte kalibrasyon yapilmadi ve mevcut
+genelleme sonucu degistirilmedi. Bu bolum yalnizca mevcut sayilari yan yana koyuyor.
+
+Sonuc dosyasi `data/asama5/generalization-decomposition.json`, ozeti
+`a56585d1adf33e07fe111b054c96c484dcad01cca15944867e301e550d52a622`.
+
+**"Belirgin dusus" siniri sonuc gormeden sabitlendi:** mutlak F1 farki `<= -0,05`.
+
+| Kaynak → Hedef | ΔPR-AUC | ΔF1 (kaynak esigi) | ΔF1 (0,5) | Ort tahmin | Hedef orani | Mutlak fark | Kaynak train orani | Kaynak − hedef |
+|---|---|---|---|---|---|---|---|---|
+| polly → jellyfin | -0.0313 | -0.0027 | -0.1393 | 0.1063 | 0.1348 | 0.0285 | 0.1300 | -0.0048 |
+| polly → sharex | +0.0120 | +0.0443 | +0.0318 | 0.1064 | 0.0506 | 0.0557 | 0.1300 | +0.0793 |
+| jellyfin → polly | +0.0169 | -0.0061 | -0.1743 | 0.0809 | 0.0121 | 0.0688 | 0.2345 | +0.2224 |
+| jellyfin → sharex | +0.0265 | +0.0229 | +0.1473 | 0.2145 | 0.0506 | 0.1638 | 0.2345 | +0.1838 |
+| sharex → polly | +0.0133 | +0.1250 | -0.0000 | 0.0488 | 0.0121 | 0.0367 | 0.1487 | +0.1367 |
+| sharex → jellyfin | -0.0258 | -0.1134 | -0.4189 | 0.0710 | 0.1348 | 0.0638 | 0.1487 | +0.0139 |
+| jellyfin+sharex → polly | -0.0110 | -0.0162 | -0.1979 | 0.0706 | 0.0121 | 0.0586 | 0.2113 | +0.1992 |
+| polly+sharex → jellyfin | -0.0246 | -0.0727 | -0.3513 | 0.0782 | 0.1348 | 0.0566 | 0.1441 | +0.0093 |
+| polly+jellyfin → sharex | +0.0277 | +0.0256 | +0.1645 | 0.2035 | 0.0506 | 0.1528 | 0.2232 | +0.1726 |
+
+### Sayimlar
+
+| Olcu | Sayi |
+|---|---|
+| PR-AUC korunup kaynak esigi F1'i belirgin dusen deney | **2 / 9** |
+| 0,5 esigi kaynak esiginden iyi olan deney | **5 / 9** |
+| Ortalama tahmin hedef orandan **yuksek** | **6 / 9** |
+| Ortalama tahmin hedef orandan **dusuk** | **3 / 9** |
+| Tek kaynakta ayni-repo F1'inin ustunde | **3 / 6** |
+| Leave-one-out'ta ayni-repo F1'inin ustunde | **1 / 3** |
+
+### Okuma
+
+**PR-AUC korunup F1'i belirgin dusen iki deney var:** ShareX → Jellyfin (ΔPR-AUC -0,0258
+ama ΔF1 -0,1134) ve Polly + ShareX → Jellyfin (ΔPR-AUC -0,0246 ama ΔF1 -0,0727). Ikisinde
+de hedef Jellyfin ve kaynak, Jellyfin'den **dusuk** taban oranli bir kume.
+
+**Ortalama tahmin ile hedef oran arasindaki fark en buyuk iki yerde**, hedefi ShareX olan
+Jellyfin kaynakli deneylerde: Jellyfin → ShareX'te ortalama tahmin 0,2145, hedef oran
+0,0506 (fark 0,1638); Polly + Jellyfin → ShareX'te 0,2035 / 0,0506 (fark 0,1528). Ayni iki
+deneyde ECE de en yuksek (0,1638 ve 0,1528).
+
+Bu, **esik ve taban orani uyumsuzluguyla uyumlu** bir tablo. Ama **neden kanitlamiyor**:
+kaynak ve hedefin oznitelik dagilimlari da farkli ve bu ayristirma iki etkiyi ayirmiyor.
+
 ## 6. Beklenti karsilastirmasi
 
 `asama5-genelleme-beklenti.md` **degistirilmedi**.

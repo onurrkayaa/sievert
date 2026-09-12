@@ -30,11 +30,17 @@ public sealed class LoadedModel
     public double Score(float[] features) => Score([features])[0];
 
     /// <summary>Tek bir satirin logit'i ve ham skoru birlikte.</summary>
-    public ModelScore Evaluate(float[] features) =>
-        LogisticRegressionModel.Outputs(context, transformer, [new ModelInput { Features = features }])[0];
+    public ModelScore Evaluate(float[] features) => Evaluate([features])[0];
+
+    /// <summary>Verilen satirlarin logit ve ham skorlari, giris sirasinda.</summary>
+    public IReadOnlyList<ModelScore> Evaluate(IReadOnlyList<float[]> rows) =>
+        LogisticRegressionModel.Outputs(context, transformer, Inputs(rows));
 
     /// <summary>Verilen satirlarin ham skorlari, giris sirasinda.</summary>
-    public IReadOnlyList<double> Score(IReadOnlyList<float[]> rows)
+    public IReadOnlyList<double> Score(IReadOnlyList<float[]> rows) =>
+        LogisticRegressionModel.Probabilities(context, transformer, Inputs(rows));
+
+    private static List<ModelInput> Inputs(IReadOnlyList<float[]> rows)
     {
         List<ModelInput> inputs = new(rows.Count);
 
@@ -43,6 +49,6 @@ public sealed class LoadedModel
             inputs.Add(new ModelInput { Features = features });
         }
 
-        return LogisticRegressionModel.Probabilities(context, transformer, inputs);
+        return inputs;
     }
 }

@@ -5,7 +5,13 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <!--
+    Sievert.Api referansi olcum icin: api-baseline komutu commit satirlarini modelin
+    bekledigi bicime cevirirken API'nin kendi donusumunu kullaniyor. Ikinci bir donusum
+    yazmak, olculen sey ile calisan sey arasinda sessiz bir ayrisma birakirdi.
+  -->
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Sievert.Api\Sievert.Api.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Data\Sievert.Data.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Mining\Sievert.Mining.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Modeling\Sievert.Modeling.csproj" />

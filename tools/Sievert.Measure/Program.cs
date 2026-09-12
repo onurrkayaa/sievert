@@ -205,6 +205,19 @@ if (args[0] == "snapshot")
     return Snapshot.Write(context, args[1]);
 }
 
+// Asama 6 Adim 2: API temel olcumu. Gercek bir API sureci baslatiyor.
+// args: api-baseline <repo-koku> <commit> <cikti.json>
+if (args[0] == "api-baseline")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure api-baseline <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await ApiBaselineCommand.RunAsync(context, args);
+}
+
 // Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.
 // args: history-check <anlik-goruntu.csv> <ozet.sha256>
 if (args[0] == "history-check")

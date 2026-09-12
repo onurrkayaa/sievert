@@ -39,6 +39,21 @@ if (args[0] == "baseline")
     return BaselineCommand.Run(args[1], args[2], args[3], args[4], args[5], args[6]);
 }
 
+// Model de dondurulmus dosyalari okuyor.
+// args: model <anlik.csv> <anlik.sha256> <manifest.csv> <manifest.sha256> <baseline.sha256> <commit> <cikti-klasoru>
+if (args[0] == "model")
+{
+    if (args.Length < 8)
+    {
+        Console.Error.WriteLine(
+            "Kullanim: measure model <anlik.csv> <anlik.sha256> <manifest.csv> <manifest.sha256> "
+            + "<baseline.sha256> <commit> <cikti-klasoru>");
+        return 2;
+    }
+
+    return ModelCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

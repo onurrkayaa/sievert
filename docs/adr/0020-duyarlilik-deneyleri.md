@@ -140,6 +140,56 @@ okunabilir; oysa o **gosterilmedi**.
 
 O yuzden her deneyin altinda ne gosterildigi ve ne gosterilmedigi ayri ayri yaziyor.
 
+## Ad degisimi deneyinin commit sirasi (v2 duzeltmesi)
+
+Deney iki kez kosuldu. **v1'de aracin commit sirasi ana metrik boru hattiyla ayni
+degildi**: arac tarih + SHA ordinal siraliyordu, ana boru hatti ise tarih + madencilik
+sirasi (veritabanindaki `Id`). Ayni saniyeye dusen commit'lerde bu iki siralama farkli
+sonuc veriyor - olculdu: ayni `AuthorDateUtc` degerini paylasan gruplarin Polly'de
+69'unun 40'inda, Jellyfin'de 321'inin 173'unde, ShareX'te 9'unun 4'unde `Id` sirasi ile
+SHA sirasi farkli.
+
+O yuzden v1'de esik 50 sonucu ana sonucla birebir uyusmuyordu ve "esik 50 ana kosudur"
+iddiasi tam dogrulanmis degildi.
+
+**v2'de siralama kurali tek bir yere yazildi** (`Sievert.Data.Metrics.CommitOrdering`) ve
+arac o kurali kullaniyor; kural iki yerde metin olarak kopyalanmiyor. Ana boru hattinin
+davranisi **degistirilmedi**: `MetricsRunner.Read` hala EF tarafinda
+`OrderBy(AuthorDateUtc).ThenBy(Id)` diyor; ortak kural o cumlenin ne anlama geldigini
+yazip test eden yer.
+
+**Esik 50 kapisi** eklendi: v2 once yalniz 50'yi kosuyor, 15 ozniteligin tamamini
+repo+SHA bazinda ana snapshot'la karsilastiriyor ve fark sifir degilse 40 ile 60'i
+**kosmuyor**. Olculen: 512 490 hucre, 0 fark. Model sonucu da ana sonucla ayni cikti.
+
+v1'in sayilari silinmedi; raporda siralama uyusmazligi notuyla duruyor.
+
+## Sentetik gurultuyu taban oranindan ayirmak
+
+Adim 4'te mutlak F1 ve PR-AUC oran arttikca yukselmisti. Bu tek basina modelin
+gurultuden faydalandigini gostermez: sabit skorlu bir tabanin PR-AUC'si taban oranina
+esit (ADR 0017), yani pozitif oran yukselince "hicbir sey yapmayan" bir yontemin PR-AUC'si
+de yukselir.
+
+O yuzden **mevcut deney degistirilmeden** uzerine eslenmis tabanlar eklendi: ayni
+flip'ler, ayni tohumlar, ayni 100 tekrar. Her tekrarda ayni sentetik etiketler uzerinde
+lojistik regresyon, `LinesAdded` esigi (esik yalniz sentetik train'de secilerek) ve
+egitim oraniyla rastgele taban hesaplandi. Arac mevcut model sonuclarinin degismedigini
+dogruladi ve dokuz durumun dokuzunda ayni cikti.
+
+Dort ek olcu: PR-AUC lift, normalize PR-AUC, climatology Brier ve Brier skill score.
+Tanimlari `asama5-gurultu-normalizasyon-sozlesmesi.md` surum 1.0'da, sonuc gormeden
+yazildi.
+
+**Yorum kapisi** da sozlesmede onceden yaziliydi: mutlak metrikler artiyor ama lift,
+normalize PR-AUC ve tabanlara fark artmiyor, skill dusuyorsa "model gurultu arttikca
+iyilesti" **yazilmaz**. Olculen sonucta tabanlara gore fark dokuz durumun dokuzunda da
+artti, yani kapi kapanmadi - ama Jellyfin'de PR-AUC lift **dustu** (0,3608 → 0,3277), yani
+artisin bir kismi taban oranindan geliyor. Rapor bunu repo bazinda sayilarla yaziyor.
+
+Sebep **kanitlanmadi**: sonuc "sinif orani etkisiyle uyumlu" diye yaziliyor, "sinif orani
+nedeniyle oldu" diye degil.
+
 **Sonuc:** Alti deneyin hicbiri ana modeli ya da ana sonucu degistirmedi. Uc beklenti
 tutmadi (90 gunluk filtrenin en cok Polly'yi degistirecegi, C# alt kumesinde
 degerlendirmenin zorlasacagi, sentetik gurultunun metrikleri bozacagi) ve ucu de

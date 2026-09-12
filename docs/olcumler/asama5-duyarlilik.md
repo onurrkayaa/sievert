@@ -214,75 +214,96 @@ snapshot ve veritabani **degismedi**; cikti `data/asama5/sensitivity/rename/` al
 **Tahmini sure, kosudan once yazildi:** ana madencilik 50 esiginde uc repoda toplam 176 sn
 surmustu; uc esik x uc repo icin yaklasik 9 dakikalik git okumasi bekliyordum.
 
-**Olculen sure:** git okumasi Polly'de 4,9 - 6,5 sn, Jellyfin'de 62,1 - 72,8 sn,
-ShareX'te 102,2 - 151,3 sn (esik basina). Toplam yaklasik 9,5 dakika, tahminle uyumlu.
+**Olculen sure:** git okumasi Polly'de 3,4 - 6,5 sn, Jellyfin'de 59,9 - 72,8 sn,
+ShareX'te 102,2 - 151,3 sn (esik basina). Tahmin ~9 dakikaydi, olculen de o civarda.
 
-Cikti: `data/asama5/sensitivity/rename/rename-results.json`, ozeti
-`b412b262d188cb24c99e7883ae7b90963a49f074a8f11095f166cb7fe03af034`.
+### v1 ve v2: commit sirasi duzeltmesi
 
-### Zincir etkisi (esik 50, ayni diff'ler)
+Bu deney **iki kez** kosuldu ve ikinci kosu birincinin bir kusurunu duzeltti.
 
-| Repo | Etkilenen commit | `PriorChanges` farkli | En buyuk fark | Toplam (takipli / takipsiz) |
-|---|---|---|---|---|
-| Polly | 1234 / 2759 (%44,7) | 1233 | 3047 | 361 826 / 263 506 |
-| ShareX | 3978 / 8490 (%46,9) | 3978 | 2669 | 2 500 811 / 2 183 940 |
-| Jellyfin | 13 340 / 22 917 (%58,2) | 13 305 | 8682 | 8 123 060 / 6 421 480 |
+**v1'in kusuru:** aracin commit sirasi ana metrik boru hattiyla ayni degildi. Arac tarih +
+SHA ordinal siralaniyordu; ana boru hatti ise tarih + **madencilik sirasi** (veritabanindaki
+`Id`) kullaniyor. Ayni saniyeye dusen commit'lerde iki siralama farkli sonuc veriyor:
+olculdu, ayni `AuthorDateUtc` degerini paylasan gruplarin Polly'de 69'unun 40'inda,
+Jellyfin'de 321'inin 173'unde, ShareX'te 9'unun 4'unde `Id` sirasi ile SHA sirasi farkli.
 
-| Repo | `MaxFileAgeDays` farkli | En buyuk fark (gun) | Toplam (takipli / takipsiz) |
-|---|---|---|---|
-| Polly | 875 | 3636 | 3 009 436 / 2 494 802 |
-| ShareX | 2009 | 4590 | 11 243 593 / 10 163 122 |
-| Jellyfin | 10 585 | 4448 | 31 675 274 / 26 567 001 |
+Sonucu: v1'de esik 50 sonucu ana sonucla birebir uyusmuyordu (Polly 0,2456 / 0,2500;
+ShareX 0,1872 / 0,1868; Jellyfin ayni).
 
-**Bagimsiz kontrol:** bu aracin Polly icin urettigi sayilar `asama4-ad-degisimi.md`
-icindeki sayilarla **birebir ayni** (1234 etkilenen commit, `PriorChanges` 1233 farkli ve
-en buyuk 3047, `MaxFileAgeDays` 875 farkli ve en buyuk 3636, toplamlar 361 826 / 263 506 ve
-3 009 436 / 2 494 802). Arac git'i bagimsiz okudugu icin bu, hem araci hem Asama 4'un
-sayilarini dogruluyor.
+**v2'de duzeltildi:** siralama kurali tek bir yerde yazildi
+(`Sievert.Data.Metrics.CommitOrdering`) ve arac o kurali kullaniyor. Sira artik tarih
+artan, esitlikte git'ten okuma sirasi artan - ana boru hattinda ayni sira veritabanina
+`Id` olarak yazilmis olan sira.
 
-Zincir etkisi uc repoda da genis: ad degisimi iceren commit orani kucuk olsa da
-metrikleri etkilenen commit orani %44,7 - %58,2.
+| Dosya | SHA-256 | Not |
+|---|---|---|
+| v1 `sensitivity/rename/rename-results.json` | `b412b262d188cb24c99e7883ae7b90963a49f074a8f11095f166cb7fe03af034` | commit sirasi ana boru hattiyla ayni degil |
+| **v2 `rename-results-v2.json`** | `6fdef8cd7c69bcefd9187d45f803de23b8113da4eb837156c10795af7cdaf4ea` | siralama duzeltildi |
 
-### Esik duyarliligi (40 / 50 / 60)
+Eski dosya silinmedi; git gecmisinde ve `data/asama5/sensitivity/rename/` altinda duruyor.
 
-| Repo | Esik | Bulunan ad degisimi | 50'ye gore metrigi degisen commit |
-|---|---|---|---|
-| Polly | 40 | 1045 | 197 |
-| Polly | 50 | 1029 | 0 |
-| Polly | 60 | 1006 | 109 |
-| ShareX | 40 | 1783 | 598 |
-| ShareX | 50 | 1740 | 0 |
-| ShareX | 60 | 1709 | 245 |
-| Jellyfin | 40 | 3586 | 2757 |
-| Jellyfin | 50 | 3413 | 0 |
-| Jellyfin | 60 | 3301 | 2514 |
+### Esik 50 eslesme kapisi
 
-| Repo | Esik | Secilen olasilik esigi | TP | FP | FN | TN | F1 | PR-AUC | Brier | ECE |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Polly | 40 | 0,2432 | 7 | 38 | 3 | 780 | 0,2545 | 0,2906 | 0,0132 | 0,0306 |
-| Polly | 50 | 0,2311 | 7 | 40 | 3 | 778 | 0,2456 | 0,3015 | 0,0132 | 0,0306 |
-| Polly | 60 | 0,2342 | 7 | 40 | 3 | 778 | 0,2456 | 0,3028 | 0,0131 | 0,0291 |
-| ShareX | 40 | 0,2076 | 46 | 326 | 83 | 2092 | 0,1836 | 0,1187 | 0,0559 | 0,0624 |
-| ShareX | 50 | 0,2170 | 44 | 297 | 85 | 2121 | 0,1872 | 0,1192 | 0,0559 | 0,0625 |
-| ShareX | 60 | 0,2168 | 43 | 300 | 86 | 2118 | 0,1822 | 0,1197 | 0,0559 | 0,0628 |
-| Jellyfin | 40 | 0,3191 | 654 | 1091 | 273 | 4858 | 0,4895 | 0,5197 | 0,0998 | 0,0809 |
-| Jellyfin | 50 | 0,3198 | 654 | 1091 | 273 | 4858 | 0,4895 | 0,5200 | 0,0999 | 0,0810 |
-| Jellyfin | 60 | 0,3195 | 653 | 1088 | 274 | 4861 | 0,4895 | 0,5202 | 0,0999 | 0,0811 |
+v2'de once yalniz esik 50 kosuldu ve 15 ozniteligin tamami repo+SHA bazinda ana
+snapshot'la karsilastirildi. Kapi gecmeseydi 40 ve 60 **kosulmayacakti**.
 
-**Esik degisikligi ad degisimi sayisini ve tarihsel metrikleri belirgin degistiriyor ama
-model sonucunu cok az degistiriyor.** Jellyfin'de 40 ile 60 arasinda 2757 ve 2514 commit'in
-metrigi degisiyor, F1 ise uc esikte de 0,4895. En buyuk F1 farki ShareX'te: 0,1836 ile
-0,1872 arasinda 0,0036.
+| Repo | Karsilastirilan hucre | Farkli hucre |
+|---|---|---|
+| Polly | 41 385 (2759 x 15) | **0** |
+| ShareX | 127 350 (8490 x 15) | **0** |
+| Jellyfin | 343 755 (22 917 x 15) | **0** |
+| **Toplam** | **512 490** | **0** |
 
-**Sinir:** bu aracin commit sirasi tarih + SHA ordinal, ana boru hattinin sirasi tarih +
-satir kimligi. Uc esik de bu arac icinde ayni kurali kullandigi icin **esikler arasi
-karsilastirma gecerli**, ama bu aracin 50 esigindeki sayilari ana sonucla birebir ayni
-degil: Polly 0,2456 (ana 0,2500), ShareX 0,1872 (ana 0,1868), Jellyfin 0,4895 (ana 0,4895).
-Farklar 0,0044 / 0,0004 / 0,0000.
+Onbes ozniteligin her birinde fark 0 ve en buyuk mutlak fark 0. Karsilastirmaya
+girmeyen alanlar: hata etiketi, etiketin kaynagi ve bot bayragi - bunlar yeniden
+hesaplanmiyor, dondurulmus hedeften SHA ile aliniyor.
 
-**Ne kanitlamiyor:** hangi esigin **dogru** oldugu. Asama 4'te yazildigi gibi, bunun icin
-ad degisimlerinden bir orneklem alip kaynak koda bakarak dogru/yanlis siniflandirmak
-gerekir ve o olcum **yapilmadi**.
+Model sonucu da artik ana sonucla ayni: Polly F1 0,2500 / PR-AUC 0,3033, ShareX 0,1868 /
+0,1192, Jellyfin 0,4895 / 0,5199. Ucu de Adim 3'un sayilariyla birebir.
+
+### v2 sonuclari (40 / 50 / 60)
+
+| Repo | Esik | Ad degisimi | 50'ye gore degisen commit | Secilen olasilik esigi | TP | FP | FN | TN | F1 | PR-AUC | Brier | ECE |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Polly | 40 | 1045 | 197 | 0,2351 | 7 | 40 | 3 | 778 | 0,2456 | 0,3009 | 0,0132 | 0,0317 |
+| Polly | 50 | 1029 | 0 | 0,2381 | 7 | 39 | 3 | 779 | **0,2500** | **0,3033** | 0,0132 | 0,0292 |
+| Polly | 60 | 1006 | 109 | 0,2588 | 7 | 34 | 3 | 784 | 0,2745 | 0,3047 | 0,0131 | 0,0303 |
+| ShareX | 40 | 1783 | 598 | 0,2076 | 46 | 326 | 83 | 2092 | 0,1836 | 0,1187 | 0,0559 | 0,0624 |
+| ShareX | 50 | 1740 | 0 | 0,2169 | 44 | 298 | 85 | 2120 | **0,1868** | **0,1192** | 0,0559 | 0,0625 |
+| ShareX | 60 | 1709 | 245 | 0,2165 | 43 | 302 | 86 | 2116 | 0,1814 | 0,1197 | 0,0558 | 0,0627 |
+| Jellyfin | 40 | 3586 | 2757 | 0,3196 | 653 | 1090 | 274 | 4859 | 0,4891 | 0,5198 | 0,0998 | 0,0809 |
+| Jellyfin | 50 | 3413 | 0 | 0,3200 | 654 | 1091 | 273 | 4858 | **0,4895** | **0,5199** | 0,0998 | 0,0810 |
+| Jellyfin | 60 | 3301 | 2514 | 0,3196 | 653 | 1088 | 274 | 4861 | 0,4895 | 0,5202 | 0,0999 | 0,0811 |
+
+### v1'e gore ne degisti
+
+| Repo | Esik | v1 F1 | v2 F1 | v1 PR-AUC | v2 PR-AUC |
+|---|---|---|---|---|---|
+| Polly | 40 | 0,2545 | 0,2456 | 0,2906 | 0,3009 |
+| Polly | 50 | 0,2456 | **0,2500** | 0,3015 | **0,3033** |
+| Polly | 60 | 0,2456 | 0,2745 | 0,3028 | 0,3047 |
+| ShareX | 40 | 0,1836 | 0,1836 | 0,1187 | 0,1187 |
+| ShareX | 50 | 0,1872 | **0,1868** | 0,1192 | **0,1192** |
+| ShareX | 60 | 0,1822 | 0,1814 | 0,1197 | 0,1197 |
+| Jellyfin | 40 | 0,4895 | 0,4891 | 0,5197 | 0,5198 |
+| Jellyfin | 50 | 0,4895 | **0,4895** | 0,5200 | **0,5199** |
+| Jellyfin | 60 | 0,4895 | 0,4895 | 0,5202 | 0,5202 |
+
+**Degisimin tamami commit sirasi duzeltmesinden geliyor:** ad degisimi sayilari (1045 /
+1029 / 1006 vb.) ve 50'ye gore degisen commit sayilari (197 / 0 / 109 vb.) iki surumde de
+**ayni**; degisen yalnizca gecmis birikiminin sirasi ve ona bagli metrikler.
+
+En buyuk fark Polly esik 60'ta: F1 0,2456 → 0,2745. Polly ayni zamanda ayni saniyeli
+commit oraninin en yuksek oldugu repo degil ama test kumesi en kucuk olan, yani tek bir
+satirin yer degistirmesi F1'i en cok orada oynatiyor.
+
+**Esas sonuc degismedi:** esik degisikligi ad degisimi sayisini ve tarihsel metrikleri
+belirgin degistiriyor, model sonucunu az degistiriyor. v2'de en buyuk F1 farki Polly'de
+0,2456 - 0,2745 arasi (0,0289); Jellyfin'de 0,0004, ShareX'te 0,0054.
+
+**Ne kanitlamiyor:** hangi esigin **dogru** oldugu. Bunun icin ad degisimlerinden bir
+orneklem alip kaynak koda bakarak dogru/yanlis siniflandirmak gerekir ve o olcum
+**yapilmadi**.
 
 ## 6. Sentetik tek yonlu etiket gurultusu
 
@@ -321,6 +342,103 @@ ayirmiyor.
 orani iddiasi degil**; yalnizca tek yonlu gizli pozitif varsayimina karsi model
 metriklerinin hassasiyetini gosteriyor.
 
+## 6b. Gurultu sonuclarinin taban oranindan ayrilmasi
+
+Adim 4'te mutlak F1 ve PR-AUC oran arttikca yukselmisti. Bu tek basina modelin
+gurultuden faydalandigini gostermez: pozitif oran yukselince rastgele bir tabanin
+PR-AUC'si de yukselir ve F1'in olcegi sinif oranindan etkilenir.
+
+Mevcut deney **degistirilmedi**: ayni oranlar, ayni ana tohum (20260912), ayni tekrar
+tohumlari, ayni flip'ler, repo basina 100 tekrar. Arac mevcut model sonuclarinin
+degismedigini programatik olarak dogruladi ve **dokuz durumun dokuzunda da ayni cikti**.
+
+Tanimlar `asama5-gurultu-normalizasyon-sozlesmesi.md` surum 1.0'da. Sonuc dosyasi
+`data/asama5/noise-normalized-results.json`, ozeti
+`92748960b95422a5a8ee0c3c3e4ecdd14d13cb91062c3a50fb98f2cfb253763b`.
+
+### Model: mutlak ve normalize olculer
+
+| Repo | Oran | Test taban orani | F1 | PR-AUC | PR-AUC lift | Normalize PR-AUC | Brier | Brier skill |
+|---|---|---|---|---|---|---|---|---|
+| Polly | %5 | 0,0204 | 0,2707 | 0,2776 | 0,2572 | 0,2626 | 0,0207 | 0,4331 |
+| Polly | %10 | 0,0284 | 0,2984 | 0,2903 | 0,2619 | 0,2696 | 0,0274 | 0,4170 |
+| Polly | %20 | 0,0464 | 0,3882 | 0,3519 | 0,3055 | 0,3205 | 0,0397 | 0,4287 |
+| ShareX | %5 | 0,0871 | 0,2250 | 0,1558 | 0,0687 | 0,0753 | 0,0856 | 0,0389 |
+| ShareX | %10 | 0,1239 | 0,2734 | 0,1967 | 0,0728 | 0,0831 | 0,1126 | 0,0453 |
+| ShareX | %20 | 0,1979 | 0,3850 | 0,2807 | 0,0828 | 0,1033 | 0,1579 | 0,0577 |
+| Jellyfin | %5 | 0,1586 | 0,4923 | 0,5194 | 0,3608 | 0,4288 | 0,1125 | 0,2206 |
+| Jellyfin | %10 | 0,1825 | 0,5096 | 0,5277 | 0,3452 | 0,4223 | 0,1237 | 0,2322 |
+| Jellyfin | %20 | 0,2303 | 0,5535 | 0,5580 | 0,3277 | 0,4258 | 0,1414 | 0,2616 |
+
+Butun degerler ortalama; N/A cikan tekrar **yok** (normalize 0, skill 0).
+
+### Eslenmis tabanlar
+
+| Repo | Oran | LinesAdded F1 | LinesAdded PR-AUC | LinesAdded lift | Rastgele F1 | Rastgele PR-AUC | Rastgele lift |
+|---|---|---|---|---|---|---|---|
+| Polly | %5 | 0,2655 | 0,2405 | 0,2201 | 0,0329 | 0,0245 | 0,0041 |
+| Polly | %10 | 0,2666 | 0,2420 | 0,2136 | 0,0475 | 0,0322 | 0,0038 |
+| Polly | %20 | 0,3200 | 0,2797 | 0,2333 | 0,0732 | 0,0498 | 0,0035 |
+| ShareX | %5 | 0,2047 | 0,1288 | 0,0416 | 0,1196 | 0,0883 | 0,0012 |
+| ShareX | %10 | 0,2524 | 0,1640 | 0,0402 | 0,1586 | 0,1253 | 0,0014 |
+| ShareX | %20 | 0,3483 | 0,2380 | 0,0401 | 0,2360 | 0,1990 | 0,0011 |
+| Jellyfin | %5 | 0,4808 | 0,4625 | 0,3038 | 0,1977 | 0,1591 | 0,0004 |
+| Jellyfin | %10 | 0,4737 | 0,4674 | 0,2849 | 0,2241 | 0,1831 | 0,0006 |
+| Jellyfin | %20 | 0,4865 | 0,4888 | 0,2586 | 0,2772 | 0,2310 | 0,0008 |
+
+Rastgele tabanin lift'i dokuz durumda da 0,0041'in altinda. Bu, lift olcusunun kendi
+kontrolu: etiketten bagimsiz bir siralamanin PR-AUC'si taban oranina esit cikiyor.
+
+### Tabanlara gore fark
+
+| Repo | Oran | ΔF1 (LinesAdded) | ΔPR-AUC (LinesAdded) | Δlift (LinesAdded) | ΔF1 (rastgele) | ΔPR-AUC (rastgele) |
+|---|---|---|---|---|---|---|
+| Polly | %5 | +0,0052 | +0,0372 | +0,0372 | +0,2378 | +0,2531 |
+| Polly | %10 | +0,0318 | +0,0483 | +0,0483 | +0,2509 | +0,2582 |
+| Polly | %20 | +0,0682 | +0,0722 | +0,0722 | +0,3150 | +0,3020 |
+| ShareX | %5 | +0,0203 | +0,0271 | +0,0271 | +0,1054 | +0,0675 |
+| ShareX | %10 | +0,0210 | +0,0327 | +0,0327 | +0,1148 | +0,0714 |
+| ShareX | %20 | +0,0367 | +0,0427 | +0,0427 | +0,1490 | +0,0818 |
+| Jellyfin | %5 | +0,0114 | +0,0569 | +0,0569 | +0,2946 | +0,3603 |
+| Jellyfin | %10 | +0,0359 | +0,0603 | +0,0603 | +0,2854 | +0,3446 |
+| Jellyfin | %20 | +0,0670 | +0,0692 | +0,0692 | +0,2763 | +0,3270 |
+
+ΔPR-AUC ile Δlift her satirda ayni: lift ikisinden de ayni taban orani cikardigi icin
+fark degismiyor. Bu bir kontrol, yeni bir bilgi degil.
+
+### Yorum
+
+Yorum kapisinin "model gurultu arttikca iyilesti yazma" kosulu **saglanmadi**: tabanlara
+gore fark dokuz durumun dokuzunda da oranla birlikte **artti**. O yuzden asagidaki
+cumleler sayilarla yaziliyor ve repo bazinda ayriliyor.
+
+**Pozitif oranla birlikte mutlak metrikler yukseldi; eslenmis tabanlara gore goreli
+sonuc da yukseldi, fakat yon her olcude ayni degil:**
+
+- **Polly:** mutlak F1 0,2707 → 0,3882; lift 0,2572 → 0,3055 (yukseldi); normalize
+  0,2626 → 0,3205 (yukseldi); Brier skill 0,4331 → 0,4287 (neredeyse yerinde);
+  `LinesAdded`'a fark +0,0372 → +0,0722 (yukseldi).
+- **ShareX:** mutlak F1 0,2250 → 0,3850; lift 0,0687 → 0,0828 (yukseldi); normalize
+  0,0753 → 0,1033 (yukseldi); skill 0,0389 → 0,0577 (yukseldi); tabana fark
+  +0,0271 → +0,0427.
+- **Jellyfin:** mutlak F1 0,4923 → 0,5535 ve PR-AUC 0,5194 → 0,5580 yukseldi, **ama lift
+  0,3608 → 0,3277'ye dustu** ve normalize PR-AUC 0,4288 → 0,4258 ile neredeyse yerinde
+  kaldi. Skill 0,2206 → 0,2616 yukseldi, tabana fark +0,0569 → +0,0692 yukseldi.
+
+Yani Jellyfin'de mutlak PR-AUC artisinin bir kismi taban oranin kendisinden geliyor:
+taban orani 0,1586'dan 0,2303'e cikarken PR-AUC'nin taban oranin uzerine ekledigi miktar
+azaliyor.
+
+**Brier uc repoda da kotulesti** (Polly 0,0207 → 0,0397, ShareX 0,0856 → 0,1579,
+Jellyfin 0,1125 → 0,1414) ama climatology de kotulestigi icin skill score iki repoda
+yukseldi, birinde neredeyse yerinde kaldi.
+
+Bu sonuclar **sinif orani etkisiyle uyumlu**; sebep **kanitlanmadi** ve "sinif orani
+nedeniyle oldu" denmiyor. Sentetik pozitiflerin yalnizca `CsFilesChanged > 0`
+satirlardan secilmesi ayri bir aday aciklama ve bu deney iki etkiyi ayirmiyor.
+
+**Butun sayilar sentetik etiketlere gore hesaplandi; gercek performans iddiasi degil.**
+
 ## 7. Beklenti karsilastirmasi
 
 `asama5-duyarlilik-beklenti.md` **degistirilmedi**.
@@ -334,7 +452,7 @@ metriklerinin hassasiyetini gosteriyor.
 | 5 | `CsFilesChanged` kaldirilinca performans duser | Jellyfin ve ShareX'te dustu, Polly'de yukseldi | **kismen tuttu** |
 | 6 | Iki kaynak tamamen ayrilamaz | ayrilmadi ve ayrildigi iddia edilmedi | **tuttu** (yontem karari) |
 | 7 | Yalniz C# alt kumesinde degerlendirme daha zor olacak | PR-AUC iki repoda hafif dustu, F1 dusmedi | **TUTMADI** |
-| 11 | Flip orani arttikca F1 ve PR-AUC bozulur | ucu de yukseldi | **TUTMADI** |
+| 11 | Flip orani arttikca F1 ve PR-AUC bozulur | mutlak metrikler yukseldi; tabanlara gore fark da yukseldi (bkz. 6b) | **TUTMADI** |
 | 12 | Deney gercek kacirma orani iddiasi degil | oyle yazildi | **tuttu** (yontem karari) |
 
 4. madde tutmadi: 90 gunluk filtre Polly'de en az degisikligi yaptigi, ShareX'te en
@@ -343,6 +461,12 @@ oldugu icin pay degismedi, ShareX'te 683 satir ve 13 pozitif cikti - ama bunun F
 degisimini ne kadar acikladigi hesaplanmadi.
 
 7. ve 11. maddeler tutmadi ve sebepleri yukarida, **tahmin oldugu yazilarak** duruyor.
+
+11. madde icin ek olcum yapildi (6b): mutlak artisin ne kadarinin taban oranindan
+geldigini gormek icin eslenmis tabanlar ve normalize olculer hesaplandi. Sonuc, mutlak
+artisin tamaminin taban oranindan gelmedigini gosteriyor - tabanlara gore fark da
+yukseliyor - ama Jellyfin'de PR-AUC lift'in **dusmesi**, artisin bir kisminin taban
+oranindan geldigine isaret ediyor. Beklentinin tutmama sebebi hala **kanitlanmadi**.
 
 ## 8. Bilinen sinirliliklar
 
@@ -357,3 +481,8 @@ degisimini ne kadar acikladigi hesaplanmadi.
   cevrilmesi) denenmedi.
 - **Bot, olgunluk ve C# deneyleri birbirinden bagimsiz kosuldu**; birlesik etkileri
   olculmedi.
+- **Ad degisimi deneyi v1'de yanlis commit sirasiyla kosuldu.** v2 duzeltti ve esik 50
+  artik ana sonucla birebir esit, ama v1'in sayilari raporda duruyor ve silinmedi.
+- **Gurultu normalizasyonu sebebi kanitlamiyor.** Eslenmis tabanlar mutlak artisin
+  tamaminin taban oranindan gelmedigini gosteriyor; hangi kismin nereden geldigi
+  **olculmedi**.

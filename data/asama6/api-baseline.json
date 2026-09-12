@@ -1,0 +1,39 @@
+{
+  "codeCommit": "25e2908",
+  "seed": 20260912,
+  "sampleSize": 300,
+  "sampleWithoutCSharpFiles": 50,
+  "http": {
+    "startupMs": 684.2133,
+    "firstRequestMs": 280.9415,
+    "warmMinimumMs": 2.2009,
+    "warmMedianMs": 3.8852,
+    "warmP95Ms": 7.4897,
+    "warmMaximumMs": 48.5473,
+    "minimumBytes": 5105,
+    "meanBytes": 6028,
+    "maximumBytes": 6503,
+    "missingMandatoryWarnings": 0,
+    "coverageWarnings": 50,
+    "outsideRangeWarnings": 46,
+    "peakWorkingSetBytes": 243892224,
+    "monotonicityViolations": 0
+  },
+  "databaseCommandsPerRequest": {
+    "risk": 3,
+    "repositoryDetail": 5,
+    "commitList": 3,
+    "repositoryList": 2
+  },
+  "wholeDatabase": {
+    "rows": 34166,
+    "tolerance": 1E-06,
+    "worstLogitDifference": 1.783298074542472E-06,
+    "worstLogitMagnitude": 2.3305323123931885,
+    "worstRowAbsoluteContributionSum": 27.391839139237547,
+    "logitViolations": 11,
+    "smallestViolatingLogitMagnitude": 0.7011137008666992,
+    "largestViolatingLogitMagnitude": 9.569917678833008,
+    "monotonicityViolations": 0
+  }
+}

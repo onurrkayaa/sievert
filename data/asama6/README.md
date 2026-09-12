@@ -6,6 +6,14 @@ Burada API'nin okudugu, urettigi degil, **okudugu** dosyalar duruyor.
 |---|---|
 | `model-score-reference.json` | Uc model profilinin egitim bolumundeki skor dagilimi |
 | `model-score-reference.sha256` | Dosyanin SHA-256 ozeti |
+| `api-baseline.json` | API temel olcumunun ciktisi |
+
+`model-score-reference.json` **dondurulmus kanit**: ayni girdiyle her kosuda ayni
+baytlari veriyor, o yuzden ozeti var.
+
+`api-baseline.json` dondurulmus kanit **degil** ve ozeti yok: icinde sure ve bellek gibi
+makineye bagli sayilar var, iki kosu ayni dosyayi vermiyor. Sayilarin yorumu
+`docs/olcumler/asama6-api-temel.md` icinde.
 
 Kontrol:
 

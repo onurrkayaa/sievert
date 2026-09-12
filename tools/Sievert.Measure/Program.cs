@@ -11,7 +11,8 @@ if (args.Length < 2)
     Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>\n"
         + "         measure snapshot <cikti-dosyasi>\n"
         + "         measure split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>\n"
-        + "         measure history-check <anlik-goruntu.csv> <ozet.sha256>");
+        + "         measure history-check <anlik-goruntu.csv> <ozet.sha256>\n"
+        + "         measure baseline <anlik.csv> <anlik.sha256> <manifest.csv> <manifest.sha256> <commit> <cikti.json>");
     return 2;
 }
 
@@ -24,6 +25,20 @@ if (args[0] == "sayim")
 
 // Bolme de veritabanina bakmiyor: dondurulmus dosyayi okuyup manifest yaziyor.
 // args: split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>
+// Taban cizgileri de veritabanina bakmiyor: iki dondurulmus dosyayi okuyup sonuc yaziyor.
+// args: baseline <anlik.csv> <anlik.sha256> <manifest.csv> <manifest.sha256> <commit> <cikti.json>
+if (args[0] == "baseline")
+{
+    if (args.Length < 7)
+    {
+        Console.Error.WriteLine(
+            "Kullanim: measure baseline <anlik.csv> <anlik.sha256> <manifest.csv> <manifest.sha256> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return BaselineCommand.Run(args[1], args[2], args[3], args[4], args[5], args[6]);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

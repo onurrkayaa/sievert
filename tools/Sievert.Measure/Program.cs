@@ -78,6 +78,18 @@ if (args[0] == "sensitivity")
     return SensitivityCommand.Run(args);
 }
 
+// Adim 5: repo-arasi genelleme. args: generalization <veri-klasoru> <commit>
+if (args[0] == "generalization")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure generalization <veri-klasoru> <commit>");
+        return 2;
+    }
+
+    return GeneralizationCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

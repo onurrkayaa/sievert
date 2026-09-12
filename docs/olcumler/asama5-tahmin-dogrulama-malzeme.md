@@ -722,7 +722,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRDI]
 
 Not:
 
@@ -798,7 +798,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -1061,7 +1061,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -1282,7 +1282,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -1503,7 +1503,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -1721,7 +1721,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -2007,7 +2007,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -2256,7 +2256,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -2559,7 +2559,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -2787,7 +2787,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -2857,7 +2857,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -2989,7 +2989,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -3107,7 +3107,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -3228,7 +3228,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -3297,7 +3297,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -3509,7 +3509,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -4318,7 +4318,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -4393,7 +4393,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -4714,7 +4714,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -5043,7 +5043,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -5583,7 +5583,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -5751,7 +5751,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[ KUSUR-GETIRMEDI]
 
 Not:
 
@@ -5859,7 +5859,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -5922,7 +5922,7 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[KUSUR-GETIRMEDI ]
 
 Not:
 
@@ -5976,7 +5976,8 @@ Sonraki tarihsel olgular:
 
 Karar:
 
-[ ]
+[
+KUSUR-GETIRDI  ]
 
 Not:
 

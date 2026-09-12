@@ -139,6 +139,18 @@ if (args[0] == "validation-sample")
     return ValidationSample.Run(args);
 }
 
+// Adim 5b: kor dogrulama sayimi. args: tally <anahtar.csv> <malzeme.md>
+if (args[0] == "tally")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure tally <anahtar.csv> <malzeme.md>");
+        return 2;
+    }
+
+    return TallyCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

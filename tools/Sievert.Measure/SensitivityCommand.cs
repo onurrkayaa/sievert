@@ -112,7 +112,9 @@ public static class SensitivityCommand
         foreach (RepositorySplit repository in repositories)
         {
             double threshold = thresholds[repository.Identity];
+            // sievert:disable SV004 Train bellekte bir liste, veritabani sorgusu degil
             int trainBots = repository.Train.Count(row => row.IsBot);
+            // sievert:disable SV004 Test bellekte bir liste, veritabani sorgusu degil
             int testBots = repository.Test.Count(row => row.IsBot);
 
             IReadOnlyList<SnapshotRow> humanTrain = [.. repository.Train.Where(row => !row.IsBot)];
@@ -172,6 +174,7 @@ public static class SensitivityCommand
         {
             double threshold = thresholds[repository.Identity];
 
+            // sievert:disable SV004 iki liste de bellekte, veritabani sorgusu degil
             DateTimeOffset last = repository.Train
                 .Concat(repository.Test)
                 .Max(row => row.AuthorDateUtc);
@@ -226,9 +229,12 @@ public static class SensitivityCommand
             double threshold = thresholds[repository.Identity];
 
             IReadOnlyList<SnapshotRow> all = [.. repository.Train, .. repository.Test];
+            // sievert:disable SV004 all bellekte birlestirilmis bir liste, veritabani sorgusu degil
             int zero = all.Count(row => row.CsFilesChanged == 0);
+            // sievert:disable SV004 ayni bellekteki liste uzerinde sayim
             int zeroPositive = all.Count(row => row.CsFilesChanged == 0 && row.IsBugIntroducing);
             int nonZero = all.Count - zero;
+            // sievert:disable SV004 ayni bellekteki liste uzerinde sayim
             int nonZeroPositive = all.Count(row => row.CsFilesChanged > 0 && row.IsBugIntroducing);
 
             IReadOnlyList<SnapshotRow> csTrain = [.. repository.Train.Where(row => row.CsFilesChanged > 0)];

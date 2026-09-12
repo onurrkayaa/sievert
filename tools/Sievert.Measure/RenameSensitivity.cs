@@ -96,7 +96,9 @@ public static class RenameSensitivity
             (bool passed, IReadOnlyList<CellComparison> cells, IReadOnlyList<string> examples) =
                 Gate(identity, mainMetrics, rows);
 
+            // sievert:disable SV004 cells bellekte 15 elemanli bir liste, veritabani sorgusu degil
             int totalCompared = cells.Sum(cell => cell.Compared);
+            // sievert:disable SV004 ayni bellekteki liste uzerinde toplama
             int totalDifferent = cells.Sum(cell => cell.Different);
 
             Console.WriteLine($"  esik 50 kapisi: {totalCompared} hucre, farkli {totalDifferent}");

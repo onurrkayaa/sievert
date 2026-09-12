@@ -18,6 +18,13 @@ public sealed record DatabaseSettings(string? Value, string? Source, string? Err
     {
         ConnectionStringResult result = ConnectionString.Find(workingDirectory);
 
-        return new DatabaseSettings(result.Value, result.Source, result.Error);
+        return new DatabaseSettings(result.Value, result.Source, Sanitise(result.Error, workingDirectory));
     }
+
+    /// <summary>
+    /// Hata metnindeki mutlak yolu goreli hale getirir. Metin saglik ucunda ve <c>503</c>
+    /// cevabinda goruluyor; sunucunun klasor duzeni oradan okunmamali.
+    /// </summary>
+    private static string? Sanitise(string? error, string workingDirectory) =>
+        error?.Replace(workingDirectory, ".", StringComparison.Ordinal);
 }

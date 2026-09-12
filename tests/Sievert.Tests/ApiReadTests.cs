@@ -37,6 +37,24 @@ public sealed class ApiReadTests(PostgresFixture postgres)
     }
 
     [DockerFact]
+    public async Task NoErrorResponseLeaksTheServerLayout()
+    {
+        using SievertApiFactory factory = new(connectionString: null);
+        using HttpClient client = factory.CreateClient();
+
+        // Baglanti dizesi yokken veritabani isteyen her uc 503 doniyor; metinde
+        // mutlak yol, sunucu adi ya da parola olmamali.
+        foreach (string path in (string[])["/api/v1/health", "/api/v1/repositories"])
+        {
+            string body = await (await client.GetAsync(path)).Content.ReadAsStringAsync();
+
+            Assert.DoesNotContain(ProjectRoot.Path, body, StringComparison.Ordinal);
+            Assert.DoesNotContain("Password=sievert", body, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("/Users/", body, StringComparison.Ordinal);
+        }
+    }
+
+    [DockerFact]
     public async Task Health_SaysWhatIsWrongWhenTheConnectionStringIsMissing()
     {
         using SievertApiFactory factory = new(connectionString: null);

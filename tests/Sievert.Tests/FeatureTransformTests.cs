@@ -151,8 +151,8 @@ public class FeatureTransformTests
     public void Contract_ForbiddenFieldsAreNotPartOfTheTransform(string name)
     {
         Assert.DoesNotContain(name, FeatureTransform.LogFeatures);
-        Assert.NotEqual(name, FeatureTransform.RawContinuousFeature);
-        Assert.NotEqual(name, FeatureTransform.FlagFeature);
+        Assert.NotEqual(FeatureTransform.RawContinuousFeature, name);
+        Assert.NotEqual(FeatureTransform.FlagFeature, name);
     }
 
     /// <summary>Butun sayim alanlari ayni degeri, Entropy ayri bir deger aliyor.</summary>

@@ -42,6 +42,13 @@ public static class Snapshot
         string? LabelSource,
         bool IsBot);
 
+    private sealed record RepositorySummary(
+        string Identity,
+        int Count,
+        int Positives,
+        DateTimeOffset First,
+        DateTimeOffset Last);
+
     private const string Header =
         "Repository,RepositoryIdentity,Sha,AuthorDateUtc,"
         + "LinesAdded,LinesDeleted,FilesChanged,CsFilesChanged,Entropy,"
@@ -153,17 +160,27 @@ public static class Snapshot
 
         Console.WriteLine("repo bazinda:");
 
-        foreach (IGrouping<string, Row> group in rows
-            .GroupBy(row => row.RepositoryIdentity)
-            .OrderBy(group => group.Key, StringComparer.Ordinal))
-        {
-            int positives = group.Count(row => row.IsBugIntroducing);
-            DateTimeOffset first = group.Min(row => row.AuthorDateUtc);
-            DateTimeOffset last = group.Max(row => row.AuthorDateUtc);
+        // Ozetler donguye girmeden once tek gecisle hesaplaniyor; dongu icinde her repo
+        // icin listeyi bastan taramak gereksiz ve aracin kendi SV004 kurali da bunu
+        // isaretliyor.
+        List<RepositorySummary> summaries =
+        [
+            .. rows
+                .GroupBy(row => row.RepositoryIdentity)
+                .Select(group => new RepositorySummary(
+                    group.Key,
+                    group.Count(),
+                    group.Count(row => row.IsBugIntroducing),
+                    group.Min(row => row.AuthorDateUtc),
+                    group.Max(row => row.AuthorDateUtc)))
+                .OrderBy(summary => summary.Identity, StringComparer.Ordinal)
+        ];
 
+        foreach (RepositorySummary summary in summaries)
+        {
             Console.WriteLine(
-                $"  {group.Key}: {positives} / {group.Count()}  "
-                + $"{Date(first)} - {Date(last)}");
+                $"  {summary.Identity}: {summary.Positives} / {summary.Count}  "
+                + $"{Date(summary.First)} - {Date(summary.Last)}");
         }
 
         Console.WriteLine();
@@ -201,12 +218,32 @@ public static class Snapshot
             ("IsFix", row => row.IsFix ? 1 : 0),
         ];
 
-        foreach ((string name, Func<Row, double> value) in numeric)
-        {
-            int nan = rows.Count(row => double.IsNaN(value(row)));
-            int infinite = rows.Count(row => double.IsInfinity(value(row)));
+        int[] nan = new int[numeric.Length];
+        int[] infinite = new int[numeric.Length];
 
-            Console.WriteLine($"  {name}: NULL 0, NaN {nan}, sonsuz {infinite}");
+        // Tek gecis: satirlar bir kez dolasilip 15 oznitelik ayni anda sayiliyor.
+        foreach (Row row in rows)
+        {
+            for (int index = 0; index < numeric.Length; index++)
+            {
+                double value = numeric[index].Value(row);
+
+                if (double.IsNaN(value))
+                {
+                    nan[index]++;
+                }
+
+                if (double.IsInfinity(value))
+                {
+                    infinite[index]++;
+                }
+            }
+        }
+
+        for (int index = 0; index < numeric.Length; index++)
+        {
+            Console.WriteLine(
+                $"  {numeric[index].Name}: NULL 0, NaN {nan[index]}, sonsuz {infinite[index]}");
         }
 
         Console.WriteLine($"  IsBugIntroducing (hedef): NULL 0");

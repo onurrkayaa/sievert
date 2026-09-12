@@ -114,6 +114,18 @@ if (args[0] == "noise-normalized")
     return NoiseNormalizedCommand.Run(args);
 }
 
+// Adim 5b: genelleme sonucunun betimsel ayristirmasi. args: decomposition <veri> <commit>
+if (args[0] == "decomposition")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure decomposition <veri-klasoru> <commit>");
+        return 2;
+    }
+
+    return GeneralizationDecomposition.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

@@ -76,6 +76,7 @@ public static class RenameSensitivity
             Console.WriteLine($"== {identity} ==");
 
             Dictionary<int, Dictionary<string, CommitMetrics>> byThreshold = [];
+            ChainEffect? chain = null;
 
             foreach (int threshold in Thresholds)
             {
@@ -97,12 +98,29 @@ public static class RenameSensitivity
 
                 if (threshold == 50)
                 {
-                    Chain(writer, identity, commits, shas, metrics);
+                    chain = Chain(identity, commits, shas, metrics);
                 }
             }
 
             writer.WriteStartObject();
             writer.WriteString("repository", identity);
+
+            if (chain is not null)
+            {
+                writer.WriteStartObject("chainEffect");
+                writer.WriteNumber("commits", chain.Commits);
+                writer.WriteNumber("affectedCommits", chain.AffectedCommits);
+                writer.WriteNumber("priorChangesDifferent", chain.PriorChangesDifferent);
+                writer.WriteNumber("priorChangesLargestDifference", chain.PriorChangesLargest);
+                writer.WriteNumber("priorChangesTotalFollowed", chain.PriorChangesFollowed);
+                writer.WriteNumber("priorChangesTotalPlain", chain.PriorChangesPlain);
+                writer.WriteNumber("maxFileAgeDifferent", chain.MaxFileAgeDifferent);
+                writer.WriteNumber("maxFileAgeLargestDifference", chain.MaxFileAgeLargest);
+                writer.WriteNumber("maxFileAgeTotalFollowed", chain.MaxFileAgeFollowed);
+                writer.WriteNumber("maxFileAgeTotalPlain", chain.MaxFileAgePlain);
+                writer.WriteEndObject();
+            }
+
             writer.WriteStartArray("thresholds");
 
             foreach (int threshold in Thresholds)
@@ -128,9 +146,21 @@ public static class RenameSensitivity
         return 0;
     }
 
+    /// <summary>Zincir takibi acik/kapali karsilastirmasinin sayilari.</summary>
+    private sealed record ChainEffect(
+        int Commits,
+        int AffectedCommits,
+        int PriorChangesDifferent,
+        int PriorChangesLargest,
+        long PriorChangesFollowed,
+        long PriorChangesPlain,
+        int MaxFileAgeDifferent,
+        int MaxFileAgeLargest,
+        long MaxFileAgeFollowed,
+        long MaxFileAgePlain);
+
     /// <summary>Zincir takibi acik/kapali karsilastirmasi; ayni diff'lerden hesaplaniyor.</summary>
-    private static void Chain(
-        Utf8JsonWriter writer,
+    private static ChainEffect Chain(
         string identity,
         List<CommitForMetrics> commits,
         Dictionary<int, string> shas,
@@ -185,18 +215,17 @@ public static class RenameSensitivity
             + $"PriorChanges farkli {priorChangesDifferent} (en buyuk {largestPriorChanges}), "
             + $"MaxFileAgeDays farkli {ageDifferent} (en buyuk {largestAge})");
 
-        writer.WriteStartObject($"chain::{identity}");
-        writer.WriteNumber("commits", commits.Count);
-        writer.WriteNumber("affectedCommits", changed);
-        writer.WriteNumber("priorChangesDifferent", priorChangesDifferent);
-        writer.WriteNumber("priorChangesLargestDifference", largestPriorChanges);
-        writer.WriteNumber("priorChangesTotalFollowed", priorChangesFollowed);
-        writer.WriteNumber("priorChangesTotalPlain", priorChangesPlain);
-        writer.WriteNumber("maxFileAgeDifferent", ageDifferent);
-        writer.WriteNumber("maxFileAgeLargestDifference", largestAge);
-        writer.WriteNumber("maxFileAgeTotalFollowed", ageFollowed);
-        writer.WriteNumber("maxFileAgeTotalPlain", agePlain);
-        writer.WriteEndObject();
+        return new ChainEffect(
+            commits.Count,
+            changed,
+            priorChangesDifferent,
+            largestPriorChanges,
+            priorChangesFollowed,
+            priorChangesPlain,
+            ageDifferent,
+            largestAge,
+            ageFollowed,
+            agePlain);
     }
 
     /// <summary>Bir esigin metriklerini ana esikle (50) karsilastirir ve modeli kosar.</summary>

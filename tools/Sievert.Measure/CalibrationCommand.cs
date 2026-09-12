@@ -133,8 +133,11 @@ public static class CalibrationCommand
             HashSet<string> calibration = [.. split.Calibration.Select(row => row.Sha)];
             HashSet<string> test = [.. split.Test.Select(row => row.Sha)];
 
+            // sievert:disable SV004 uc kume de bellekteki HashSet, veritabani sorgusu degil
             int overlap = fit.Intersect(calibration).Count()
+                // sievert:disable SV004 ayni kesisim, bellekteki HashSet uzerinde
                 + fit.Intersect(test).Count()
+                // sievert:disable SV004 ayni kesisim, bellekteki HashSet uzerinde
                 + calibration.Intersect(test).Count();
 
             int inversions = Inversions(split.ModelFit) + Inversions(split.Calibration) + Inversions(split.Test);

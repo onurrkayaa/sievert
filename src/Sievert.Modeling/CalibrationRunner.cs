@@ -226,6 +226,7 @@ public static class CalibrationRunner
 
             foreach (RepositoryCalibration result in results)
             {
+                // sievert:disable SV004 Outcomes bellekte uc elemanli bir liste, veritabani sorgusu degil
                 total += pick(result.Outcomes.Single(outcome => outcome.Method == method));
             }
 

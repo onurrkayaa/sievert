@@ -12,6 +12,9 @@
   -->
   <ItemGroup>
     <PackageVersion Include="LibGit2Sharp" Version="0.32.0" />
+    <!-- 10.0.12: daha eski 10.0.x surumleri Microsoft.OpenApi 2.0.0 cekiyor ve o
+         surumde bilinen bir guvenlik acigi var (GHSA-v5pm-xwqc-g5wc). -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
     <PackageVersion Include="Microsoft.ML" Version="5.0.0" />
@@ -20,6 +23,7 @@
 
   <ItemGroup Label="Testler">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />

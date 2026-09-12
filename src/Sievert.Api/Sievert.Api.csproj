@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <!--
+    Salt-okunur API. Yazma islemi, repo klonlama ve uzun suren analiz isi yok; onlar
+    yol haritasinin 3. adiminda (docs/planlar/asama6-api-ve-panel.md).
+
+    Sievert.Analysis'e referans YOK: statik tarama endpoint'i bu turda yazilmadi ve
+    referans vermek "birazdan gelecek" izlenimi verirdi. Statik bulgular cevapta
+    yalnizca "not-run" durumu olarak duruyor (ADR 0023).
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sievert.Data\Sievert.Data.csproj" />
+    <ProjectReference Include="..\Sievert.Modeling\Sievert.Modeling.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sievert.Tests" />
+  </ItemGroup>
+
+</Project>

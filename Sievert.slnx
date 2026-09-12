@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Sievert.Analysis/Sievert.Analysis.csproj" />
+    <Project Path="src/Sievert.Api/Sievert.Api.csproj" />
     <Project Path="src/Sievert.Cli/Sievert.Cli.csproj" />
     <Project Path="src/Sievert.Core/Sievert.Core.csproj" />
     <Project Path="src/Sievert.Data/Sievert.Data.csproj" />

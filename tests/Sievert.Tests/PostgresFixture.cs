@@ -44,7 +44,13 @@ public sealed class PostgresFixture : IAsyncLifetime
     }
 
     /// <summary>Bos bir veritabani acip semayi migration ile kurar ve baglamini verir.</summary>
-    public SievertContext NewDatabase()
+    public SievertContext NewDatabase() => SievertContextBuilder.Create(NewDatabaseConnectionString());
+
+    /// <summary>
+    /// Ayni isi yapar ama baglam yerine baglanti dizesini verir. API testleri baglami
+    /// kendi servis kabinden aldigi icin dizeye ihtiyac duyuyor.
+    /// </summary>
+    public string NewDatabaseConnectionString()
     {
         string name = "sievert_test_" + Guid.NewGuid().ToString("n");
 
@@ -57,13 +63,14 @@ public sealed class PostgresFixture : IAsyncLifetime
         }
 
         NpgsqlConnectionStringBuilder builder = new(AdminConnectionString) { Database = name };
-        SievertContext context = SievertContextBuilder.Create(builder.ConnectionString);
+
+        using SievertContext context = SievertContextBuilder.Create(builder.ConnectionString);
 
         // EnsureCreated degil Migrate: repoya eklenen migration'in gercek bir PostgreSQL'de
         // uygulanabildigi de boylece test edilmis oluyor.
         context.Database.Migrate();
 
-        return context;
+        return builder.ConnectionString;
     }
 
     public async Task DisposeAsync()

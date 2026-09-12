@@ -1,0 +1,135 @@
+namespace Sievert.Data.Entities;
+
+/// <summary>Arka planda kosan is turleri. Ikisi de gercek is yapiyor; demo isi yok.</summary>
+public enum AnalysisJobKind
+{
+    /// <summary>Reponun calisma agacini SV kurallariyla tarar.</summary>
+    StaticScan,
+
+    /// <summary>Reponun metrikli butun commit'lerini kendi profiliyle skorlar.</summary>
+    RiskScoreAll,
+}
+
+/// <summary>
+/// Bir isin durumu. <see cref="Queued"/> ve <see cref="Running"/> aktif sayiliyor;
+/// geri kalan uc durum terminal ve geri donusu yok.
+/// </summary>
+public enum AnalysisJobStatus
+{
+    Queued,
+    Running,
+    Succeeded,
+    Failed,
+    Canceled,
+}
+
+/// <summary>
+/// Arka plan isi. Kuyruk degil, **kayit**: kuyruk yalnizca uyandirma mekanizmasi, isin
+/// gercekten var olup olmadiginin tek kaynagi bu tablo (ADR 0024).
+///
+/// Sonuclar bu ise bagli ayri tablolarda duruyor, ana <c>Commits</c> tablosunun uzerine
+/// yazilmiyor. Sebep: ayni repo birden fazla kez skorlanabiliyor, is yarida kalabiliyor
+/// ve ileride farkli model surumleri cikabilir; uzerine yazmak hangi sonucun hangi
+/// kosuldan geldigini kaybetmek olurdu.
+/// </summary>
+public sealed class AnalysisJobRow
+{
+    public Guid Id { get; set; }
+
+    public int RepositoryId { get; set; }
+
+    public RepositoryRow? Repository { get; set; }
+
+    public AnalysisJobKind Kind { get; set; }
+
+    public AnalysisJobStatus Status { get; set; }
+
+    public DateTimeOffset RequestedAtUtc { get; set; }
+
+    public DateTimeOffset? StartedAtUtc { get; set; }
+
+    public DateTimeOffset? CompletedAtUtc { get; set; }
+
+    /// <summary>
+    /// Iptal isteginin geldigi an. Iptalin tek kaynagi bu sutun; surec icindeki iptal
+    /// jetonu yalnizca hizlandirici, cunku isi kosan surec istegi alan surecten farkli
+    /// olabilir.
+    /// </summary>
+    public DateTimeOffset? CancellationRequestedAtUtc { get; set; }
+
+    /// <summary>Isin o an hangi asamada oldugu; ilerleme cubugunun yanindaki metin.</summary>
+    public string CurrentPhase { get; set; } = string.Empty;
+
+    public int ProcessedItems { get; set; }
+
+    /// <summary>Toplam oge sayisi. Kesfedilmeden once null.</summary>
+    public int? TotalItems { get; set; }
+
+    public double? ProgressPercent { get; set; }
+
+    public DateTimeOffset? HeartbeatAtUtc { get; set; }
+
+    public string? ErrorCode { get; set; }
+
+    /// <summary>Kullaniciya gosterilebilir hata metni. Yol, baglanti dizesi ve yigin izi ICERMEZ.</summary>
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>Istemcinin verdigi tekrar anahtari. Tam hali gunluge yazilmaz.</summary>
+    public string? IdempotencyKey { get; set; }
+
+    /// <summary>
+    /// Aktifken <c>"{repositoryId}:{kind}"</c>, terminal durumda null.
+    ///
+    /// Benzersiz indeksli. Boylece ayni repo ve tur icin ayni anda iki is acilmasi
+    /// yarisi uygulama koduna birakilmiyor; iki es zamanli istek yarisirsa veritabani
+    /// ikincisini reddediyor.
+    /// </summary>
+    public string? ActiveDeduplicationKey { get; set; }
+
+    /// <summary>Kaydedilen sonuc satiri sayisi.</summary>
+    public int ResultCount { get; set; }
+
+    /// <summary>Sonuc tam mi. Yalnizca <see cref="AnalysisJobStatus.Succeeded"/> durumunda true.</summary>
+    public bool IsResultComplete { get; set; }
+
+    /// <summary>Isi kosan surecin kimligi. Hangi surecin yarida biraktigi gorulsun diye.</summary>
+    public string? WorkerInstanceId { get; set; }
+
+    /// <summary>Iyimser es zamanlilik jetonu; iki worker ayni isi alamasin diye.</summary>
+    public uint Version { get; set; }
+
+    /// <summary>Aktif bir is icin tekillik anahtari.</summary>
+    public static string DeduplicationKeyFor(int repositoryId, AnalysisJobKind kind) =>
+        $"{repositoryId}:{Name(kind)}";
+
+    /// <summary>Tur adinin kablo uzerindeki yazilisi.</summary>
+    public static string Name(AnalysisJobKind kind) => kind switch
+    {
+        AnalysisJobKind.StaticScan => "static-scan",
+        AnalysisJobKind.RiskScoreAll => "risk-score-all",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Bilinmeyen is turu."),
+    };
+
+    /// <summary>Kablodaki yazilistan tur. Taninmayan deger null.</summary>
+    public static AnalysisJobKind? Parse(string? kind) => kind switch
+    {
+        "static-scan" => AnalysisJobKind.StaticScan,
+        "risk-score-all" => AnalysisJobKind.RiskScoreAll,
+        _ => null,
+    };
+
+    /// <summary>Durumun kablodaki yazilisi.</summary>
+    public static string Name(AnalysisJobStatus status) => status switch
+    {
+        AnalysisJobStatus.Queued => "queued",
+        AnalysisJobStatus.Running => "running",
+        AnalysisJobStatus.Succeeded => "succeeded",
+        AnalysisJobStatus.Failed => "failed",
+        AnalysisJobStatus.Canceled => "canceled",
+        _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Bilinmeyen durum."),
+    };
+
+    /// <summary>Aktif durumlar: kuyrukta ya da kosuyor.</summary>
+    public static bool IsActive(AnalysisJobStatus status) =>
+        status is AnalysisJobStatus.Queued or AnalysisJobStatus.Running;
+}

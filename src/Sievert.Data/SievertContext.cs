@@ -5,8 +5,9 @@ using Sievert.Data.Entities;
 namespace Sievert.Data;
 
 /// <summary>
-/// Veritabani baglami. Dort tablo: uc tanesi git'ten okunan ham veri, dorduncusu
-/// (CommitMetrics) Adim 3'te doldurulacak turetilmis olculer icin bos duruyor.
+/// Veritabani baglami. Ilk dort tablo git'ten okunan ham veri ve ondan turetilen
+/// olculer. Son uc tablo Asama 6 Adim 3'te eklendi: arka plan isleri ve o islerin
+/// urettigi sonuclar.
 /// </summary>
 public sealed class SievertContext(DbContextOptions<SievertContext> options) : DbContext(options)
 {
@@ -17,6 +18,12 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
     public DbSet<CommitFileRow> CommitFiles => Set<CommitFileRow>();
 
     public DbSet<CommitMetricRow> CommitMetrics => Set<CommitMetricRow>();
+
+    public DbSet<AnalysisJobRow> AnalysisJobs => Set<AnalysisJobRow>();
+
+    public DbSet<StaticAnalysisFindingRow> StaticAnalysisFindings => Set<StaticAnalysisFindingRow>();
+
+    public DbSet<CommitRiskSnapshotRow> CommitRiskSnapshots => Set<CommitRiskSnapshotRow>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -80,6 +87,82 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
             metric.HasIndex(row => row.CommitId).IsUnique();
 
             metric.HasOne(row => row.Commit)
+                .WithMany()
+                .HasForeignKey(row => row.CommitId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<AnalysisJobRow>(job =>
+        {
+            // Durum ve tur metin olarak yaziliyor. Sayi olsaydi veritabanina bakan biri
+            // 3'un ne demek oldugunu koda gitmeden bilemezdi.
+            job.Property(row => row.Kind).HasConversion<string>().HasMaxLength(40);
+            job.Property(row => row.Status).HasConversion<string>().HasMaxLength(20);
+            job.Property(row => row.CurrentPhase).HasMaxLength(60);
+            job.Property(row => row.ErrorCode).HasMaxLength(60);
+            job.Property(row => row.ErrorMessage).HasMaxLength(1000);
+            job.Property(row => row.IdempotencyKey).HasMaxLength(128);
+            job.Property(row => row.ActiveDeduplicationKey).HasMaxLength(80);
+            job.Property(row => row.WorkerInstanceId).HasMaxLength(80);
+
+            // PostgreSQL'in satir surumu; iki worker ayni isi alamasin diye.
+            job.Property(row => row.Version).IsRowVersion();
+
+            // Tekilligin gercek dayanagi burasi. PostgreSQL'de NULL'lar birbirinden
+            // farkli sayildigi icin terminal isler bu kisiti hic gormuyor.
+            job.HasIndex(row => row.ActiveDeduplicationKey).IsUnique();
+
+            // Ayni anahtar iki ayri ise verilemez; verilirse istek reddediliyor.
+            job.HasIndex(row => row.IdempotencyKey).IsUnique();
+
+            job.HasIndex(row => new { row.RepositoryId, row.RequestedAtUtc });
+            job.HasIndex(row => row.Status);
+
+            // Cascade DEGIL: bir depo silindiginde is gecmisi sessizce yok olmamali.
+            // Silme gercekten isteniyorsa once isler acikca ele alinmali.
+            job.HasOne(row => row.Repository)
+                .WithMany()
+                .HasForeignKey(row => row.RepositoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<StaticAnalysisFindingRow>(finding =>
+        {
+            finding.Property(row => row.RuleCode).HasMaxLength(10);
+            finding.Property(row => row.Severity).HasMaxLength(10);
+            finding.Property(row => row.RelativePath).HasMaxLength(1000);
+            finding.Property(row => row.MemberName).HasMaxLength(400);
+            finding.Property(row => row.Message).HasMaxLength(2000);
+            finding.Property(row => row.Rationale).HasMaxLength(2000);
+
+            finding.HasIndex(row => new { row.AnalysisJobId, row.RuleCode });
+
+            // Is silinirse bulgulari da gider; bulgu isten bagimsiz bir anlam tasimiyor.
+            finding.HasOne(row => row.AnalysisJob)
+                .WithMany()
+                .HasForeignKey(row => row.AnalysisJobId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<CommitRiskSnapshotRow>(snapshot =>
+        {
+            snapshot.Property(row => row.ModelProfile).HasMaxLength(40);
+            snapshot.Property(row => row.ModelChecksum).HasMaxLength(64);
+            snapshot.Property(row => row.WarningCodes).HasMaxLength(1000);
+
+            // Ayni is ayni commit'i iki kez yazamaz. Bir batch yeniden denenirse
+            // ciftlenmeyi veritabani engelliyor, kodun dikkatli olmasi degil.
+            snapshot.HasIndex(row => new { row.AnalysisJobId, row.CommitId }).IsUnique();
+
+            // "En riskli" siralamasi bu indeksten karsilaniyor.
+            snapshot.HasIndex(row => new { row.AnalysisJobId, row.RawModelScore });
+
+            snapshot.HasOne(row => row.AnalysisJob)
+                .WithMany()
+                .HasForeignKey(row => row.AnalysisJobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            snapshot.HasOne(row => row.Commit)
                 .WithMany()
                 .HasForeignKey(row => row.CommitId)
                 .OnDelete(DeleteBehavior.Cascade);

@@ -2,7 +2,7 @@
   "metricContractVersion": "1.0",
   "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
   "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
-  "codeCommit": "0e20959",
+  "codeCommit": "15fc80f",
   "split": [
     {
       "repository": "github.com/app-vnext/polly",
@@ -282,6 +282,15 @@
         "max": 2237,
         "notAvailable": 0
       }
+    },
+    "macroF1": {
+      "mean": 0.09073604104211228,
+      "p2_5": 0.07459411837259704,
+      "median": 0.08995003479560003,
+      "p97_5": 0.10882522273253899,
+      "min": 0.0661422926877328,
+      "max": 0.12453860288848277,
+      "notAvailable": 0
     }
   },
   "linesAddedBaseline": {

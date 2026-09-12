@@ -73,6 +73,14 @@ public static class CommandRunner
             return RunMine(mine);
         }
 
+        // check artik ortak tarama servisinden geciyor. Arka plan isi de ayni servisi
+        // cagiriyor; iki kopya olsaydi zamanla ayrisir ve "panel ile CLI farkli sey
+        // soyluyor" diye bir kusur cikardi.
+        if (options is CheckOptions check)
+        {
+            return RunCheck(check);
+        }
+
         SourceFileSearch search = SourceFileFinder.Search(options.TargetPath);
 
         if (search.Files.Count == 0)
@@ -120,7 +128,6 @@ public static class CommandRunner
         return options switch
         {
             ScanOptions scan => RunScan(scan, excluded.Files, root, excludedCount, skipped),
-            CheckOptions check => RunCheck(check, excluded.Files, root, excludedCount, skipped, config),
             _ => throw new InvalidOperationException("Bilinmeyen komut turu."),
         };
     }
@@ -197,50 +204,35 @@ public static class CommandRunner
         return ExitCodes.Clean;
     }
 
-    private static int RunCheck(
-        CheckOptions options,
-        IReadOnlyList<string> files,
-        string root,
-        int excludedCount,
-        IReadOnlyList<string> skippedDirectories,
-        SievertConfig config)
+    private static int RunCheck(CheckOptions options)
     {
-        // Kural listesi RuleCatalog'da; burada sadece yapilandirmayla suzuluyor.
-        RuleSelectionResult selectionResult = RuleCatalog.Select(config);
+        ScanOutcome outcome = ScanService.Run(options.TargetPath, options.ConfigPath, options.Exclude);
 
-        if (selectionResult.Selection is not RuleSelection selection)
+        if (!outcome.Ok)
         {
-            Console.Error.WriteLine(selectionResult.Error);
+            Console.Error.WriteLine(outcome.Error);
             return ExitCodes.ToolError;
         }
 
-        RuleResult result = new RuleRunner(selection.Enabled).Run(files, root);
-
-        // Seviye ezmesi bulgular uretildikten sonra uygulaniyor; --fail-on karsilastirmasi
-        // da ezilmis seviyeyi goruyor, cunku asagida bu liste kullaniliyor.
-        IReadOnlyList<Finding> findings = selection.ApplySeverity(result.Findings);
-
-        CheckSummary summary = CheckSummary.Of(
-            files.Count,
-            findings,
-            excludedCount,
-            skippedDirectories,
-            new RuleUsage(selection.Enabled.Select(rule => rule.Code).ToArray(), selection.DisabledCodes),
-            result.Suppressions.Count);
+        WarnAboutUnmatchedPatterns(outcome.UnmatchedPatterns, outcome.Root);
 
         if (options.Json)
         {
-            Console.Out.WriteLine(
-                JsonFormatter.FormatCheck(root, findings, result.Exemptions, result.Suppressions, summary));
+            Console.Out.WriteLine(JsonFormatter.FormatCheck(
+                outcome.Root,
+                outcome.Findings,
+                outcome.Exemptions,
+                outcome.Suppressions,
+                outcome.Summary));
         }
         else
         {
             ConsoleWriter.Write(
-                DiagnosticCardFormatter.Format(findings, summary),
+                DiagnosticCardFormatter.Format(outcome.Findings, outcome.Summary),
                 ConsoleWriter.UseColor());
         }
 
-        return CheckCommand.ExitCode(findings, options.FailOn);
+        return CheckCommand.ExitCode(outcome.Findings, options.FailOn);
     }
 
     private static int RunMine(MineOptions options)

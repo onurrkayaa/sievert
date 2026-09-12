@@ -56,6 +56,14 @@ public sealed class StaticScanHandler(
                 "Kayitli klasor bir git deposu degil.");
         }
 
+        // Tarama, isleyicinin gozunden tek ve bolunmez bir cagri: basladiktan sonraki
+        // duraklama noktalari ScanService'in icinde. O yuzden iptal BASLAMADAN once de
+        // soruluyor. Risk isinde bu gerekmiyor, orada her obek zaten bir duraklama noktasi.
+        if (await run.Progress.IsCancellationRequestedAsync(cancellation))
+        {
+            return JobOutcome.Canceled(0, 0);
+        }
+
         ScanRelay relay = new();
 
         using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellation);

@@ -11,10 +11,13 @@ public static class ApiSeed
     public const string UnknownIdentity = "github.com/bilinmeyen/depo";
 
     /// <summary>Iki depo yazar ve kimliklerine gore id'lerini verir.</summary>
-    public static (int Known, int Unknown) Write(SievertContext database)
+    public static (int Known, int Unknown) Write(SievertContext database, string? localPath = null)
     {
         RepositoryRow known = NewRepository(KnownIdentity, "polly");
         RepositoryRow unknown = NewRepository(UnknownIdentity, "depo");
+
+        known.LocalPath = localPath;
+        unknown.LocalPath = localPath;
 
         database.Repositories.AddRange(known, unknown);
         database.SaveChanges();

@@ -61,7 +61,12 @@ public sealed class RiskScoreAllHandler(
 
         await run.Progress.FlushAsync(PhaseCounting, 0, null, cancellation);
 
-        int total = await ScorableCommits(run.RepositoryId).CountAsync(cancellation);
+        int total = await context.Commits
+            .AsNoTracking()
+            .CountAsync(
+                commit => commit.RepositoryId == run.RepositoryId
+                    && context.CommitMetrics.Any(metric => metric.CommitId == commit.Id),
+                cancellation);
 
         await run.Progress.FlushAsync(PhaseScoring, 0, total, cancellation);
 
@@ -80,8 +85,6 @@ public sealed class RiskScoreAllHandler(
 
             // sievert:disable SV004 dongu basina tek sorgu bilincli: 22 bin satiri bellege almamak icin sayfali okuyoruz
             List<CommitWithMetric> batch = await ScorableCommits(run.RepositoryId)
-                .OrderBy(pair => pair.Commit.AuthorDateUtc)
-                .ThenBy(pair => pair.Commit.Id)
                 .Skip(processed)
                 .Take(options.RiskBatchSize)
                 .ToListAsync(cancellation);
@@ -176,16 +179,20 @@ public sealed class RiskScoreAllHandler(
             }));
     }
 
-    /// <summary>Olcusu hesaplanmis commit'ler; olcusu olmayan skorlanamaz.</summary>
+    /// <summary>
+    /// Olcusu hesaplanmis commit'ler, metrik hesabiyla ayni sirada (CommitOrdering:
+    /// tarih artan, esitlikte madencilik sirasi artan).
+    ///
+    /// Siralama <c>select</c>'ten ONCE yaziliyor. Sonra yazilinca EF sorguyu ceviremiyor:
+    /// kendi kurdugu kaydin icine bakip alan secmesi gerekiyor ve bunu SQL'e dokemiyor.
+    /// Bir kez yasandi, hata mesaji tam olarak bunu soyluyordu.
+    /// </summary>
     private IQueryable<CommitWithMetric> ScorableCommits(int repositoryId) =>
-        context.Commits
-            .AsNoTracking()
-            .Where(commit => commit.RepositoryId == repositoryId)
-            .Join(
-                context.CommitMetrics.AsNoTracking(),
-                commit => commit.Id,
-                metric => metric.CommitId,
-                (commit, metric) => new CommitWithMetric(commit, metric));
+        from commit in context.Commits.AsNoTracking()
+        join metric in context.CommitMetrics.AsNoTracking() on commit.Id equals metric.CommitId
+        where commit.RepositoryId == repositoryId
+        orderby commit.AuthorDateUtc, commit.Id
+        select new CommitWithMetric(commit, metric);
 
     private sealed record CommitWithMetric(CommitRow Commit, CommitMetricRow Metric);
 }

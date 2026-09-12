@@ -62,7 +62,16 @@ public sealed class PostgresFixture : IAsyncLifetime
             create.ExecuteNonQuery();
         }
 
-        NpgsqlConnectionStringBuilder builder = new(AdminConnectionString) { Database = name };
+        // Havuz kucuk tutuluyor. Her test kendi veritabanini aciyor ve her baglanti dizesi
+        // kendi havuzunu kuruyor; varsayilan boyutla konteynerin max_connections siniri
+        // doluyor ve testler "too many clients already" ile dusuyor. Bir kez oldu.
+        NpgsqlConnectionStringBuilder builder = new(AdminConnectionString)
+        {
+            Database = name,
+            MaxPoolSize = 4,
+            ConnectionIdleLifetime = 5,
+            ConnectionPruningInterval = 1,
+        };
 
         using SievertContext context = SievertContextBuilder.Create(builder.ConnectionString);
 

@@ -482,6 +482,5 @@ $RECYCLE.BIN/
 *.swp
 
 # Yerel calisma notlari, repoya girmiyor
-CLAUDE.md
 test-sonuclari/
 .playwright-mcp/

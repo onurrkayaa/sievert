@@ -10,7 +10,8 @@ if (args.Length < 2)
 {
     Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>\n"
         + "         measure snapshot <cikti-dosyasi>\n"
-        + "         measure split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>");
+        + "         measure split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>\n"
+        + "         measure history-check <anlik-goruntu.csv> <ozet.sha256>");
     return 2;
 }
 
@@ -50,6 +51,19 @@ MetricsRunner runner = new(context);
 if (args[0] == "snapshot")
 {
     return Snapshot.Write(context, args[1]);
+}
+
+// Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.
+// args: history-check <anlik-goruntu.csv> <ozet.sha256>
+if (args[0] == "history-check")
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Kullanim: measure history-check <anlik-goruntu.csv> <ozet.sha256>");
+        return 2;
+    }
+
+    return HistoryRecheck.Report(context, args[1], args[2]);
 }
 
 if (runner.FindRepository(args[1]) is not { } repository)

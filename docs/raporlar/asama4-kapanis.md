@@ -31,12 +31,17 @@ testin hicbiri gormemisti.
 
 Kaynak: `docs/olcumler/asama4-mine-bellek.md` (`dca4c8d`).
 
-| Katman | Sure | Tepe bellek |
-|---|---|---|
-| Git okuma + JSONL | 3,95 sn | 244 MB |
-| Git okuma + PostgreSQL'e yazma | 5,44 sn | 323 MB |
-| Veritabanindan metrik | 0,61 sn | 169 MB |
-| SZZ etiketleme | 125,04 sn | 178 MB |
+| Katman | Sure | Tepe bellek | Olcum surumu |
+|---|---|---|---|
+| Git okuma + JSONL | 3,95 sn | 244 MB | `dca4c8d` |
+| Git okuma + PostgreSQL'e yazma | 5,44 sn | 323 MB | `dca4c8d` |
+| Veritabanindan metrik | 0,61 sn | 169 MB | `dca4c8d` |
+| SZZ etiketleme (kayma hatasi duzeltilmeden once) | 125,04 sn | 178 MB | `dca4c8d` |
+| SZZ etiketleme (duzeltilmis kod) | 117,71 sn | 218 MB | `9592508` |
+
+Iki SZZ satiri ayni kosullarda olculmedigi icin tabloda ayri duruyor; ikisinde de
+blame'e gonderilen satir sayisi ayni (5102), yani aradaki fark gonderilen satir
+sayisindan gelmiyor. Diger uc katman kayma hatasindan etkilenmiyor.
 
 ### Uc repoda etiket orani
 

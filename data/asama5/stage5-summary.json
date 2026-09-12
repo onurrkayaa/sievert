@@ -1,0 +1,141 @@
+{
+  "stage": "Asama 5",
+  "codeCommit": "ab4ed40",
+  "humanDecisionCommit": "6806406",
+  "unreviewedRecordedCommit": "b364f1a",
+  "checksums": {
+    "commit-metrics.csv": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+    "split-manifest.csv": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+    "baseline-results.json": "dd62daa7ca7a077645c2053732bcf93291b3459cd1e958797f66cd10f6f38d65",
+    "model-results.json": "cd3b3e3d7575859b7d7bc446024df1ee140aec7f5fb710a4f4b265578249a0b5",
+    "model-predictions.csv": "21b6987790610530d1d42f43b9d595236864f95a09b6a8ccdbed61d23810ee4f",
+    "calibration-manifest.csv": "e97337503e0ba37b33c69862bcee86f3bcc30cd3a3f02af6ce92f004ed19da58",
+    "calibration-results.json": "7a3456cba3a6e56d33b7ac79d67f3c424955e04cc1d4b4f7c5c37f9e7d05debb",
+    "calibration-predictions.csv": "8e54e656114fce2052ca6b6adf5b4dc287a70148912339152118e9e4809a74b7",
+    "bootstrap-results.json": "5acd9b445dd4f612fe784e7304d414fe27246c6ee22e4529ab4655785a233467",
+    "sensitivity-results.json": "9b0c4706c7f69bc6ea167671a920e758a7551d3c5e131257b24164e327915266",
+    "noise-normalized-results.json": "92748960b95422a5a8ee0c3c3e4ecdd14d13cb91062c3a50fb98f2cfb253763b",
+    "rename-results-v2.json": "6fdef8cd7c69bcefd9187d45f803de23b8113da4eb837156c10795af7cdaf4ea",
+    "generalization-results.json": "515f561c797c22c296c07c1ca4e7c7412309a1f12896ee2b8d08dc3014159b89",
+    "generalization-predictions.csv": "99e82ca974c75b32d91ecb87ee25e3a5063359ed53577b73720bd98e27f863ef",
+    "generalization-decomposition.json": "a56585d1adf33e07fe111b054c96c484dcad01cca15944867e301e550d52a622",
+    "prediction-validation-key.csv": "f4dae59b2ca0d5f656260b672b7a8d016ab8f47032d6376045d9fd1219337ea5",
+    "prediction-validation-results.json": "9c11cf943910039f76e4f4985a1da49e4dcf929a5557efa420c60fc1f9c73668"
+  },
+  "data": {
+    "commits": 34166,
+    "positives": 5962,
+    "trainRows": 23915,
+    "trainPositives": 4896,
+    "testRows": 10251,
+    "testPositives": 1066
+  },
+  "baselines": {
+    "negativeMicro": {
+      "tp": 0,
+      "fn": 1066,
+      "precision": null,
+      "recall": 0,
+      "f1": 0
+    },
+    "randomMicroF1Mean": 0.1502225795039171,
+    "randomMacroF1Mean": 0.09073604104211228,
+    "linesAddedMicroF1": 0.37537619699042407,
+    "linesAddedMacroF1": 0.2999225449352556,
+    "linesAddedMicroRawPrAuc": 0.26111753300193535
+  },
+  "model": {
+    "microF1": 0.44076273835573615,
+    "microPrecision": 0.33052039381153303,
+    "microRecall": 0.6613508442776735,
+    "microTp": 705,
+    "microFp": 1428,
+    "microFn": 361,
+    "microTn": 7757,
+    "macroF1": 0.3087858253768471,
+    "microPrAuc": 0.47753210227817766,
+    "baselineConditionsPassed": 3
+  },
+  "bootstrap": {
+    "micro": {
+      "deltaF1": {
+        "mean": 0.06545606353745066,
+        "p2_5": 0.048538162957047215,
+        "p97_5": 0.0822979645126623
+      },
+      "deltaPrAuc": {
+        "mean": 0.2157678839960562,
+        "p2_5": 0.1817698234810286,
+        "p97_5": 0.25127060665408196
+      }
+    },
+    "macro": {
+      "deltaF1": {
+        "mean": 0.010920386384308053,
+        "p2_5": -0.02956460006749384,
+        "p97_5": 0.05629055958928969
+      },
+      "deltaPrAuc": {
+        "mean": 0.03996665858983733,
+        "p2_5": -0.015499054387860414,
+        "p97_5": 0.12157756671399055
+      }
+    }
+  },
+  "calibration": {
+    "ham": {
+      "brier": 0.08434331634768065,
+      "ece": 0.08087164458047504,
+      "prAuc": 0.4742477390372674
+    },
+    "platt": {
+      "brier": 0.08379240167705339,
+      "ece": 0.07375906164548472,
+      "prAuc": 0.47698001690410907
+    },
+    "isotonic": {
+      "brier": 0.0833245133988187,
+      "ece": 0.06991400296702713,
+      "prAuc": 0.4755375562746382
+    },
+    "productionCalibrator": "secilmedi"
+  },
+  "generalization": {
+    "prAucKeptF1MateriallyDropped": 2,
+    "halfThresholdBetter": 5,
+    "meanPredictionAboveTargetRate": 6,
+    "meanPredictionBelowTargetRate": 3,
+    "singleSourceAboveSameRepoF1": 3,
+    "leaveOneOutAboveSameRepoF1": 1
+  },
+  "humanValidation": {
+    "sampleSize": 30,
+    "introduced": 2,
+    "notIntroduced": 23,
+    "notEnoughData": 0,
+    "notReviewed": 5,
+    "decided": 25,
+    "model-pozitif": {
+      "numerator": 1,
+      "denominator": 14,
+      "ratio": 0.07142857142857142
+    },
+    "model-negatif": {
+      "numerator": 1,
+      "denominator": 11,
+      "ratio": 0.09090909090909091
+    }
+  },
+  "expectations": {
+    "held": 24,
+    "partlyHeld": 3,
+    "didNotHold": 8,
+    "notMeasured": 1
+  },
+  "verification": {
+    "tests": 578,
+    "selfScanFindings": 0,
+    "selfScanSuppressions": 29,
+    "ciRun": "34693283539"
+  }
+}

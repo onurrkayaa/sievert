@@ -25,6 +25,9 @@ public sealed class ModelOutput
     public bool PredictedLabel { get; set; }
 }
 
+/// <summary>Modelin bir satir icin verdigi logit ve ham skor.</summary>
+public readonly record struct ModelScore(double Logit, double Probability);
+
 /// <summary>Egitilmis modelin katsayilari. Olcek standartlastirilmis olcek.</summary>
 public sealed record Coefficients(double Intercept, IReadOnlyList<double> Weights);
 
@@ -161,15 +164,35 @@ public static class LogisticRegressionModel
         ITransformer transformer,
         IReadOnlyList<ModelInput> rows)
     {
-        IDataView scored = transformer.Transform(Load(context, rows));
         List<double> probabilities = new(rows.Count);
 
-        foreach (ModelOutput output in context.Data.CreateEnumerable<ModelOutput>(scored, reuseRowObject: false))
+        foreach (ModelScore score in Outputs(context, transformer, rows))
         {
-            probabilities.Add(output.Probability);
+            probabilities.Add(score.Probability);
         }
 
         return probabilities;
+    }
+
+    /// <summary>
+    /// Hem logit'i hem olasiligi verir. Aciklama hesabi logit'e bakiyor: olasilik ucta
+    /// sifira ya da bire yaklasinca geri donusturulen logit duyarliligini kaybediyor,
+    /// modelin kendi verdigi logit ise kaybetmiyor.
+    /// </summary>
+    internal static IReadOnlyList<ModelScore> Outputs(
+        MLContext context,
+        ITransformer transformer,
+        IReadOnlyList<ModelInput> rows)
+    {
+        IDataView scored = transformer.Transform(Load(context, rows));
+        List<ModelScore> outputs = new(rows.Count);
+
+        foreach (ModelOutput output in context.Data.CreateEnumerable<ModelOutput>(scored, reuseRowObject: false))
+        {
+            outputs.Add(new ModelScore(output.Score, output.Probability));
+        }
+
+        return outputs;
     }
 
     private static Coefficients Read(ITransformer transformer)

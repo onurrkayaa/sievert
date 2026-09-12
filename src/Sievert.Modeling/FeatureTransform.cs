@@ -155,6 +155,16 @@ public sealed class FeatureScaler
         return features;
     }
 
+    /// <summary>
+    /// Bir ozniteligin donusum uygulanmis (log alinmis) ama standartlastirilmamis degeri.
+    /// Aciklama uretirken egitim araligiyla karsilastirmak icin gerekiyor: aralik da ayni
+    /// olcekte kayitli.
+    /// </summary>
+    public double ScaleValue(SnapshotRow row, string name) => Value(row, name);
+
+    /// <summary>Ozniteligin egitim istatistigi. IsFix standartlastirilmadigi icin onda null.</summary>
+    public FeatureStatistics? StatisticsFor(string name) => statistics.GetValueOrDefault(name);
+
     /// <summary>Egitimde gorulen [min, max] araliginin disinda kalan DEGER sayisi.</summary>
     public int OutsideTrainRange(IReadOnlyList<SnapshotRow> rows)
     {

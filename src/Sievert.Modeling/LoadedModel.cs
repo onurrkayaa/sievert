@@ -29,6 +29,10 @@ public sealed class LoadedModel
     /// <summary>Tek bir satirin ham skoru.</summary>
     public double Score(float[] features) => Score([features])[0];
 
+    /// <summary>Tek bir satirin logit'i ve ham skoru birlikte.</summary>
+    public ModelScore Evaluate(float[] features) =>
+        LogisticRegressionModel.Outputs(context, transformer, [new ModelInput { Features = features }])[0];
+
     /// <summary>Verilen satirlarin ham skorlari, giris sirasinda.</summary>
     public IReadOnlyList<double> Score(IReadOnlyList<float[]> rows)
     {

@@ -96,6 +96,24 @@ public sealed class ModelRegistryTests
     }
 
     [Fact]
+    public void TheModelIsReadFromDiskExactlyOnce()
+    {
+        ModelRegistry registry = Registry();
+
+        Assert.Equal(0, registry.LoadCountOf("polly"));
+
+        for (int attempt = 0; attempt < 5; attempt++)
+        {
+            registry.Load("polly");
+        }
+
+        Assert.Equal(1, registry.LoadCountOf("polly"));
+
+        // Diger profiller hic dokunulmadigi icin hala yuklenmemis.
+        Assert.Equal(0, registry.LoadCountOf("sharex"));
+    }
+
+    [Fact]
     public void ForRepository_ReturnsNothingForAnUnknownRepository()
     {
         Assert.Null(Registry().ForRepository("github.com/bilinmeyen/depo"));

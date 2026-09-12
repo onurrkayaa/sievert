@@ -108,7 +108,7 @@ public sealed class StaticScanHandler(
             AnalysisJobStatus.Succeeded,
             saved,
             outcome.Summary.FileCount,
-            ResultSummary: Summarise(outcome));
+            ResultSummary: Summarise(outcome, run.Progress));
     }
 
     /// <summary>
@@ -193,12 +193,15 @@ public sealed class StaticScanHandler(
         return saved;
     }
 
-    private static string Summarise(ScanOutcome outcome)
+    private static string Summarise(ScanOutcome outcome, JobProgress progress)
     {
         CheckSummary summary = outcome.Summary;
 
         return JsonSerializer.Serialize(new Dictionary<string, object?>(StringComparer.Ordinal)
         {
+            // Ilerlemenin kac kez yazildigi: oge basina yazilmadigini gosteren sayi.
+            ["progressWrites"] = progress.WriteCount,
+            ["cancellationChecks"] = progress.CancellationCheckCount,
             ["scannedFiles"] = summary.FileCount,
             ["findingCount"] = summary.FindingCount,
             ["suppressedCount"] = summary.SuppressedCount,

@@ -74,6 +74,9 @@ public sealed class ModelRegistry
 
     private readonly Dictionary<string, string> failures = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Profil basina modelin diskten KAC KEZ okundugu.</summary>
+    private readonly Dictionary<string, int> loadCounts = new(StringComparer.OrdinalIgnoreCase);
+
     private ModelRegistry()
     {
     }
@@ -139,8 +142,19 @@ public sealed class ModelRegistry
                 registry.failures[code] = failure;
             }
 
+            registry.loadCounts[code] = 0;
             registry.loaders[code] = new Lazy<LoadedModel>(
-                () => LoadedModel.FromFile(profile.ModelPath),
+                () =>
+                {
+                    // Sayac Lazy'nin ICINDE: "bir kez yuklendi" iddiasi varsayim degil
+                    // olculen bir sayi olsun diye.
+                    lock (registry.loadCounts)
+                    {
+                        registry.loadCounts[code]++;
+                    }
+
+                    return LoadedModel.FromFile(profile.ModelPath);
+                },
                 LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -167,6 +181,15 @@ public sealed class ModelRegistry
         statuses.GetValueOrDefault(profileCode, ModelStatus.Failed);
 
     public string? FailureOf(string profileCode) => failures.GetValueOrDefault(profileCode);
+
+    /// <summary>Modelin diskten kac kez okundugu. Bir kez yuklendigi buradan gorulur.</summary>
+    public int LoadCountOf(string profileCode)
+    {
+        lock (loadCounts)
+        {
+            return loadCounts.GetValueOrDefault(profileCode);
+        }
+    }
 
     /// <summary>
     /// Modeli getirir; ilk cagriada diskten yukler, sonrakilerde ayni ornegi verir.

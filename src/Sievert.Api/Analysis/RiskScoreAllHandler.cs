@@ -176,6 +176,9 @@ public sealed class RiskScoreAllHandler(
                 ["scoredCommits"] = saved,
                 ["explanationMismatches"] = explanationMismatches,
                 ["batchSize"] = options.RiskBatchSize,
+                ["progressWrites"] = run.Progress.WriteCount,
+                ["cancellationChecks"] = run.Progress.CancellationCheckCount,
+                ["modelLoads"] = registry.LoadCountOf(profile.ProfileCode),
             }));
     }
 

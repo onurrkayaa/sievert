@@ -21,6 +21,8 @@ belirsizlesir ve karsilastirilan sayilar ayni kumeden gelmemis olur.
 | Sema | `data/asama5/README.md` |
 
 **Ureten Sievert commit'i:** `687a140` (`tools/Sievert.Measure`, `snapshot` komutu).
+Sonrasinda `bb9e60b` aracin rapor bolumunu tek gecise cevirdi; dosya o kodla yeniden
+uretildi ve SHA-256 degismedi, yani ikisi ayni ciktiyi veriyor.
 
 **Kaynak repo commit'leri** - Asama 4'te madencilik yapilan commit'lerin ayni:
 

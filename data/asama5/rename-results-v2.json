@@ -1,0 +1,499 @@
+{
+  "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+  "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+  "codeCommit": "8ab43e5",
+  "note": "git yeniden okundu; ana snapshot ve veritabani degismedi. Etiketler SHA ile dondurulmus hedeften baglandi. Commit sirasi ana boru hattiyla ayni: tarih artan, esitlikte madencilik sirasi (CommitOrdering).",
+  "repositories": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "chainEffect": {
+        "commits": 2759,
+        "affectedCommits": 1234,
+        "priorChangesDifferent": 1233,
+        "priorChangesLargestDifference": 3047,
+        "priorChangesTotalFollowed": 361826,
+        "priorChangesTotalPlain": 263506,
+        "maxFileAgeDifferent": 875,
+        "maxFileAgeLargestDifference": 3636,
+        "maxFileAgeTotalFollowed": 3009436,
+        "maxFileAgeTotalPlain": 2494802
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "renamesDetected": 1045,
+          "commitsDifferentFromMain": 197,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.23506122827529907,
+          "tp": 7,
+          "fp": 40,
+          "fn": 3,
+          "tn": 778,
+          "f1": 0.24561403508771928,
+          "prAuc": 0.30090087257579967,
+          "brier": 0.01321249652543372,
+          "ece": 0.03174972080195082
+        },
+        {
+          "threshold": 50,
+          "renamesDetected": 1029,
+          "commitsDifferentFromMain": 0,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.23811133205890656,
+          "tp": 7,
+          "fp": 39,
+          "fn": 3,
+          "tn": 779,
+          "f1": 0.25,
+          "prAuc": 0.303279472237008,
+          "brier": 0.013229432082571895,
+          "ece": 0.029155558472539183
+        },
+        {
+          "threshold": 60,
+          "renamesDetected": 1006,
+          "commitsDifferentFromMain": 109,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.25875285267829895,
+          "tp": 7,
+          "fp": 34,
+          "fn": 3,
+          "tn": 784,
+          "f1": 0.2745098039215686,
+          "prAuc": 0.3046516526881359,
+          "brier": 0.013097950768848211,
+          "ece": 0.03026495824662456
+        }
+      ]
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "chainEffect": {
+        "commits": 22917,
+        "affectedCommits": 13340,
+        "priorChangesDifferent": 13305,
+        "priorChangesLargestDifference": 8682,
+        "priorChangesTotalFollowed": 8123060,
+        "priorChangesTotalPlain": 6421480,
+        "maxFileAgeDifferent": 10585,
+        "maxFileAgeLargestDifference": 4448,
+        "maxFileAgeTotalFollowed": 31675274,
+        "maxFileAgeTotalPlain": 26567001
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "renamesDetected": 3586,
+          "commitsDifferentFromMain": 2757,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.3196391761302948,
+          "tp": 653,
+          "fp": 1090,
+          "fn": 274,
+          "tn": 4859,
+          "f1": 0.4891385767790263,
+          "prAuc": 0.519763511750287,
+          "brier": 0.09983542050762766,
+          "ece": 0.08090431920187605
+        },
+        {
+          "threshold": 50,
+          "renamesDetected": 3413,
+          "commitsDifferentFromMain": 0,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.31998512148857117,
+          "tp": 654,
+          "fp": 1091,
+          "fn": 273,
+          "tn": 4858,
+          "f1": 0.48952095808383234,
+          "prAuc": 0.5199459583907894,
+          "brier": 0.09984755571147351,
+          "ece": 0.08102012175260107
+        },
+        {
+          "threshold": 60,
+          "renamesDetected": 3301,
+          "commitsDifferentFromMain": 2514,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.3195837140083313,
+          "tp": 653,
+          "fp": 1088,
+          "fn": 274,
+          "tn": 4861,
+          "f1": 0.4895052473763119,
+          "prAuc": 0.5202400023871473,
+          "brier": 0.09985977399326262,
+          "ece": 0.08112892318189056
+        }
+      ]
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "chainEffect": {
+        "commits": 8490,
+        "affectedCommits": 3978,
+        "priorChangesDifferent": 3978,
+        "priorChangesLargestDifference": 2669,
+        "priorChangesTotalFollowed": 2500811,
+        "priorChangesTotalPlain": 2183940,
+        "maxFileAgeDifferent": 2009,
+        "maxFileAgeLargestDifference": 4590,
+        "maxFileAgeTotalFollowed": 11243593,
+        "maxFileAgeTotalPlain": 10163122
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "renamesDetected": 1783,
+          "commitsDifferentFromMain": 598,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.20761418342590332,
+          "tp": 46,
+          "fp": 326,
+          "fn": 83,
+          "tn": 2092,
+          "f1": 0.18363273453093812,
+          "prAuc": 0.11871796810487069,
+          "brier": 0.05588427809506642,
+          "ece": 0.06242777451470125
+        },
+        {
+          "threshold": 50,
+          "renamesDetected": 1740,
+          "commitsDifferentFromMain": 0,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.2169155329465866,
+          "tp": 44,
+          "fp": 298,
+          "fn": 85,
+          "tn": 2120,
+          "f1": 0.18683651804670912,
+          "prAuc": 0.11916415080328081,
+          "brier": 0.055856073839294584,
+          "ece": 0.06248053095775307
+        },
+        {
+          "threshold": 60,
+          "renamesDetected": 1709,
+          "commitsDifferentFromMain": 245,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.21651755273342133,
+          "tp": 43,
+          "fp": 302,
+          "fn": 86,
+          "tn": 2116,
+          "f1": 0.18143459915611815,
+          "prAuc": 0.11968288024404229,
+          "brier": 0.055840921468388496,
+          "ece": 0.06272510183671104
+        }
+      ]
+    }
+  ],
+  "thresholdFiftyGate": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "comparedCells": 41385,
+      "differentCells": 0,
+      "features": [
+        {
+          "feature": "LinesAdded",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "CsFilesChanged",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "Entropy",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "SubsystemCount",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorChanges",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorFixes",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorCommitCount",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "IsFix",
+          "compared": 2759,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        }
+      ],
+      "examples": []
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "comparedCells": 343755,
+      "differentCells": 0,
+      "features": [
+        {
+          "feature": "LinesAdded",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "CsFilesChanged",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "Entropy",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "SubsystemCount",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorChanges",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorFixes",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorCommitCount",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "IsFix",
+          "compared": 22917,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        }
+      ],
+      "examples": []
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "comparedCells": 127350,
+      "differentCells": 0,
+      "features": [
+        {
+          "feature": "LinesAdded",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "LinesDeleted",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "FilesChanged",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "CsFilesChanged",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "Entropy",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DirectoryCount",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "SubsystemCount",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MaxFileAgeDays",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "MinFileAgeDays",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorChanges",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "PriorFixes",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "DistinctAuthorsOnFiles",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorCommitCount",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "AuthorFileExperience",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        },
+        {
+          "feature": "IsFix",
+          "compared": 8490,
+          "different": 0,
+          "largestAbsoluteDifference": 0
+        }
+      ],
+      "examples": []
+    }
+  ]
+}

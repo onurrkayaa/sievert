@@ -64,6 +64,26 @@ public static class ModelFeatures
             + string.Join(", ", found.Select(name => $"{name} ({Excluded[name]})")));
     }
 
+    /// <summary>
+    /// Tek bir ozniteligin degeri, adiyla. Yasak bir ad verilirse durur; tahmin ureten
+    /// her yol buradan gectigi icin hedef ya da kimlik alani yanlislikla tahmin
+    /// girdisi olamiyor.
+    /// </summary>
+    public static double Value(SnapshotRow row, string name)
+    {
+        EnsureNoExcluded([name]);
+
+        for (int index = 0; index < Candidates.Count; index++)
+        {
+            if (string.Equals(Candidates[index], name, StringComparison.Ordinal))
+            {
+                return Values(row)[index];
+            }
+        }
+
+        throw new InvalidOperationException($"Boyle bir aday oznitelik yok: {name}");
+    }
+
     /// <summary>Aday ozniteliklerin degerleri, <see cref="Candidates"/> ile ayni sirada.</summary>
     public static IReadOnlyList<double> Values(SnapshotRow row) =>
     [

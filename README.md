@@ -34,6 +34,8 @@ src/
   Sievert.Analysis/           code analysis with Roslyn
   Sievert.Mining/             git history with LibGit2Sharp, separate from Analysis
   Sievert.Data/               PostgreSQL with EF Core, separate from Mining
+  Sievert.Modeling/           feature transform, logistic regression, model registry
+  Sievert.Api/                read-only ASP.NET Core Web API over the trained models
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
@@ -268,7 +270,8 @@ Exit codes are the same for both commands:
    simplified SZZ labelling, stored in PostgreSQL via EF Core
 5. Risk engine: weighted baseline, then ML.NET classifier, then
    calibration (Brier, ECE, reliability diagram) — the research core
-6. ASP.NET Core Web API + Blazor dashboard
+6. ASP.NET Core Web API + Blazor dashboard — read-only API and the commit risk
+   endpoint are done, the dashboard is not started
 7. GitHub Action bot that comments risk on pull requests
 8. Test suite, Docker Compose, evaluation on real open-source C# repos
 
@@ -295,7 +298,6 @@ only precision number this project has.
 
 Stage 4 has started with git history. There is a `mine` command that walks a repository's
 commits and writes one JSON object per commit to a file; it does not touch a database yet.
-Risk scoring, the API and the dashboard have not been written.
 
 ### Stage 5 result
 
@@ -323,3 +325,65 @@ Thirty test predictions were checked by hand, blind to the model output and the 
 the miss signal 1/11. These are sample-bound signals, not the model's precision or recall.
 
 Numbers and their sources: `docs/raporlar/asama5-kapanis.md`.
+
+### Stage 6 so far
+
+Steps 0 to 2 of stage 6 are done: the product-language contract, a read-only Web API and
+the commit risk endpoint. The dashboard, background jobs and the static analysis endpoint
+are **not** written. The roadmap is in `docs/planlar/asama6-api-ve-panel.md`.
+
+## The API
+
+`src/Sievert.Api` serves the three trained models over HTTP. Everything is read-only:
+there is no write operation, no repository cloning and no long-running job yet.
+
+```bash
+export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=..."
+dotnet run --project src/Sievert.Api
+```
+
+It listens on the ASP.NET Core default ports and serves an OpenAPI document at
+`/openapi/v1.json`. The model files are read relative to the content root, so if you start
+it from somewhere else, pass `--contentRoot <repo root>`.
+
+| Endpoint | What |
+|---|---|
+| `GET /api/v1/health` | database state and the status of each model profile |
+| `GET /api/v1/models` | the three trained profiles and their limitations |
+| `GET /api/v1/repositories` | mined repositories, paged |
+| `GET /api/v1/repositories/{id}` | one repository with its label counts |
+| `GET /api/v1/repositories/{id}/commits` | commits, newest first, paged |
+| `GET /api/v1/repositories/{id}/commits/{sha}/risk` | model assessment for one commit |
+
+### What the risk endpoint does and does not say
+
+The response carries four separate numbers and none of them replaces another:
+
+- `rawModelScore` — the model's raw output. **Not a calibrated probability.** No
+  calibrator was picked for production, so this number must not be read as a percentage.
+- `decisionAt05` — the decision at the 0.5 threshold.
+- `decisionAtTrainThreshold` — the decision at the threshold picked on that repo's
+  training split, which is also returned as `trainThreshold`.
+- `riskIndex` — where this score sits in the training score distribution, 0 to 100. This
+  is **not** `rawModelScore * 100`, and indexes from different profiles cannot be
+  compared with each other.
+
+There is no `probability` field and no combined static-plus-model score. Static analysis
+findings sit in their own section with `status: "not-run"` and
+`includedInModelScore: false`; an empty list means "did not run", not "found nothing".
+
+Every assessment carries at least four warnings: the score is uncalibrated, the target
+came from SZZ, static analysis is not part of the score, and human validation was
+limited. Commits that touch no C# file get a coverage warning on top, because no commit
+in that group is labelled positive in the training data.
+
+Repositories outside the three training repos are not scored at all — the API returns
+`422` rather than silently picking a profile, because cross-repo transfer was measured
+and came out inconsistent (ADR 0021).
+
+Feature contributions are checked against the model's own logit before they are returned.
+If they disagree the API returns `MODEL_EXPLANATION_MISMATCH` instead of an explanation.
+This gate fires on 11 of 34 166 commits; the reason and what I did not do about it are in
+`docs/olcumler/asama6-api-temel.md`.
+
+The full contract is `docs/urun/risk-sozlesmesi.md` and the reasoning is in ADR 0023.

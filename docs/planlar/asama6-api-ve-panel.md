@@ -50,6 +50,9 @@ salt-okunur olarak sunmak.
 yeniden yuklenmiyor, butun hatalar `ProblemDetails` + `errorCode` donuyor, baglanti
 dizesi ve dosya yolu cevaba sizmiyor.
 
+**Olculen.** `docs/olcumler/asama6-api-temel.md`. Ilk istek 278 ms, sonrakilerin medyani
+3,8 ms; yani model bir kez yukleniyor.
+
 **Yapilmayanlar.** Yazma islemi yok, arama yok, statik tarama endpoint'i yok.
 
 ### 2. Commit risk aciklamasi — **bu turda yapildi**
@@ -63,6 +66,11 @@ katkilari ve uyarilar.
 **Basari olcutu.** Katki toplami modelin logit'iyle 1e-6 tolerans icinde esliyor;
 `RiskIndex` monoton; uc zorunlu uyari her cevapta; `CsFilesChanged = 0` commit'lerde
 kapsam uyarisi.
+
+**Olculen.** `RiskIndex` 34 166 satirda monoton, 0 ihlal. Uc zorunlu uyari 300 istegin
+hepsinde cikti. Kapsam uyarisi tam olarak 50 / 50 dogru yerde cikti. **Tolerans tutmadi:**
+34 166 satirin 11'inde 1e-6 asildi, en buyuk fark 1,783e-6. Tolerans degistirilmedi;
+ayrinti ve acik karar `docs/olcumler/asama6-api-temel.md` bolum 7'de.
 
 **Yapilmayanlar.** Statik analiz calistirilmiyor, birlesik skor yok, bilinmeyen repo
 skorlanmiyor.

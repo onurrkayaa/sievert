@@ -27,21 +27,21 @@ Ureten komut:
 dotnet run --project tools/Sievert.Measure -- api-baseline . <commit> data/asama6/api-baseline.json
 ```
 
-Ureten kod: `25e2908`. Cikti: `data/asama6/api-baseline.json`.
+Ureten kod: `af00974`. Cikti: `data/asama6/api-baseline.json`.
 
 **Makine:** Apple M2, 8 cekirdek, 16 GB, macOS 26.6.2. PostgreSQL 17.11 Docker'da,
 5433 portunda. Derleme `Debug`.
 
-Sureler **tek kosudan** geliyor ve kosudan kosuya oynuyor (medyan uc kosuda 3,9 - 4,4 ms,
+Sureler **tek kosudan** geliyor ve kosudan kosuya oynuyor (medyan dort kosuda 3,8 - 4,4 ms,
 p95 5,7 - 7,9 ms). Sayilari kesin esik gibi okumak dogru olmaz.
 
 ## 2. Beklentilerin karsiligi
 
 | # | Beklenti | Olculen | Tuttu mu |
 |---|---|---|---|
-| 1 | Isinmis risk istegi < 100 ms | medyan 3,9 ms, p95 7,5 ms, en buyuk 48,5 ms | evet |
-| 2 | Ilk yukleme ayri olculecek | acilis 684 ms, ilk risk istegi 281 ms | evet |
-| 3 | Model her istekte yuklenmemeli | ilk istek 281 ms, sonrakilerin medyani 3,9 ms | evet |
+| 1 | Isinmis risk istegi < 100 ms | medyan 3,8 ms, p95 6,9 ms, en buyuk 40,1 ms | evet |
+| 2 | Ilk yukleme ayri olculecek | acilis 668 ms, ilk risk istegi 278 ms | evet |
+| 3 | Model her istekte yuklenmemeli | ilk istek 278 ms, sonrakilerin medyani 3,8 ms | evet |
 | 4 | `AsNoTracking` | baglam `QueryTrackingBehavior.NoTracking` ile kuruluyor | evet |
 | 5 | Commit listesi sayfali | sayfali | evet |
 | 6 | Varsayilan 25, en fazla 100 | varsayilan 25, 100 ustu `400` | evet |
@@ -56,19 +56,19 @@ p95 5,7 - 7,9 ms). Sayilari kesin esik gibi okumak dogru olmaz.
 
 | Olcu | Deger |
 |---|---|
-| Acilis (saglik ucu cevap verene kadar) | 684 ms |
-| Ilk risk istegi (model + skor referansi yukleniyor) | 281 ms |
+| Acilis (saglik ucu cevap verene kadar) | 668 ms |
+| Ilk risk istegi (model + skor referansi yukleniyor) | 278 ms |
 | Isinmis istek, en kucuk | 2,2 ms |
-| Isinmis istek, medyan | 3,9 ms |
-| Isinmis istek, p95 | 7,5 ms |
-| Isinmis istek, en buyuk | 48,5 ms |
+| Isinmis istek, medyan | 3,8 ms |
+| Isinmis istek, p95 | 6,9 ms |
+| Isinmis istek, en buyuk | 40,1 ms |
 
 En buyuk deger medyanin on kati. Tek bir istekte; sebebini kovalamadim, cop toplama ya
 da isletim sisteminin zamanlamasi olabilir. Bunu olcmedim, tahmin olarak yaziyorum.
 
-Ilk istegin 281 ms'si modelin diskten yuklenmesi ve 676 KB'lik skor referansinin
-ayristirilmasi. Sonraki isteklerin 3,9 ms'si, modelin gercekten bir kez yuklendigini
-gosteriyor: her istekte yeniden yuklense hepsi 281 ms bandinda kalirdi.
+Ilk istegin 278 ms'si modelin diskten yuklenmesi ve 676 KB'lik skor referansinin
+ayristirilmasi. Sonraki isteklerin 3,8 ms'si, modelin gercekten bir kez yuklendigini
+gosteriyor: her istekte yeniden yuklense hepsi 278 ms bandinda kalirdi.
 
 ## 4. Veritabani sorgu sayisi
 
@@ -92,7 +92,7 @@ sayim (commit, hata getiren, bot, olcusu olan) ve deponun kendisi.
 | Risk cevabi, en kucuk | 5105 bayt |
 | Risk cevabi, ortalama | 6028 bayt |
 | Risk cevabi, en buyuk | 6503 bayt |
-| API surecinin olculen en yuksek bellegi | 232 MB |
+| API surecinin olculen en yuksek bellegi | 234 MB |
 
 Bellek icin not: macOS ve Linux'ta `PeakWorkingSet64` desteklenmiyor. Deger 50 ms'de bir
 orneklenip en buyugu alindi, yani **olculen en yuksek deger**; gercek tepe bunun

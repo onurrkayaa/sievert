@@ -1,0 +1,92 @@
+{
+  "codeCommit": "577cc8e",
+  "contractVersion": "2.0",
+  "absoluteToleranceV1": 1E-06,
+  "floatUnitRoundoff": 1.1920928955078125E-07,
+  "mutationLogitDrift": 0.0001,
+  "profiles": [
+    {
+      "profile": "jellyfin",
+      "repository": "github.com/jellyfin/jellyfin",
+      "rows": 22917,
+      "v1Failures": 7,
+      "v2Failures": 0,
+      "worstAbsoluteError": 1.2227765830985504E-06,
+      "worstAllowedError": 4.979674328432901E-06,
+      "normalizedError": {
+        "p50": 0.05221916152863782,
+        "p95": 0.16225707454123542,
+        "p99": 0.218280785436186,
+        "max": 0.509779726994916
+      },
+      "mutation": {
+        "feature": "DirectoryCount",
+        "absoluteError": 9.989065457238766E-05,
+        "allowedError": 3.406769881311613E-06,
+        "normalizedError": 29.321221583046746,
+        "rejected": true
+      },
+      "v1FailingRows": [
+        { "sha": "7f320ce0638cd3c26b45bb75184d526f03b18651", "absoluteError": 1.1803474713190099E-06, "scale": 15.535523453399477, "allowedError": 2.851978713679251E-06, "normalizedError": 0.4138696637732893, "passesV2": true },
+        { "sha": "dce9093ba1f67a41c3bb9bca59ec9df77c5bd4bd", "absoluteError": 1.0115758473094871E-06, "scale": 14.185217137664178, "allowedError": 2.6910096571045136E-06, "normalizedError": 0.37590940806876466, "passesV2": true },
+        { "sha": "ab3da461130b0db2f77e7e848c4bbd1280e5524a", "absoluteError": 1.186692182741922E-06, "scale": 16.61647834867509, "allowedError": 2.9808385787814966E-06, "normalizedError": 0.3981068251025577, "passesV2": true },
+        { "sha": "48facb797ed912e4ea6b04b17d1ff190ac2daac4", "absoluteError": 1.2227765830985504E-06, "scale": 33.38392790888686, "allowedError": 4.979674328432901E-06, "normalizedError": 0.2455535246786625, "passesV2": true },
+        { "sha": "f47ad85011a1251c3fda8a213c0b96dcf46d5e05", "absoluteError": 1.2089497998246657E-06, "scale": 23.645579263548218, "allowedError": 3.8187727050242685E-06, "normalizedError": 0.31658071668787174, "passesV2": true },
+        { "sha": "d0b3dc1485ddffe14fcd5370e0544648809eaf91", "absoluteError": 1.182630743556956E-06, "scale": 11.072004478508322, "allowedError": 2.3198857877860455E-06, "normalizedError": 0.509779726994916, "passesV2": true },
+        { "sha": "1dbc91978ece81628c339d1dc3b53f6d250cb005", "absoluteError": 1.0627929771800382E-06, "scale": 14.604471635779621, "allowedError": 2.740988687965825E-06, "normalizedError": 0.3877407381672818, "passesV2": true }
+      ]
+    },
+    {
+      "profile": "polly",
+      "repository": "github.com/app-vnext/polly",
+      "rows": 2759,
+      "v1Failures": 3,
+      "v2Failures": 0,
+      "worstAbsoluteError": 1.783298074542472E-06,
+      "worstAllowedError": 4.307946259330083E-06,
+      "normalizedError": {
+        "p50": 0.05818750471717662,
+        "p95": 0.1762542811606746,
+        "p99": 0.23562386553588796,
+        "max": 0.41808836083791745
+      },
+      "mutation": {
+        "feature": "MaxFileAgeDays",
+        "absoluteError": 9.980617362193023E-05,
+        "allowedError": 3.199125801767445E-06,
+        "normalizedError": 31.1979521301693,
+        "rejected": true
+      },
+      "v1FailingRows": [
+        { "sha": "f5cc4fe6da9f754dbc770fb64989684a1a7d9417", "absoluteError": 1.0638944190066724E-06, "scale": 18.857430921911984, "allowedError": 3.2479809429540613E-06, "normalizedError": 0.32755562230579255, "passesV2": true },
+        { "sha": "d05f172f77b7d7383ce04ac7f0660ca7dc6985be", "absoluteError": 1.0618321906186168E-06, "scale": 27.31110442691706, "allowedError": 4.255737355579979E-06, "normalizedError": 0.24950604370036564, "passesV2": true },
+        { "sha": "e32730600746b479db0241826b9bdef8eec9bb28", "absoluteError": 1.783298074542472E-06, "scale": 27.391839139237547, "allowedError": 4.265361683277791E-06, "normalizedError": 0.41808836083791745, "passesV2": true }
+      ]
+    },
+    {
+      "profile": "sharex",
+      "repository": "github.com/sharex/sharex",
+      "rows": 8490,
+      "v1Failures": 1,
+      "v2Failures": 0,
+      "worstAbsoluteError": 1.093241846383819E-06,
+      "worstAllowedError": 3.6376691313276915E-06,
+      "normalizedError": {
+        "p50": 0.03864069247450011,
+        "p95": 0.12166876331460089,
+        "p99": 0.18275839388512566,
+        "max": 0.3547221992780825
+      },
+      "mutation": {
+        "feature": "MaxFileAgeDays",
+        "absoluteError": 9.992469521113989E-05,
+        "allowedError": 2.1241856719926995E-06,
+        "normalizedError": 47.04141287112651,
+        "rejected": true
+      },
+      "v1FailingRows": [
+        { "sha": "e770e8600f3632b0652888a01c776845e4949c3b", "absoluteError": 1.093241846383819E-06, "scale": 17.46479874244268, "allowedError": 3.0819662502339696E-06, "normalizedError": 0.3547221992780825, "passesV2": true }
+      ]
+    }
+  ]
+}

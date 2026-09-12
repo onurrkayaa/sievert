@@ -150,6 +150,11 @@ skorlanabilir commit'ler ve kullanicinin gozunde sebepsiz bir hata gibi gorunuyo
 toplamina oranli) teknik olarak daha dogru gorunuyor, ama bu bir sozlesme degisikligi ve
 olcumden sonra yapiliyor. Yol haritasinda ayri bir madde olarak durmasi gerekir.
 
+**Sonradan not (Adim 3).** Kural surum 2.0 olarak yeniden yazildi
+(`docs/urun/model-aciklama-sayisal-tolerans.md`) ve ayni veri uzerinde yeniden olculdu:
+`docs/olcumler/asama6-aciklama-toleransi.md`. Yukaridaki v1 sonucu **oldugu gibi
+duruyor**; yeni kural eskisini silmiyor, yanina yaziliyor.
+
 ## 8. Olcum kodunda duzelttigim bir hata
 
 Ilk kosuda HTTP tarafindaki monotonluk kontrolu **56 ihlal** verdi, ayni kontrol butun

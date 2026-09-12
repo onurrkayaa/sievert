@@ -67,7 +67,11 @@ public static class RenameSensitivity
         writer.WriteString(
             "note",
             "git yeniden okundu; ana snapshot ve veritabani degismedi. Etiketler SHA ile "
-            + "dondurulmus hedeften baglandi. Commit sirasi bu araçta tarih + SHA ordinal.");
+            + "dondurulmus hedeften baglandi. Commit sirasi ana boru hattiyla ayni: "
+            + "tarih artan, esitlikte madencilik sirasi (CommitOrdering).");
+        List<(string Identity, int Compared, int Different, IReadOnlyList<CellComparison> Cells, IReadOnlyList<string> Examples)> gateRows = [];
+        bool failed = false;
+
         writer.WriteStartArray("repositories");
 
         foreach ((string identity, string path) in clones.Values.SelectMany(entry => entry))
@@ -76,10 +80,61 @@ public static class RenameSensitivity
             Console.WriteLine($"== {identity} ==");
 
             Dictionary<int, Dictionary<string, CommitMetrics>> byThreshold = [];
+            Dictionary<int, int> renameCounts = [];
             ChainEffect? chain = null;
+
+            // ESIK 50 KAPISI: once yalniz 50 kosuluyor ve ana snapshot'la karsilastiriliyor.
+            // Gecmezse 40 ve 60 KOSULMUYOR.
+            (List<CommitForMetrics> mainCommits, int mainRenames, Dictionary<int, string> mainShas) = ReadGit(path, 50);
+            Dictionary<string, CommitMetrics> mainMetrics = new(StringComparer.Ordinal);
+
+            foreach (CommitMetrics computed in new MetricCalculator(MetricOptions.Default).Compute(mainCommits))
+            {
+                mainMetrics[mainShas[computed.CommitId]] = computed;
+            }
+
+            (bool passed, IReadOnlyList<CellComparison> cells, IReadOnlyList<string> examples) =
+                Gate(identity, mainMetrics, rows);
+
+            int totalCompared = cells.Sum(cell => cell.Compared);
+            int totalDifferent = cells.Sum(cell => cell.Different);
+
+            Console.WriteLine($"  esik 50 kapisi: {totalCompared} hucre, farkli {totalDifferent}");
+
+            foreach (CellComparison cell in cells)
+            {
+                Console.WriteLine(
+                    $"    {cell.Feature,-24} karsilastirilan {cell.Compared}, farkli {cell.Different}, "
+                    + $"en buyuk {cell.Largest.ToString("G", CultureInfo.InvariantCulture)}");
+            }
+
+            gateRows.Add((identity, totalCompared, totalDifferent, cells, examples));
+
+            if (!passed)
+            {
+                Console.Error.WriteLine($"  {identity}: esik 50 kapisi GECMEDI. Ilk farklar:");
+
+                foreach (string example in examples)
+                {
+                    Console.Error.WriteLine("    " + example);
+                }
+
+                failed = true;
+                continue;
+            }
+
+            renameCounts[50] = mainRenames;
+            byThreshold[50] = mainMetrics;
+            chain = Chain(identity, mainCommits, mainShas, mainMetrics);
+            Console.WriteLine($"  esik 50: {mainCommits.Count} commit, {mainRenames} ad degisimi");
 
             foreach (int threshold in Thresholds)
             {
+                if (threshold == 50)
+                {
+                    continue;
+                }
+
                 DateTimeOffset started = DateTimeOffset.UtcNow;
                 (List<CommitForMetrics> commits, int renames, Dictionary<int, string> shas) = ReadGit(path, threshold);
 
@@ -91,15 +146,11 @@ public static class RenameSensitivity
                 }
 
                 byThreshold[threshold] = metrics;
+                renameCounts[threshold] = renames;
 
                 Console.WriteLine(
                     $"  esik {threshold}: {commits.Count} commit, {renames} ad degisimi, "
                     + $"{(DateTimeOffset.UtcNow - started).TotalSeconds.ToString("F1", CultureInfo.InvariantCulture)} sn");
-
-                if (threshold == 50)
-                {
-                    chain = Chain(identity, commits, shas, metrics);
-                }
             }
 
             writer.WriteStartObject();
@@ -125,7 +176,41 @@ public static class RenameSensitivity
 
             foreach (int threshold in Thresholds)
             {
-                Compare(writer, identity, threshold, byThreshold[threshold], byThreshold[50], rows, entries);
+                Compare(writer, identity, threshold, renameCounts[threshold], byThreshold[threshold], byThreshold[50], rows, entries);
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
+
+        writer.WriteStartArray("thresholdFiftyGate");
+
+        foreach ((string identity, int compared, int different, IReadOnlyList<CellComparison> cells, IReadOnlyList<string> examples) in gateRows)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("repository", identity);
+            writer.WriteNumber("comparedCells", compared);
+            writer.WriteNumber("differentCells", different);
+            writer.WriteStartArray("features");
+
+            foreach (CellComparison cell in cells)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("feature", cell.Feature);
+                writer.WriteNumber("compared", cell.Compared);
+                writer.WriteNumber("different", cell.Different);
+                writer.WriteNumber("largestAbsoluteDifference", cell.Largest);
+                writer.WriteEndObject();
+            }
+
+            writer.WriteEndArray();
+            writer.WriteStartArray("examples");
+
+            foreach (string example in examples)
+            {
+                writer.WriteStringValue(example);
             }
 
             writer.WriteEndArray();
@@ -136,12 +221,20 @@ public static class RenameSensitivity
         writer.WriteEndObject();
         writer.Flush();
 
-        string output = Path.Combine(outputDirectory, "rename-results.json");
+        if (failed)
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("Esik 50 kapisi gecmedi; 40 ve 60 kosulmadi ve sonuc yazilmadi.");
+
+            return 2;
+        }
+
+        string output = Path.Combine(outputDirectory, "rename-results-v2.json");
         File.WriteAllText(output, Encoding.UTF8.GetString(stream.ToArray()) + "\n", new UTF8Encoding(false));
         File.WriteAllText(Path.ChangeExtension(output, ".sha256"), FileChecksum.Line(output));
 
         Console.WriteLine();
-        Console.WriteLine($"rename-results.json: {FileChecksum.Sha256(output)}");
+        Console.WriteLine($"rename-results-v2.json: {FileChecksum.Sha256(output)}");
 
         return 0;
     }
@@ -233,6 +326,7 @@ public static class RenameSensitivity
         Utf8JsonWriter writer,
         string identity,
         int threshold,
+        int renames,
         Dictionary<string, CommitMetrics> metrics,
         Dictionary<string, CommitMetrics> main,
         IReadOnlyList<SnapshotRow> snapshot,
@@ -298,6 +392,7 @@ public static class RenameSensitivity
 
         writer.WriteStartObject();
         writer.WriteNumber("threshold", threshold);
+        writer.WriteNumber("renamesDetected", renames);
         writer.WriteNumber("commitsDifferentFromMain", changed);
         writer.WriteNumber("rows", outcome.Rows);
         writer.WriteNumber("positives", outcome.Positives);
@@ -330,6 +425,89 @@ public static class RenameSensitivity
         writer.WriteEndObject();
     }
 
+    /// <summary>Bir ozniteligin ana snapshot'la karsilastirmasi.</summary>
+    private sealed record CellComparison(string Feature, int Compared, int Different, double Largest);
+
+    /// <summary>
+    /// Esik 50 kapisi: bu aracin yeniden hesapladigi 15 oznitelik, ana snapshot'takilerle
+    /// birebir ayni mi. Ayni degilse 40 ve 60 deneyleri KOSULMUYOR.
+    ///
+    /// Karsilastirilan alanlar 15 aday ozniteligin tamami; deneyde bilerek farkli
+    /// birakilan alan yok. Etiket (<c>IsBugIntroducing</c>), <c>LabelSource</c> ve
+    /// <c>BotMu</c> yeniden hesaplanmiyor, dondurulmus hedeften SHA ile aliniyor, o yuzden
+    /// karsilastirmaya girmiyorlar.
+    /// </summary>
+    private static (bool Passed, IReadOnlyList<CellComparison> Cells, IReadOnlyList<string> Examples) Gate(
+        string identity,
+        Dictionary<string, CommitMetrics> metrics,
+        IReadOnlyList<SnapshotRow> snapshot)
+    {
+        (string Name, Func<CommitMetrics, double> Fresh, Func<SnapshotRow, double> Stored)[] features =
+        [
+            ("LinesAdded", m => m.LinesAdded, r => r.LinesAdded),
+            ("LinesDeleted", m => m.LinesDeleted, r => r.LinesDeleted),
+            ("FilesChanged", m => m.FilesChanged, r => r.FilesChanged),
+            ("CsFilesChanged", m => m.CsFilesChanged, r => r.CsFilesChanged),
+            ("Entropy", m => m.Entropy, r => r.Entropy),
+            ("DirectoryCount", m => m.DirectoryCount, r => r.DirectoryCount),
+            ("SubsystemCount", m => m.SubsystemCount, r => r.SubsystemCount),
+            ("MaxFileAgeDays", m => m.MaxFileAgeDays, r => r.MaxFileAgeDays),
+            ("MinFileAgeDays", m => m.MinFileAgeDays, r => r.MinFileAgeDays),
+            ("PriorChanges", m => m.PriorChanges, r => r.PriorChanges),
+            ("PriorFixes", m => m.PriorFixes, r => r.PriorFixes),
+            ("DistinctAuthorsOnFiles", m => m.DistinctAuthorsOnFiles, r => r.DistinctAuthorsOnFiles),
+            ("AuthorCommitCount", m => m.AuthorCommitCount, r => r.AuthorCommitCount),
+            ("AuthorFileExperience", m => m.AuthorFileExperience, r => r.AuthorFileExperience),
+            ("IsFix", m => m.IsFix ? 1 : 0, r => r.IsFix ? 1 : 0),
+        ];
+
+        int[] different = new int[features.Length];
+        int[] compared = new int[features.Length];
+        double[] largest = new double[features.Length];
+        List<string> examples = [];
+
+        foreach (SnapshotRow row in snapshot)
+        {
+            if (!string.Equals(row.RepositoryIdentity, identity, StringComparison.Ordinal)
+                || !metrics.TryGetValue(row.Sha, out CommitMetrics? fresh))
+            {
+                continue;
+            }
+
+            for (int index = 0; index < features.Length; index++)
+            {
+                double one = features[index].Fresh(fresh);
+                double other = features[index].Stored(row);
+                compared[index]++;
+
+                if (Math.Abs(one - other) > 1e-9)
+                {
+                    different[index]++;
+                    largest[index] = Math.Max(largest[index], Math.Abs(one - other));
+
+                    if (examples.Count < 10)
+                    {
+                        examples.Add(
+                            $"{identity} {row.Sha} {features[index].Name}: "
+                            + $"snapshot {other.ToString(CultureInfo.InvariantCulture)}, "
+                            + $"yeniden hesaplanan {one.ToString(CultureInfo.InvariantCulture)}");
+                    }
+                }
+            }
+        }
+
+        List<CellComparison> cells = [];
+        bool passed = true;
+
+        for (int index = 0; index < features.Length; index++)
+        {
+            cells.Add(new CellComparison(features[index].Name, compared[index], different[index], largest[index]));
+            passed = passed && different[index] == 0;
+        }
+
+        return (passed, cells, examples);
+    }
+
     private static bool Different(CommitMetrics one, CommitMetrics other) =>
         one.PriorFixes != other.PriorFixes
         || one.PriorChanges != other.PriorChanges
@@ -358,7 +536,7 @@ public static class RenameSensitivity
 
         using Repository repository = new(path);
 
-        List<(DateTimeOffset Date, string Sha, string Email, string Subject, List<FileForMetrics> Files)> read = [];
+        List<(DateTimeOffset Date, string Sha, string Email, string Subject, List<FileForMetrics> Files, int Sequence)> read = [];
         int renames = 0;
 
         foreach (Commit commit in repository.Commits.QueryBy(new CommitFilter { SortBy = CommitSortStrategies.Time }))
@@ -397,31 +575,29 @@ public static class RenameSensitivity
             string message = commit.Message ?? string.Empty;
             int newline = message.IndexOf('\n', StringComparison.Ordinal);
 
+            // Sayac git'ten okuma sirasi; ana madencilikte ayni sira Id'ye donusuyor.
             read.Add((
                 commit.Author.When.ToUniversalTime(),
                 commit.Sha,
                 commit.Author.Email.ToLowerInvariant(),
                 (newline < 0 ? message : message[..newline]).Trim(),
-                files));
+                files,
+                read.Count));
         }
 
-        // Sira tarih artan, esitlikte SHA ordinal. Ana boru hattinda sira tarih + satir
-        // kimligi; bu arac icinde uc esik de AYNI kurali kullandigi icin karsilastirma
-        // gecerli, ama ana snapshot'la birebir ayni sira degil.
-        read.Sort((left, right) =>
-        {
-            int date = left.Date.UtcDateTime.CompareTo(right.Date.UtcDateTime);
-
-            return date != 0 ? date : string.CompareOrdinal(left.Sha, right.Sha);
-        });
+        // Sira ANA BORU HATTIYLA AYNI: tarih artan, esitlikte madencilik sirasi artan.
+        // Madencilik sirasi commit'lerin git'ten okunma sirasi; ana boru hattinda ayni
+        // sira veritabanina Id olarak yazilmis (bkz. CommitOrdering).
+        List<(DateTimeOffset Date, string Sha, string Email, string Subject, List<FileForMetrics> Files, int Sequence)> ordered =
+            CommitOrdering.Apply(read, entry => entry.Date, entry => entry.Sequence);
 
         List<CommitForMetrics> commits = [];
         Dictionary<int, string> shas = [];
 
-        for (int index = 0; index < read.Count; index++)
+        for (int index = 0; index < ordered.Count; index++)
         {
-            commits.Add(new CommitForMetrics(index, read[index].Email, read[index].Date, read[index].Subject, read[index].Files));
-            shas[index] = read[index].Sha;
+            commits.Add(new CommitForMetrics(index, ordered[index].Email, ordered[index].Date, ordered[index].Subject, ordered[index].Files));
+            shas[index] = ordered[index].Sha;
         }
 
         return (commits, renames, shas);

@@ -30,6 +30,7 @@ public static class BackgroundJobsCommand
 
     private const int EquivalenceSample = 100;
 
+    // sievert:disable SV006 komut satirindan tek sefer kosuyor; iptali Ctrl+C yapiyor
     public static async Task<int> RunAsync(SievertContext context, string[] args)
     {
         string repositoryRoot = Path.GetFullPath(args[1]);

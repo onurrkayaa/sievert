@@ -70,11 +70,20 @@ public sealed record RandomSummary(
     Distribution PredictedPositives);
 
 /// <summary>Butun tekrarlarin sonucu.</summary>
+/// <param name="MacroF1">
+/// Her tekrarda depo F1'lerinin basit ortalamasi, sonra bu 1000 sayinin dagilimi. Mikro
+/// toplamdan ayri tutuluyor: mikro Jellyfin agirlikli (test satirlarinin %67,1'i),
+/// makro her repoyu esit sayiyor.
+///
+/// Depo F1'lerinden TURETILIYOR; fazladan rastgele sayi cekmiyor, o yuzden eklenmesi
+/// depo sonuclarini degistirmiyor.
+/// </param>
 public sealed record RandomBaselineResult(
     int Seed,
     int Repeats,
     IReadOnlyList<RandomSummary> Repositories,
-    RandomSummary Micro);
+    RandomSummary Micro,
+    Distribution MacroF1);
 
 /// <summary>
 /// Egitim pozitif oraniyla rastgele tahmin eden taban. Her repo KENDI egitim oranini
@@ -107,11 +116,13 @@ public static class RandomBaseline
         List<double?>[] f1 = Lists(repositories.Count + 1);
         List<double?>[] area = Lists(repositories.Count + 1);
         List<double?>[] predicted = Lists(repositories.Count + 1);
+        List<double?> macro = [];
 
         for (int repeat = 0; repeat < repeats; repeat++)
         {
             Random random = new(seed + repeat);
             List<Scored> micro = [];
+            List<double?> repeatScores = [];
 
             for (int index = 0; index < repositories.Count; index++)
             {
@@ -125,11 +136,14 @@ public static class RandomBaseline
                     scored.Add(new Scored(score < probability, score, row.IsBugIntroducing));
                 }
 
-                Record(Evaluation.Of(scored), index, precision, recall, f1, area, predicted);
+                Outcome outcome = Evaluation.Of(scored);
+                Record(outcome, index, precision, recall, f1, area, predicted);
+                repeatScores.Add(outcome.Counts.F1);
                 micro.AddRange(scored);
             }
 
             Record(Evaluation.Of(micro), repositories.Count, precision, recall, f1, area, predicted);
+            macro.Add(Totals.MacroF1(repeatScores));
         }
 
         List<RandomSummary> summaries = [];
@@ -158,7 +172,7 @@ public static class RandomBaseline
             area,
             predicted);
 
-        return new RandomBaselineResult(seed, repeats, summaries, combined);
+        return new RandomBaselineResult(seed, repeats, summaries, combined, Distribution.Of(macro));
     }
 
     private static List<double?>[] Lists(int count)

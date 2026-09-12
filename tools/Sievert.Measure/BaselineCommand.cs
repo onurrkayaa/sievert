@@ -53,6 +53,7 @@ public static class BaselineCommand
             codeCommit);
 
         Print(report);
+        PrintOperatorCheck(repositories, report);
         BaselineJson.Write(outputPath, report);
         File.WriteAllText(Path.ChangeExtension(outputPath, ".sha256"), FileChecksum.Line(outputPath));
 
@@ -114,6 +115,7 @@ public static class BaselineCommand
         }
 
         PrintRandom(report.Random.Micro);
+        Console.WriteLine($"  makro F1  {Spread(report.Random.MacroF1)}");
         Console.WriteLine();
 
         Console.WriteLine("== C) LinesAdded esigi ==");
@@ -137,6 +139,45 @@ public static class BaselineCommand
             $"    PR-AUC ham {Number(report.LinesAdded.MicroRawPrAuc)}, "
             + $"esikli {Number(report.LinesAdded.MicroBinaryPrAuc)}");
         Console.WriteLine($"  makro F1: {Number(report.LinesAdded.MacroF1)}");
+    }
+
+    /// <summary>
+    /// ">" ile ">=" ayni tahminleri mi uretiyor. Ana sonucu degistirmiyor; yalnizca
+    /// beklenti dosyasindaki yazimla uygulanan protokolun farkini sayiyor.
+    /// </summary>
+    private static void PrintOperatorCheck(
+        IReadOnlyList<RepositorySplit> repositories,
+        BaselineReport report)
+    {
+        Console.WriteLine();
+        Console.WriteLine("== Protokol kontrolu: > ile >= ==");
+
+        Dictionary<string, double> thresholds = new(StringComparer.Ordinal);
+
+        foreach (ThresholdRepositoryOutcome outcome in report.LinesAdded.Repositories)
+        {
+            thresholds[outcome.Identity] = outcome.Threshold;
+        }
+
+        int total = 0;
+
+        foreach (RepositorySplit repository in repositories)
+        {
+            OperatorCheck check = ThresholdOperatorCheck.Compare(repository, thresholds[repository.Identity]);
+            total += check.TrainDifferences + check.TestDifferences;
+
+            string greater = check.Greater is double value
+                ? value.ToString("F0", CultureInfo.InvariantCulture)
+                : "yok (esik egitimin en kucuk degeri)";
+
+            Console.WriteLine($"  {repository.Identity}: >= {check.GreaterOrEqual} ile > {greater}");
+            Console.WriteLine(
+                $"    train farkli tahmin: {check.TrainDifferences} / {check.TrainRows}");
+            Console.WriteLine(
+                $"    test  farkli tahmin: {check.TestDifferences} / {check.TestRows}");
+        }
+
+        Console.WriteLine($"  toplam fark: {total}");
     }
 
     private static void PrintRandom(RandomSummary summary)

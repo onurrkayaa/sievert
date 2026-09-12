@@ -97,6 +97,10 @@ public static class BaselineJson
         writer.WritePropertyName("micro");
         WriteSummary(writer, result.Micro);
 
+        // Makro, her tekrarda depo F1'lerinin basit ortalamasi. Mikro'dan ayri duruyor:
+        // mikro buyuk repoyu agirlikliyor, makro uc repoyu esit sayiyor.
+        WriteDistribution(writer, "macroF1", result.MacroF1);
+
         writer.WriteEndObject();
     }
 

@@ -1,0 +1,106 @@
+{
+  "modelPredictionsSha256": "21b6987790610530d1d42f43b9d595236864f95a09b6a8ccdbed61d23810ee4f",
+  "baselineSha256": "dd62daa7ca7a077645c2053732bcf93291b3459cd1e958797f66cd10f6f38d65",
+  "codeCommit": "7463d66",
+  "seed": 20260912,
+  "repeats": 2000,
+  "method": "paired circular moving-block bootstrap",
+  "scope": "model egitim belirsizligini kapsamaz; yalnizca sabit tahminler uzerindeki zamansal test ornekleme belirsizligini olcer",
+  "repositories": [
+    {
+      "name": "github.com/app-vnext/polly",
+      "blockLength": 29,
+      "validRepeats": 2000,
+      "notAvailableF1": 2,
+      "notAvailablePrAuc": 2,
+      "deltaF1": {
+        "mean": -0.010595366882350325,
+        "p2_5": -0.12413793103448273,
+        "median": -0.011469534050179198,
+        "p97_5": 0.11398624303963314
+      },
+      "deltaPrAuc": {
+        "mean": 0.04693606475961982,
+        "p2_5": -0.11934596411340595,
+        "median": 0.0366637447653442,
+        "p97_5": 0.29490348620783413
+      }
+    },
+    {
+      "name": "github.com/jellyfin/jellyfin",
+      "blockLength": 83,
+      "validRepeats": 2000,
+      "notAvailableF1": 0,
+      "notAvailablePrAuc": 0,
+      "deltaF1": {
+        "mean": 0.008475196981495455,
+        "p2_5": -0.008835921456877449,
+        "median": 0.008542881821446191,
+        "p97_5": 0.025711440383860973
+      },
+      "deltaPrAuc": {
+        "mean": 0.05310214788145464,
+        "p2_5": 0.03289891992142763,
+        "median": 0.05310269984567706,
+        "p97_5": 0.07292706318810271
+      }
+    },
+    {
+      "name": "github.com/sharex/sharex",
+      "blockLength": 51,
+      "validRepeats": 2000,
+      "notAvailableF1": 0,
+      "notAvailablePrAuc": 0,
+      "deltaF1": {
+        "mean": 0.03488885499589751,
+        "p2_5": -0.0054910343189644994,
+        "median": 0.034679648153084275,
+        "p97_5": 0.07753447896704468
+      },
+      "deltaPrAuc": {
+        "mean": 0.01985460188011956,
+        "p2_5": -0.00746829660416759,
+        "median": 0.02013850769653605,
+        "p97_5": 0.04526490922457345
+      }
+    }
+  ],
+  "micro": {
+    "name": "mikro",
+    "blockLength": null,
+    "validRepeats": 2000,
+    "notAvailableF1": 0,
+    "notAvailablePrAuc": 0,
+    "deltaF1": {
+      "mean": 0.06545606353745066,
+      "p2_5": 0.048538162957047215,
+      "median": 0.06534734607181969,
+      "p97_5": 0.0822979645126623
+    },
+    "deltaPrAuc": {
+      "mean": 0.2157678839960562,
+      "p2_5": 0.1817698234810286,
+      "median": 0.21573658457034678,
+      "p97_5": 0.25127060665408196
+    }
+  },
+  "macro": {
+    "name": "makro",
+    "blockLength": null,
+    "validRepeats": 2000,
+    "notAvailableF1": 2,
+    "notAvailablePrAuc": 2,
+    "deltaF1": {
+      "mean": 0.010920386384308053,
+      "p2_5": -0.02956460006749384,
+      "median": 0.010870541063531663,
+      "p97_5": 0.05629055958928969
+    },
+    "deltaPrAuc": {
+      "mean": 0.03996665858983733,
+      "p2_5": -0.015499054387860414,
+      "median": 0.03661981536819717,
+      "p97_5": 0.12157756671399055
+    }
+  }
+}

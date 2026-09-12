@@ -1,0 +1,1400 @@
+{
+  "contractVersion": "1.0",
+  "metricContractVersion": "1.0",
+  "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+  "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+  "modelResultsSha256": "cd3b3e3d7575859b7d7bc446024df1ee140aec7f5fb710a4f4b265578249a0b5",
+  "codeCommit": "7463d66",
+  "note": "azaltilmis-egitim modeli; Adim 3 tam-train modelinin yerine gecmez",
+  "repositories": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "modelFitRows": 1544,
+      "modelFitPositives": 226,
+      "calibrationRows": 387,
+      "calibrationPositives": 25,
+      "testRows": 828,
+      "testPositives": 10,
+      "plattSlope": 1.001585518813319,
+      "plattOffset": -0.3211977173487425,
+      "plattIterations": 5,
+      "isotonicBlocks": 266,
+      "methods": [
+        {
+          "method": "ham",
+          "brier": 0.01415621651967485,
+          "ece": 0.03202034212277127,
+          "meanPrediction": 0.04409763680876161,
+          "positives": 10,
+          "count": 828,
+          "prAuc": 0.2700239119629264,
+          "atHalf": {
+            "tp": 4,
+            "fp": 5,
+            "fn": 6,
+            "tn": 813,
+            "precision": 0.4444444444444444,
+            "recall": 0.4,
+            "f1": 0.4210526315789474
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 745,
+              "meanPrediction": 0.015409663015032724,
+              "positives": 1,
+              "observedRate": 0.0013422818791946308,
+              "gap": 0.014067381135838093
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 22,
+              "meanPrediction": 0.15514481677250427,
+              "positives": 1,
+              "observedRate": 0.045454545454545456,
+              "gap": 0.10969027131795882
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 24,
+              "meanPrediction": 0.2483382144321998,
+              "positives": 2,
+              "observedRate": 0.08333333333333333,
+              "gap": 0.16500488109886646
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 18,
+              "meanPrediction": 0.3326617098516888,
+              "positives": 1,
+              "observedRate": 0.05555555555555555,
+              "gap": 0.2771061542961333
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 10,
+              "meanPrediction": 0.4435803800821304,
+              "positives": 1,
+              "observedRate": 0.1,
+              "gap": 0.34358038008213043
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 7,
+              "meanPrediction": 0.5302156805992126,
+              "positives": 3,
+              "observedRate": 0.42857142857142855,
+              "gap": 0.1016442520277841
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 2,
+              "meanPrediction": 0.762058436870575,
+              "positives": 1,
+              "observedRate": 0.5,
+              "gap": 0.26205843687057495
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        },
+        {
+          "method": "platt",
+          "brier": 0.011989629241704344,
+          "ece": 0.023225672095357672,
+          "meanPrediction": 0.03448680697727538,
+          "positives": 10,
+          "count": 828,
+          "prAuc": 0.2700239119629264,
+          "atHalf": {
+            "tp": 1,
+            "fp": 2,
+            "fn": 9,
+            "tn": 816,
+            "precision": 0.3333333333333333,
+            "recall": 0.1,
+            "f1": 0.15384615384615383
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 748,
+              "meanPrediction": 0.011486187413327633,
+              "positives": 1,
+              "observedRate": 0.001336898395721925,
+              "gap": 0.010149289017605707
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 36,
+              "meanPrediction": 0.15006790851312346,
+              "positives": 2,
+              "observedRate": 0.05555555555555555,
+              "gap": 0.09451235295756791
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 24,
+              "meanPrediction": 0.25163440794816583,
+              "positives": 2,
+              "observedRate": 0.08333333333333333,
+              "gap": 0.1683010746148325
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 10,
+              "meanPrediction": 0.3557132853788024,
+              "positives": 1,
+              "observedRate": 0.1,
+              "gap": 0.25571328537880245
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 7,
+              "meanPrediction": 0.43598436707952615,
+              "positives": 3,
+              "observedRate": 0.42857142857142855,
+              "gap": 0.0074129385080976
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 1,
+              "meanPrediction": 0.51298509330249,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.51298509330249
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 1,
+              "meanPrediction": 0.662109841113952,
+              "positives": 1,
+              "observedRate": 1,
+              "gap": 0.337890158886048
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 1,
+              "meanPrediction": 0.7376191370254132,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.7376191370254132
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        },
+        {
+          "method": "isotonic",
+          "brier": 0.011395022340992125,
+          "ece": 0.015029957964740572,
+          "meanPrediction": 0.027107252650730856,
+          "positives": 10,
+          "count": 828,
+          "prAuc": 0.28374446552814675,
+          "atHalf": {
+            "tp": 5,
+            "fp": 7,
+            "fn": 5,
+            "tn": 811,
+            "precision": 0.4166666666666667,
+            "recall": 0.5,
+            "f1": 0.45454545454545453
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 729,
+              "meanPrediction": 0.0027434842249657075,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.0027434842249657075
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 82,
+              "meanPrediction": 0.1415505226480836,
+              "positives": 5,
+              "observedRate": 0.06097560975609756,
+              "gap": 0.08057491289198604
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 5,
+              "meanPrediction": 0.2857142857142857,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.2857142857142857
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 9,
+              "meanPrediction": 0.5454545454545454,
+              "positives": 4,
+              "observedRate": 0.4444444444444444,
+              "gap": 0.101010101010101
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 3,
+              "meanPrediction": 0.8333333333333334,
+              "positives": 1,
+              "observedRate": 0.3333333333333333,
+              "gap": 0.5
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "modelFitRows": 12832,
+      "modelFitPositives": 3064,
+      "calibrationRows": 3209,
+      "calibrationPositives": 697,
+      "testRows": 6876,
+      "testPositives": 927,
+      "plattSlope": 1.0668935600316054,
+      "plattOffset": 0.053544625750844656,
+      "plattIterations": 4,
+      "isotonicBlocks": 619,
+      "methods": [
+        {
+          "method": "ham",
+          "brier": 0.10248740180278464,
+          "ece": 0.090349745713537,
+          "meanPrediction": 0.22516649964023858,
+          "positives": 927,
+          "count": 6876,
+          "prAuc": 0.5173826151907513,
+          "atHalf": {
+            "tp": 487,
+            "fp": 558,
+            "fn": 440,
+            "tn": 5391,
+            "precision": 0.4660287081339713,
+            "recall": 0.5253505933117584,
+            "f1": 0.4939148073022312
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 3185,
+              "meanPrediction": 0.03996598366514547,
+              "positives": 43,
+              "observedRate": 0.013500784929356358,
+              "gap": 0.026465198735789112
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 1080,
+              "meanPrediction": 0.1453737163088388,
+              "positives": 94,
+              "observedRate": 0.08703703703703704,
+              "gap": 0.058336679271801764
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 682,
+              "meanPrediction": 0.24578881737860767,
+              "positives": 109,
+              "observedRate": 0.1598240469208211,
+              "gap": 0.08596477045778655
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 474,
+              "meanPrediction": 0.3474250690469259,
+              "positives": 96,
+              "observedRate": 0.20253164556962025,
+              "gap": 0.14489342347730563
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 410,
+              "meanPrediction": 0.4476568611656747,
+              "positives": 98,
+              "observedRate": 0.23902439024390243,
+              "gap": 0.20863247092177228
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 268,
+              "meanPrediction": 0.5468119745379063,
+              "positives": 83,
+              "observedRate": 0.30970149253731344,
+              "gap": 0.23711048200059287
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 249,
+              "meanPrediction": 0.6503277741761572,
+              "positives": 91,
+              "observedRate": 0.3654618473895582,
+              "gap": 0.28486592678659894
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 206,
+              "meanPrediction": 0.7492843695635935,
+              "positives": 86,
+              "observedRate": 0.4174757281553398,
+              "gap": 0.33180864140825367
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 195,
+              "meanPrediction": 0.8491141572976724,
+              "positives": 122,
+              "observedRate": 0.6256410256410256,
+              "gap": 0.22347313165664673
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 127,
+              "meanPrediction": 0.9424861805645499,
+              "positives": 105,
+              "observedRate": 0.8267716535433071,
+              "gap": 0.11571452702124285
+            }
+          ]
+        },
+        {
+          "method": "platt",
+          "brier": 0.10403773039362454,
+          "ece": 0.08996251624858381,
+          "meanPrediction": 0.2247792701752852,
+          "positives": 927,
+          "count": 6876,
+          "prAuc": 0.5173826151907513,
+          "atHalf": {
+            "tp": 500,
+            "fp": 594,
+            "fn": 427,
+            "tn": 5355,
+            "precision": 0.4570383912248629,
+            "recall": 0.5393743257820928,
+            "f1": 0.4948045522018803
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 3301,
+              "meanPrediction": 0.03687215490980401,
+              "positives": 53,
+              "observedRate": 0.016055740684641016,
+              "gap": 0.02081641422516299
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 1022,
+              "meanPrediction": 0.14581929225645696,
+              "positives": 90,
+              "observedRate": 0.08806262230919765,
+              "gap": 0.05775666994725931
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 629,
+              "meanPrediction": 0.24655014199918823,
+              "positives": 105,
+              "observedRate": 0.1669316375198728,
+              "gap": 0.07961850447931543
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 443,
+              "meanPrediction": 0.3475127838419669,
+              "positives": 89,
+              "observedRate": 0.20090293453724606,
+              "gap": 0.14660984930472082
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 387,
+              "meanPrediction": 0.4474826061737827,
+              "positives": 90,
+              "observedRate": 0.23255813953488372,
+              "gap": 0.214924466638899
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 276,
+              "meanPrediction": 0.5462513618668677,
+              "positives": 82,
+              "observedRate": 0.2971014492753623,
+              "gap": 0.24914991259150543
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 234,
+              "meanPrediction": 0.6513470696816408,
+              "positives": 83,
+              "observedRate": 0.3547008547008547,
+              "gap": 0.2966462149807861
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 206,
+              "meanPrediction": 0.7449263061007544,
+              "positives": 85,
+              "observedRate": 0.41262135922330095,
+              "gap": 0.33230494687745343
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 213,
+              "meanPrediction": 0.8465635350584607,
+              "positives": 115,
+              "observedRate": 0.539906103286385,
+              "gap": 0.3066574317720757
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 165,
+              "meanPrediction": 0.9435305959284765,
+              "positives": 135,
+              "observedRate": 0.8181818181818182,
+              "gap": 0.1253487777466583
+            }
+          ]
+        },
+        {
+          "method": "isotonic",
+          "brier": 0.10349427756663336,
+          "ece": 0.08609112156520585,
+          "meanPrediction": 0.22090787549190805,
+          "positives": 927,
+          "count": 6876,
+          "prAuc": 0.514651872139225,
+          "atHalf": {
+            "tp": 485,
+            "fp": 558,
+            "fn": 442,
+            "tn": 5391,
+            "precision": 0.4650047938638543,
+            "recall": 0.52319309600863,
+            "f1": 0.49238578680203043
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 3168,
+              "meanPrediction": 0.014723512983945518,
+              "positives": 40,
+              "observedRate": 0.012626262626262626,
+              "gap": 0.002097250357682892
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 979,
+              "meanPrediction": 0.154317174637821,
+              "positives": 78,
+              "observedRate": 0.07967313585291114,
+              "gap": 0.07464403878490986
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 892,
+              "meanPrediction": 0.2756646928053133,
+              "positives": 146,
+              "observedRate": 0.16367713004484305,
+              "gap": 0.11198756276047026
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 325,
+              "meanPrediction": 0.3630573248407662,
+              "positives": 64,
+              "observedRate": 0.19692307692307692,
+              "gap": 0.16613424791768927
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 469,
+              "meanPrediction": 0.4711030508726301,
+              "positives": 114,
+              "observedRate": 0.24307036247334754,
+              "gap": 0.22803268839928256
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 188,
+              "meanPrediction": 0.5118281075027983,
+              "positives": 55,
+              "observedRate": 0.2925531914893617,
+              "gap": 0.21927491601343657
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 430,
+              "meanPrediction": 0.6314526768457351,
+              "positives": 157,
+              "observedRate": 0.36511627906976746,
+              "gap": 0.2663363977759677
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 299,
+              "meanPrediction": 0.8229603729603701,
+              "positives": 168,
+              "observedRate": 0.5618729096989966,
+              "gap": 0.26108746326137344
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 126,
+              "meanPrediction": 0.9729729729729713,
+              "positives": 105,
+              "observedRate": 0.8333333333333334,
+              "gap": 0.13963963963963788
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "modelFitRows": 4754,
+      "modelFitPositives": 767,
+      "calibrationRows": 1189,
+      "calibrationPositives": 117,
+      "testRows": 2547,
+      "testPositives": 129,
+      "plattSlope": 0.9614711919929698,
+      "plattOffset": -0.3499525670360287,
+      "plattIterations": 5,
+      "isotonicBlocks": 232,
+      "methods": [
+        {
+          "method": "ham",
+          "brier": 0.058177704674453455,
+          "ece": 0.07116510945838812,
+          "meanPrediction": 0.1218129304242303,
+          "positives": 129,
+          "count": 2547,
+          "prAuc": 0.11758252870695289,
+          "atHalf": {
+            "tp": 10,
+            "fp": 37,
+            "fn": 119,
+            "tn": 2381,
+            "precision": 0.2127659574468085,
+            "recall": 0.07751937984496124,
+            "f1": 0.11363636363636365
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 1472,
+              "meanPrediction": 0.0479926253104405,
+              "positives": 27,
+              "observedRate": 0.018342391304347828,
+              "gap": 0.02965023400609267
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 615,
+              "meanPrediction": 0.14162373873518735,
+              "positives": 51,
+              "observedRate": 0.08292682926829269,
+              "gap": 0.05869690946689467
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 249,
+              "meanPrediction": 0.24223166381020145,
+              "positives": 23,
+              "observedRate": 0.09236947791164658,
+              "gap": 0.14986218589855488
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 104,
+              "meanPrediction": 0.3497034039061803,
+              "positives": 13,
+              "observedRate": 0.125,
+              "gap": 0.22470340390618032
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 60,
+              "meanPrediction": 0.4391582916180293,
+              "positives": 5,
+              "observedRate": 0.08333333333333333,
+              "gap": 0.35582495828469596
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 22,
+              "meanPrediction": 0.5366288531910289,
+              "positives": 6,
+              "observedRate": 0.2727272727272727,
+              "gap": 0.2639015804637562
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 12,
+              "meanPrediction": 0.6521889468034109,
+              "positives": 2,
+              "observedRate": 0.16666666666666666,
+              "gap": 0.48552228013674426
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 11,
+              "meanPrediction": 0.7437065135348927,
+              "positives": 2,
+              "observedRate": 0.18181818181818182,
+              "gap": 0.5618883317167109
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 2,
+              "meanPrediction": 0.8332902193069458,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.8332902193069458
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        },
+        {
+          "method": "platt",
+          "brier": 0.052479412011299326,
+          "ece": 0.04670859953883693,
+          "meanPrediction": 0.0973564205046794,
+          "positives": 129,
+          "count": 2547,
+          "prAuc": 0.11758252870695289,
+          "atHalf": {
+            "tp": 4,
+            "fp": 22,
+            "fn": 125,
+            "tn": 2396,
+            "precision": 0.15384615384615385,
+            "recall": 0.031007751937984496,
+            "f1": 0.05161290322580646
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 1704,
+              "meanPrediction": 0.04498333327128828,
+              "positives": 40,
+              "observedRate": 0.023474178403755867,
+              "gap": 0.02150915486753241
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 548,
+              "meanPrediction": 0.14035485007338167,
+              "positives": 50,
+              "observedRate": 0.09124087591240876,
+              "gap": 0.049113974160972906
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 157,
+              "meanPrediction": 0.24049117023891137,
+              "positives": 17,
+              "observedRate": 0.10828025477707007,
+              "gap": 0.1322109154618413
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 85,
+              "meanPrediction": 0.3379900026510382,
+              "positives": 12,
+              "observedRate": 0.1411764705882353,
+              "gap": 0.1968135320628029
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 27,
+              "meanPrediction": 0.43759993394463137,
+              "positives": 6,
+              "observedRate": 0.2222222222222222,
+              "gap": 0.21537771172240916
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 10,
+              "meanPrediction": 0.545128650116075,
+              "positives": 1,
+              "observedRate": 0.1,
+              "gap": 0.44512865011607505
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 13,
+              "meanPrediction": 0.6463450456880945,
+              "positives": 3,
+              "observedRate": 0.23076923076923078,
+              "gap": 0.4155758149188637
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 2,
+              "meanPrediction": 0.7188938166651275,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.7188938166651275
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 1,
+              "meanPrediction": 0.8077233931406417,
+              "positives": 0,
+              "observedRate": 0,
+              "gap": 0.8077233931406417
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        },
+        {
+          "method": "isotonic",
+          "brier": 0.05225671605999296,
+          "ece": 0.04408366208788096,
+          "meanPrediction": 0.0947314830537225,
+          "positives": 129,
+          "count": 2547,
+          "prAuc": 0.12125676364326794,
+          "atHalf": {
+            "tp": 10,
+            "fp": 37,
+            "fn": 119,
+            "tn": 2381,
+            "precision": 0.2127659574468085,
+            "recall": 0.07751937984496124,
+            "f1": 0.11363636363636365
+          },
+          "bins": [
+            {
+              "lower": 0,
+              "upper": 0.1,
+              "count": 1910,
+              "meanPrediction": 0.045903859802236775,
+              "positives": 62,
+              "observedRate": 0.032460732984293195,
+              "gap": 0.01344312681794358
+            },
+            {
+              "lower": 0.1,
+              "upper": 0.2,
+              "count": 256,
+              "meanPrediction": 0.15668402777777865,
+              "positives": 22,
+              "observedRate": 0.0859375,
+              "gap": 0.07074652777777865
+            },
+            {
+              "lower": 0.2,
+              "upper": 0.3,
+              "count": 316,
+              "meanPrediction": 0.2658025443178773,
+              "positives": 33,
+              "observedRate": 0.10443037974683544,
+              "gap": 0.16137216457104187
+            },
+            {
+              "lower": 0.3,
+              "upper": 0.4,
+              "count": 18,
+              "meanPrediction": 0.33333333333333326,
+              "positives": 2,
+              "observedRate": 0.1111111111111111,
+              "gap": 0.22222222222222215
+            },
+            {
+              "lower": 0.4,
+              "upper": 0.5,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.5,
+              "upper": 0.6,
+              "count": 47,
+              "meanPrediction": 0.5,
+              "positives": 10,
+              "observedRate": 0.2127659574468085,
+              "gap": 0.2872340425531915
+            },
+            {
+              "lower": 0.6,
+              "upper": 0.7,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.7,
+              "upper": 0.8,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.8,
+              "upper": 0.9,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            },
+            {
+              "lower": 0.9,
+              "upper": 1,
+              "count": 0,
+              "meanPrediction": 0,
+              "positives": 0,
+              "observedRate": null,
+              "gap": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "micro": [
+    {
+      "method": "ham",
+      "brier": 0.08434331634768065,
+      "ece": 0.08087164458047504,
+      "meanPrediction": 0.18486149922880202,
+      "positives": 1066,
+      "count": 10251,
+      "prAuc": 0.4742477390372674,
+      "atHalf": {
+        "tp": 501,
+        "fp": 600,
+        "fn": 565,
+        "tn": 8585,
+        "precision": 0.4550408719346049,
+        "recall": 0.4699812382739212,
+        "f1": 0.4623904014766959
+      },
+      "bins": [
+        {
+          "lower": 0,
+          "upper": 0.1,
+          "count": 5402,
+          "meanPrediction": 0.03876656819264274,
+          "positives": 71,
+          "observedRate": 0.013143280266567938,
+          "gap": 0.025623287926074805
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1717,
+          "meanPrediction": 0.14415573611221968,
+          "positives": 146,
+          "observedRate": 0.0850320326150262,
+          "gap": 0.05912370349719348
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 955,
+          "meanPrediction": 0.24492541873018156,
+          "positives": 134,
+          "observedRate": 0.14031413612565444,
+          "gap": 0.10461128260452712
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 596,
+          "meanPrediction": 0.3473767575701611,
+          "positives": 110,
+          "observedRate": 0.18456375838926176,
+          "gap": 0.16281299918089936
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 480,
+          "meanPrediction": 0.44650961328297856,
+          "positives": 104,
+          "observedRate": 0.21666666666666667,
+          "gap": 0.22984294661631188
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 297,
+          "meanPrediction": 0.545666510809953,
+          "positives": 92,
+          "observedRate": 0.30976430976430974,
+          "gap": 0.23590220104564324
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 261,
+          "meanPrediction": 0.6504133453314331,
+          "positives": 93,
+          "observedRate": 0.3563218390804598,
+          "gap": 0.29409150625097336
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 219,
+          "meanPrediction": 0.7491208614279691,
+          "positives": 89,
+          "observedRate": 0.4063926940639269,
+          "gap": 0.34272816736404216
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 197,
+          "meanPrediction": 0.8489535081810152,
+          "positives": 122,
+          "observedRate": 0.6192893401015228,
+          "gap": 0.22966416807949241
+        },
+        {
+          "lower": 0.9,
+          "upper": 1,
+          "count": 127,
+          "meanPrediction": 0.9424861805645499,
+          "positives": 105,
+          "observedRate": 0.8267716535433071,
+          "gap": 0.11571452702124285
+        }
+      ]
+    },
+    {
+      "method": "platt",
+      "brier": 0.08379240167705339,
+      "ece": 0.07375906164548472,
+      "meanPrediction": 0.17774891629381157,
+      "positives": 1066,
+      "count": 10251,
+      "prAuc": 0.47698001690410907,
+      "atHalf": {
+        "tp": 505,
+        "fp": 618,
+        "fn": 561,
+        "tn": 8567,
+        "precision": 0.44968833481745324,
+        "recall": 0.47373358348968103,
+        "f1": 0.46139789858382824
+      },
+      "bins": [
+        {
+          "lower": 0,
+          "upper": 0.1,
+          "count": 5753,
+          "meanPrediction": 0.035973970352287034,
+          "positives": 94,
+          "observedRate": 0.01633930123413871,
+          "gap": 0.019634669118148325
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1606,
+          "meanPrediction": 0.14404994970908144,
+          "positives": 142,
+          "observedRate": 0.08841843088418432,
+          "gap": 0.05563151882489713
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 810,
+          "meanPrediction": 0.245526393624388,
+          "positives": 124,
+          "observedRate": 0.15308641975308643,
+          "gap": 0.09243997387130157
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 538,
+          "meanPrediction": 0.34616068089427066,
+          "positives": 102,
+          "observedRate": 0.1895910780669145,
+          "gap": 0.15656960282735616
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 421,
+          "meanPrediction": 0.4466576184686833,
+          "positives": 99,
+          "observedRate": 0.23515439429928742,
+          "gap": 0.21150322416939588
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 287,
+          "meanPrediction": 0.5460963326471036,
+          "positives": 83,
+          "observedRate": 0.289198606271777,
+          "gap": 0.25689772637532654
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 248,
+          "meanPrediction": 0.6511282650829159,
+          "positives": 87,
+          "observedRate": 0.35080645161290325,
+          "gap": 0.30032181347001263
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 209,
+          "meanPrediction": 0.7446422288378521,
+          "positives": 85,
+          "observedRate": 0.40669856459330145,
+          "gap": 0.3379436642445507
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 214,
+          "meanPrediction": 0.8463820390681904,
+          "positives": 115,
+          "observedRate": 0.5373831775700935,
+          "gap": 0.30899886149809697
+        },
+        {
+          "lower": 0.9,
+          "upper": 1,
+          "count": 165,
+          "meanPrediction": 0.9435305959284765,
+          "positives": 135,
+          "observedRate": 0.8181818181818182,
+          "gap": 0.1253487777466583
+        }
+      ]
+    },
+    {
+      "method": "isotonic",
+      "brier": 0.0833245133988187,
+      "ece": 0.06991400296702713,
+      "meanPrediction": 0.17390385761535126,
+      "positives": 1066,
+      "count": 10251,
+      "prAuc": 0.4755375562746382,
+      "atHalf": {
+        "tp": 500,
+        "fp": 602,
+        "fn": 566,
+        "tn": 8583,
+        "precision": 0.4537205081669691,
+        "recall": 0.46904315196998125,
+        "f1": 0.46125461254612543
+      },
+      "bins": [
+        {
+          "lower": 0,
+          "upper": 0.1,
+          "count": 5807,
+          "meanPrediction": 0.023475195687172535,
+          "positives": 102,
+          "observedRate": 0.017565007749268124,
+          "gap": 0.005910187937904411
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 1317,
+          "meanPrediction": 0.15398235986232187,
+          "positives": 105,
+          "observedRate": 0.07972665148063782,
+          "gap": 0.07425570838168405
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 1213,
+          "meanPrediction": 0.27313691790219763,
+          "positives": 179,
+          "observedRate": 0.14756801319043694,
+          "gap": 0.1255689047117607
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 343,
+          "meanPrediction": 0.36149746522813103,
+          "positives": 66,
+          "observedRate": 0.1924198250728863,
+          "gap": 0.16907764015524473
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 469,
+          "meanPrediction": 0.4711030508726301,
+          "positives": 114,
+          "observedRate": 0.24307036247334754,
+          "gap": 0.22803268839928256
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 244,
+          "meanPrediction": 0.5107900619656431,
+          "positives": 69,
+          "observedRate": 0.2827868852459016,
+          "gap": 0.22800317671974152
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 430,
+          "meanPrediction": 0.6314526768457351,
+          "positives": 157,
+          "observedRate": 0.36511627906976746,
+          "gap": 0.2663363977759677
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 0,
+          "meanPrediction": 0,
+          "positives": 0,
+          "observedRate": null,
+          "gap": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 302,
+          "meanPrediction": 0.8230634156130816,
+          "positives": 169,
+          "observedRate": 0.5596026490066225,
+          "gap": 0.2634607666064591
+        },
+        {
+          "lower": 0.9,
+          "upper": 1,
+          "count": 126,
+          "meanPrediction": 0.9729729729729713,
+          "positives": 105,
+          "observedRate": 0.8333333333333334,
+          "gap": 0.13963963963963788
+        }
+      ]
+    }
+  ],
+  "macro": {
+    "brier": {
+      "ham": 0.058273774332304316,
+      "platt": 0.0561689238822094,
+      "isotonic": 0.05571533865587281
+    },
+    "ece": {
+      "ham": 0.06451173243156547,
+      "platt": 0.05329892929425947,
+      "isotonic": 0.04840158053927579
+    },
+    "prAuc": {
+      "ham": 0.3016630186202102,
+      "platt": 0.3016630186202102,
+      "isotonic": 0.30655103377021325
+    },
+    "f1AtHalf": {
+      "ham": 0.34286793417251404,
+      "platt": 0.2334212030912802,
+      "isotonic": 0.3535225349946162
+    }
+  }
+}

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="260" y="26" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#111111">Guvenilirlik diyagrami - github.com/jellyfin/jellyfin</text>
+<text x="260" y="46" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#444444">test N = 6876</text>
+<rect x="70" y="70" width="380" height="380" fill="none" stroke="#999999" stroke-width="1"/>
+<line x1="70.00" y1="70" x2="70.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="450.00" x2="450" y2="450.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="70.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.0</text>
+<text x="60" y="454.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.0</text>
+<line x1="146.00" y1="70" x2="146.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="374.00" x2="450" y2="374.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="146.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.2</text>
+<text x="60" y="378.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.2</text>
+<line x1="222.00" y1="70" x2="222.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="298.00" x2="450" y2="298.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="222.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.4</text>
+<text x="60" y="302.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.4</text>
+<line x1="298.00" y1="70" x2="298.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="222.00" x2="450" y2="222.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="298.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.6</text>
+<text x="60" y="226.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.6</text>
+<line x1="374.00" y1="70" x2="374.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="146.00" x2="450" y2="146.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="374.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.8</text>
+<text x="60" y="150.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.8</text>
+<line x1="450.00" y1="70" x2="450.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="70.00" x2="450" y2="70.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="450.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">1.0</text>
+<text x="60" y="74.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">1.0</text>
+<line x1="70.00" y1="450.00" x2="450.00" y2="70.00" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<polyline points="85.19,444.87 125.24,416.93 163.40,389.27 202.02,373.04 240.11,359.17 277.79,332.31 317.12,311.12 354.73,291.36 392.66,212.26 428.14,135.83" fill="none" stroke="#b5651d" stroke-width="2"/>
+<circle cx="85.19" cy="444.87" r="3.5" fill="#b5651d"/>
+<circle cx="125.24" cy="416.93" r="3.5" fill="#b5651d"/>
+<circle cx="163.40" cy="389.27" r="3.5" fill="#b5651d"/>
+<circle cx="202.02" cy="373.04" r="3.5" fill="#b5651d"/>
+<circle cx="240.11" cy="359.17" r="3.5" fill="#b5651d"/>
+<circle cx="277.79" cy="332.31" r="3.5" fill="#b5651d"/>
+<circle cx="317.12" cy="311.12" r="3.5" fill="#b5651d"/>
+<circle cx="354.73" cy="291.36" r="3.5" fill="#b5651d"/>
+<circle cx="392.66" cy="212.26" r="3.5" fill="#b5651d"/>
+<circle cx="428.14" cy="135.83" r="3.5" fill="#b5651d"/>
+<polyline points="84.01,443.90 125.41,416.54 163.69,386.57 202.05,373.66 240.04,361.63 277.58,337.10 317.51,315.21 353.07,293.20 391.69,244.84 428.54,139.09" fill="none" stroke="#1f6fb4" stroke-width="2"/>
+<circle cx="84.01" cy="443.90" r="3.5" fill="#1f6fb4"/>
+<circle cx="125.41" cy="416.54" r="3.5" fill="#1f6fb4"/>
+<circle cx="163.69" cy="386.57" r="3.5" fill="#1f6fb4"/>
+<circle cx="202.05" cy="373.66" r="3.5" fill="#1f6fb4"/>
+<circle cx="240.04" cy="361.63" r="3.5" fill="#1f6fb4"/>
+<circle cx="277.58" cy="337.10" r="3.5" fill="#1f6fb4"/>
+<circle cx="317.51" cy="315.21" r="3.5" fill="#1f6fb4"/>
+<circle cx="353.07" cy="293.20" r="3.5" fill="#1f6fb4"/>
+<circle cx="391.69" cy="244.84" r="3.5" fill="#1f6fb4"/>
+<circle cx="428.54" cy="139.09" r="3.5" fill="#1f6fb4"/>
+<polyline points="75.59,445.20 128.64,419.72 174.75,387.80 207.96,375.17 249.02,357.63 264.49,338.83 309.95,311.26 382.72,236.49 439.73,133.33" fill="none" stroke="#2e8b57" stroke-width="2"/>
+<circle cx="75.59" cy="445.20" r="3.5" fill="#2e8b57"/>
+<circle cx="128.64" cy="419.72" r="3.5" fill="#2e8b57"/>
+<circle cx="174.75" cy="387.80" r="3.5" fill="#2e8b57"/>
+<circle cx="207.96" cy="375.17" r="3.5" fill="#2e8b57"/>
+<circle cx="249.02" cy="357.63" r="3.5" fill="#2e8b57"/>
+<circle cx="264.49" cy="338.83" r="3.5" fill="#2e8b57"/>
+<circle cx="309.95" cy="311.26" r="3.5" fill="#2e8b57"/>
+<circle cx="382.72" cy="236.49" r="3.5" fill="#2e8b57"/>
+<circle cx="439.73" cy="133.33" r="3.5" fill="#2e8b57"/>
+<text x="260" y="502" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#111111">ortalama tahmin olasiligi</text>
+<text x="18" y="260" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#111111" transform="rotate(-90 18 260)">gozlenen pozitif oran</text>
+<line x1="82" y1="82" x2="110" y2="82" stroke="#b5651d" stroke-width="2"/>
+<circle cx="96" cy="82" r="3" fill="#b5651d"/>
+<text x="118" y="86" font-family="sans-serif" font-size="11" fill="#111111">ham</text>
+<line x1="82" y1="100" x2="110" y2="100" stroke="#1f6fb4" stroke-width="2"/>
+<circle cx="96" cy="100" r="3" fill="#1f6fb4"/>
+<text x="118" y="104" font-family="sans-serif" font-size="11" fill="#111111">Platt</text>
+<line x1="82" y1="118" x2="110" y2="118" stroke="#2e8b57" stroke-width="2"/>
+<circle cx="96" cy="118" r="3" fill="#2e8b57"/>
+<text x="118" y="122" font-family="sans-serif" font-size="11" fill="#111111">isotonic</text>
+<line x1="82" y1="136" x2="110" y2="136" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="118" y="140" font-family="sans-serif" font-size="11" fill="#111111">ideal (y = x)</text>
+</svg>

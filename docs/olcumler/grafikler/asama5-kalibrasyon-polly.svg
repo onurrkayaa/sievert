@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" viewBox="0 0 520 520">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="260" y="26" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#111111">Guvenilirlik diyagrami - github.com/app-vnext/polly</text>
+<text x="260" y="46" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#444444">test N = 828</text>
+<rect x="70" y="70" width="380" height="380" fill="none" stroke="#999999" stroke-width="1"/>
+<line x1="70.00" y1="70" x2="70.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="450.00" x2="450" y2="450.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="70.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.0</text>
+<text x="60" y="454.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.0</text>
+<line x1="146.00" y1="70" x2="146.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="374.00" x2="450" y2="374.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="146.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.2</text>
+<text x="60" y="378.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.2</text>
+<line x1="222.00" y1="70" x2="222.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="298.00" x2="450" y2="298.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="222.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.4</text>
+<text x="60" y="302.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.4</text>
+<line x1="298.00" y1="70" x2="298.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="222.00" x2="450" y2="222.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="298.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.6</text>
+<text x="60" y="226.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.6</text>
+<line x1="374.00" y1="70" x2="374.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="146.00" x2="450" y2="146.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="374.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">0.8</text>
+<text x="60" y="150.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">0.8</text>
+<line x1="450.00" y1="70" x2="450.00" y2="450" stroke="#eeeeee" stroke-width="1"/>
+<line x1="70" y1="70.00" x2="450" y2="70.00" stroke="#eeeeee" stroke-width="1"/>
+<text x="450.00" y="468" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444444">1.0</text>
+<text x="60" y="74.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444444">1.0</text>
+<line x1="70.00" y1="450.00" x2="450.00" y2="70.00" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<polyline points="75.86,449.49 128.96,432.73 164.37,418.33 196.41,428.89 238.56,412.00 271.48,287.14 359.58,260.00" fill="none" stroke="#b5651d" stroke-width="2"/>
+<circle cx="75.86" cy="449.49" r="3.5" fill="#b5651d"/>
+<circle cx="128.96" cy="432.73" r="3.5" fill="#b5651d"/>
+<circle cx="164.37" cy="418.33" r="3.5" fill="#b5651d"/>
+<circle cx="196.41" cy="428.89" r="3.5" fill="#b5651d"/>
+<circle cx="238.56" cy="412.00" r="3.5" fill="#b5651d"/>
+<circle cx="271.48" cy="287.14" r="3.5" fill="#b5651d"/>
+<circle cx="359.58" cy="260.00" r="3.5" fill="#b5651d"/>
+<polyline points="74.36,449.49 127.03,428.89 165.62,418.33 205.17,412.00 235.67,287.14 264.93,450.00 321.60,70.00 350.30,450.00" fill="none" stroke="#1f6fb4" stroke-width="2"/>
+<circle cx="74.36" cy="449.49" r="3.5" fill="#1f6fb4"/>
+<circle cx="127.03" cy="428.89" r="3.5" fill="#1f6fb4"/>
+<circle cx="165.62" cy="418.33" r="3.5" fill="#1f6fb4"/>
+<circle cx="205.17" cy="412.00" r="3.5" fill="#1f6fb4"/>
+<circle cx="235.67" cy="287.14" r="3.5" fill="#1f6fb4"/>
+<circle cx="264.93" cy="450.00" r="3.5" fill="#1f6fb4"/>
+<circle cx="321.60" cy="70.00" r="3.5" fill="#1f6fb4"/>
+<circle cx="350.30" cy="450.00" r="3.5" fill="#1f6fb4"/>
+<polyline points="71.04,450.00 123.79,426.83 178.57,450.00 277.27,281.11 386.67,323.33" fill="none" stroke="#2e8b57" stroke-width="2"/>
+<circle cx="71.04" cy="450.00" r="3.5" fill="#2e8b57"/>
+<circle cx="123.79" cy="426.83" r="3.5" fill="#2e8b57"/>
+<circle cx="178.57" cy="450.00" r="3.5" fill="#2e8b57"/>
+<circle cx="277.27" cy="281.11" r="3.5" fill="#2e8b57"/>
+<circle cx="386.67" cy="323.33" r="3.5" fill="#2e8b57"/>
+<text x="260" y="502" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#111111">ortalama tahmin olasiligi</text>
+<text x="18" y="260" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#111111" transform="rotate(-90 18 260)">gozlenen pozitif oran</text>
+<line x1="82" y1="82" x2="110" y2="82" stroke="#b5651d" stroke-width="2"/>
+<circle cx="96" cy="82" r="3" fill="#b5651d"/>
+<text x="118" y="86" font-family="sans-serif" font-size="11" fill="#111111">ham</text>
+<line x1="82" y1="100" x2="110" y2="100" stroke="#1f6fb4" stroke-width="2"/>
+<circle cx="96" cy="100" r="3" fill="#1f6fb4"/>
+<text x="118" y="104" font-family="sans-serif" font-size="11" fill="#111111">Platt</text>
+<line x1="82" y1="118" x2="110" y2="118" stroke="#2e8b57" stroke-width="2"/>
+<circle cx="96" cy="118" r="3" fill="#2e8b57"/>
+<text x="118" y="122" font-family="sans-serif" font-size="11" fill="#111111">isotonic</text>
+<line x1="82" y1="136" x2="110" y2="136" stroke="#000000" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="118" y="140" font-family="sans-serif" font-size="11" fill="#111111">ideal (y = x)</text>
+</svg>

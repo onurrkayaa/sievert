@@ -148,6 +148,67 @@ public sealed class AnalysisCancellationTests(PostgresFixture postgres)
         Assert.Empty(context.StaticAnalysisFindings.Where(row => row.AnalysisJobId == jobId));
     }
 
+    /// <summary>
+    /// Jeton uzerinden iptal.
+    ///
+    /// Olcumde cikan gercek bir kusurun testi: is jetonla iptal edildiginde sayilar
+    /// isleyiciden cikamiyordu ve is "0 satir" diye kaydediliyordu, oysa veritabaninda
+    /// 2250 satir duruyordu. Kismi sonucun buyuklugunu yanlis soylemek, kismi sonucu hic
+    /// soylememekten kotu.
+    /// </summary>
+    [DockerFact]
+    public async Task CancellingThroughTheTokenStillReportsTheRowsThatWereWritten()
+    {
+        string connection = postgres.NewDatabaseConnectionString();
+        using SievertContext context = SievertContextBuilder.Create(connection);
+
+        (int known, int _) = ApiSeed.Write(context);
+
+        AnalysisJobStore store = new(context);
+        Guid jobId = (await store.CreateAsync(known, AnalysisJobKind.RiskScoreAll, null, DateTimeOffset.UtcNow)).Job!.Id;
+
+        await store.TryStartAsync(jobId, "test", DateTimeOffset.UtcNow);
+
+        AnalysisOptions options = new() { RiskBatchSize = 2 };
+
+        using CancellationTokenSource source = new();
+
+        // Ilk obek yazildiktan sonra jetonu iptal et.
+        JobProgress progress = Progress(store, jobId, options);
+
+        // Gozcu KENDI baglamini kullaniyor: DbContext is parcaciklari arasinda
+        // paylasilmaz, paylasilirsa "ikinci islem baslatildi" hatasi aliniyor.
+        Task watcher = Task.Run(async () =>
+        {
+            using SievertContext own = SievertContextBuilder.Create(connection);
+
+            while (own.CommitRiskSnapshots.Count(row => row.AnalysisJobId == jobId) < 2)
+            {
+                await Task.Delay(5);
+            }
+
+            await source.CancelAsync();
+        });
+
+        JobOutcome outcome = await Handler(context, options).RunAsync(
+            new AnalysisJobRun(jobId, known, progress),
+            source.Token);
+
+        await watcher;
+
+        int actual = context.CommitRiskSnapshots.Count(row => row.AnalysisJobId == jobId);
+
+        // Is ya bitti ya iptal edildi; iki durumda da bildirdigi sayi gercek satir
+        // sayisiyla ayni olmali.
+        Assert.Equal(actual, outcome.ResultCount);
+
+        if (outcome.Status == AnalysisJobStatus.Canceled)
+        {
+            Assert.True(actual > 0, "hicbir satir yazilmadan iptal edildi; test bir sey sinamadi");
+            Assert.True(actual < 5, $"iptal edilmesine ragmen butun satirlar yazildi: {actual}");
+        }
+    }
+
     [DockerFact]
     public async Task ProgressIsNotWrittenOncePerCommit()
     {

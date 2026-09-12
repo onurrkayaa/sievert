@@ -79,74 +79,90 @@ public sealed class RiskScoreAllHandler(
         int saved = 0;
         int explanationMismatches = 0;
 
-        while (processed < total)
+        // Jeton dongunun ICINDEKI her await'i kesebilir: obek sorgusu, kayit, ilerleme
+        // yazimi. Hepsini tek bir yerde yakaliyoruz ki iptal her durumda gercek
+        // sayilarla raporlansin. Sadece dongu basinda bakmak yetmedi; olcumde is 2250
+        // satir yazmisken 0 sonucla iptal edilmisti.
+        try
         {
-            cancellation.ThrowIfCancellationRequested();
-
-            // sievert:disable SV004 dongu basina tek sorgu bilincli: 22 bin satiri bellege almamak icin sayfali okuyoruz
-            List<CommitWithMetric> batch = await ScorableCommits(run.RepositoryId)
-                .Skip(processed)
-                .Take(options.RiskBatchSize)
-                .ToListAsync(cancellation);
-
-            if (batch.Count == 0)
+            while (processed < total)
             {
-                break;
-            }
-
-            DateTimeOffset now = clock.GetUtcNow();
-            List<CommitRiskSnapshotRow> rows = [];
-
-            foreach (CommitWithMetric pair in batch)
-            {
-                CommitRiskResult assessment = CommitRiskCalculator.Compute(
-                    profile,
-                    scaler,
-                    model,
-                    distribution,
-                    repository,
-                    pair.Commit,
-                    pair.Metric);
-
-                if (!assessment.Explanation.IsWithinTolerance)
+                // Jeton iptal edildiginde ISTISNA FIRLATMIYORUZ. Firlatsaydik sayilar
+                // isleyiciden cikamaz, is "0 satir yazdi" diye kaydedilirdi; oysa yazilmis
+                // satirlar veritabaninda duruyor olurdu. Bir kez tam bunu yasadim: 2250
+                // satir yazilmisken is 0 sonucla iptal edildi.
+                if (cancellation.IsCancellationRequested)
                 {
-                    // Aciklama dogrulanamadi. Skor yine de gecerli - aciklama ile skor
-                    // ayri seyler - ama sayisi raporlaniyor ki sessiz kalmasin.
-                    explanationMismatches++;
+                    return await CanceledAsync(run, total);
                 }
 
-                rows.Add(new CommitRiskSnapshotRow
+                // sievert:disable SV004 dongu basina tek sorgu bilincli: 22 bin satiri bellege almamak icin sayfali okuyoruz
+                List<CommitWithMetric> batch = await ScorableCommits(run.RepositoryId)
+                    .Skip(processed)
+                    .Take(options.RiskBatchSize)
+                    .ToListAsync(cancellation);
+
+                if (batch.Count == 0)
                 {
-                    AnalysisJobId = run.JobId,
-                    CommitId = pair.Commit.Id,
-                    RawModelScore = assessment.Explanation.RawModelScore,
-                    RiskIndex = assessment.RiskIndex,
-                    DecisionAt05 = assessment.Explanation.RawModelScore >= 0.5,
-                    DecisionAtTrainThreshold = assessment.Explanation.RawModelScore >= profile.TrainThreshold,
-                    TrainThreshold = profile.TrainThreshold,
-                    ModelProfile = profile.ProfileCode,
-                    ModelChecksum = profile.ShortChecksum,
-                    IsCalibrated = profile.IsCalibrated,
-                    WarningCodes = JsonSerializer.Serialize(assessment.Warnings),
-                    CreatedAtUtc = now,
-                });
+                    break;
+                }
+
+                DateTimeOffset now = clock.GetUtcNow();
+                List<CommitRiskSnapshotRow> rows = [];
+
+                foreach (CommitWithMetric pair in batch)
+                {
+                    CommitRiskResult assessment = CommitRiskCalculator.Compute(
+                        profile,
+                        scaler,
+                        model,
+                        distribution,
+                        repository,
+                        pair.Commit,
+                        pair.Metric);
+
+                    if (!assessment.Explanation.IsWithinTolerance)
+                    {
+                        // Aciklama dogrulanamadi. Skor yine de gecerli - aciklama ile skor
+                        // ayri seyler - ama sayisi raporlaniyor ki sessiz kalmasin.
+                        explanationMismatches++;
+                    }
+
+                    rows.Add(new CommitRiskSnapshotRow
+                    {
+                        AnalysisJobId = run.JobId,
+                        CommitId = pair.Commit.Id,
+                        RawModelScore = assessment.Explanation.RawModelScore,
+                        RiskIndex = assessment.RiskIndex,
+                        DecisionAt05 = assessment.Explanation.RawModelScore >= 0.5,
+                        DecisionAtTrainThreshold = assessment.Explanation.RawModelScore >= profile.TrainThreshold,
+                        TrainThreshold = profile.TrainThreshold,
+                        ModelProfile = profile.ProfileCode,
+                        ModelChecksum = profile.ShortChecksum,
+                        IsCalibrated = profile.IsCalibrated,
+                        WarningCodes = JsonSerializer.Serialize(assessment.Warnings),
+                        CreatedAtUtc = now,
+                    });
+                }
+
+                context.CommitRiskSnapshots.AddRange(rows);
+                await context.SaveChangesAsync(cancellation);
+                context.ChangeTracker.Clear();
+
+                processed += batch.Count;
+                saved += rows.Count;
+
+                await run.Progress.ReportAsync(PhaseScoring, processed, total, cancellation);
+
+                if (await run.Progress.IsCancellationRequestedAsync(cancellation))
+                {
+                    return await CanceledAsync(run, total);
+                }
             }
-
-            context.CommitRiskSnapshots.AddRange(rows);
-            await context.SaveChangesAsync(cancellation);
-            context.ChangeTracker.Clear();
-
-            processed += batch.Count;
-            saved += rows.Count;
-
-            await run.Progress.ReportAsync(PhaseScoring, processed, total, cancellation);
-
-            if (await run.Progress.IsCancellationRequestedAsync(cancellation))
-            {
-                await run.Progress.FlushAsync(PhaseScoring, processed, total, cancellation);
-
-                return JobOutcome.Canceled(saved, processed);
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            return await CanceledAsync(run, total);
         }
 
         await run.Progress.FlushAsync(PhaseScoring, processed, total, cancellation);
@@ -180,6 +196,27 @@ public sealed class RiskScoreAllHandler(
                 ["cancellationChecks"] = run.Progress.CancellationCheckCount,
                 ["modelLoads"] = registry.LoadCountOf(profile.ProfileCode),
             }));
+    }
+
+    /// <summary>
+    /// Iptal sonucunu uretir.
+    ///
+    /// Sayilar veritabanindan SAYILIYOR, bellekteki sayactan degil: obegin ortasinda
+    /// iptal edilirse sayac ile gercekte yazilmis satirlar ayrisabilir. Kismi sonucun
+    /// kac satir oldugunu yanlis soylemek, kismi sonucu hic soylememekten kotu.
+    ///
+    /// Iptal jetonu bu noktada zaten iptal edilmis olabilecegi icin son yazim
+    /// <see cref="CancellationToken.None"/> ile yapiliyor.
+    /// </summary>
+    private async Task<JobOutcome> CanceledAsync(AnalysisJobRun run, int total)
+    {
+        int actual = await context.CommitRiskSnapshots
+            .AsNoTracking()
+            .CountAsync(row => row.AnalysisJobId == run.JobId, CancellationToken.None);
+
+        await run.Progress.FlushAsync(PhaseScoring, actual, total, CancellationToken.None);
+
+        return JobOutcome.Canceled(actual, actual);
     }
 
     /// <summary>

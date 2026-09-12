@@ -137,7 +137,14 @@ public sealed class AnalysisJobWorker(
         }
         catch (OperationCanceledException)
         {
-            outcome = JobOutcome.Canceled(0, 0);
+            // Isleyiciler kendi iptallerini sayilariyla birlikte dondurmeli; buraya
+            // dusmek beklenmiyor. Duserse de sifir YAZMIYORUZ: isin en son bildirdigi
+            // ilerleme korunuyor, cunku sifir yazmak gercekte islenmis isi yok saymak olur.
+            logger.LogWarning("Is jeton uzerinden iptal edildi; sayilar isleyiciden gelmedi. JobId={JobId}", jobId);
+
+            AnalysisJobRow? current = await store.FindAsync(jobId, CancellationToken.None);
+
+            outcome = JobOutcome.Canceled(current?.ResultCount ?? 0, current?.ProcessedItems ?? 0);
         }
         catch (Exception error)
         {

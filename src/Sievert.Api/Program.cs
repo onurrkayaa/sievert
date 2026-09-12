@@ -63,6 +63,8 @@ app.MapOpenApi();
 RouteGroupBuilder api = app.MapGroup("/api/v1");
 
 api.MapHealth();
+api.MapModels();
+api.MapRepositories();
 
 app.Run();
 

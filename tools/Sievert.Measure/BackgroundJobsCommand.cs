@@ -550,14 +550,21 @@ public static class BackgroundJobsCommand
             JsonElement interrupted = await ReadAsync(client, $"/api/v1/analyses/{running}");
             JsonElement health = await ReadAsync(client, "/api/v1/health");
             JsonElement recovery = health.GetProperty("analysis").GetProperty("lastRecovery");
+            JsonElement queuedJob = await ReadAsync(client, $"/api/v1/analyses/{queued}");
 
-            // Ikinci kurtarma: degisiklik 0 olmali.
+            // Kurtarmanin idempotent oldugunu olcmek icin API'nin DURMASI gerekiyor.
+            // Calisan bir sisteme karsi kurtarma kosturmak, o anda kosan isi yarida
+            // kalmis saymak demek; olculen sey idempotentlik degil, kendi mudahalemiz olur.
+            // Ilk kosumda tam bunu yaptim ve ikinci kurtarma 1 degisiklik gosterdi.
+            restarted.Stop();
+
             using SievertContext direct = SievertContextBuilder.Create(
                 ConnectionString.Find(Directory.GetCurrentDirectory()).Value!);
 
-            RecoveryReport second = await new AnalysisJobStore(direct).RecoverAsync(DateTimeOffset.UtcNow);
+            AnalysisJobStore store = new(direct);
 
-            JsonElement queuedJob = await ReadAsync(client, $"/api/v1/analyses/{queued}");
+            RecoveryReport first = await store.RecoverAsync(DateTimeOffset.UtcNow);
+            RecoveryReport second = await store.RecoverAsync(DateTimeOffset.UtcNow);
 
             RecoveryResult result = new(
                 interrupted.GetProperty("status").GetString()!,
@@ -568,6 +575,8 @@ public static class BackgroundJobsCommand
                 second.ChangedRows,
                 queuedJob.GetProperty("status").GetString()!);
 
+            Console.WriteLine($"  API durdurulduktan sonra kurtarma: birinci {first.ChangedRows} degisiklik");
+
             Console.WriteLine(
                 $"  kosan is -> {result.InterruptedStatus} / {result.InterruptedErrorCode}, "
                 + $"sonuc tam mi: {result.InterruptedResultComplete}");
@@ -575,8 +584,6 @@ public static class BackgroundJobsCommand
                 $"  kurtarma: yarida kalan {result.RecoveredInterrupted}, yeniden kuyruga {result.RecoveredRequeued}");
             Console.WriteLine($"  ikinci kurtarma degisiklik: {result.SecondRecoveryChanges}");
             Console.WriteLine($"  kuyruktaki isin durumu: {result.QueuedStatus}");
-
-            restarted.Stop();
 
             return result;
         }

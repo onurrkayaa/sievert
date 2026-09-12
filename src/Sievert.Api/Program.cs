@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 using Sievert.Api;
+using Sievert.Api.Analysis;
 using Sievert.Api.Endpoints;
 using Sievert.Data;
 using Sievert.Modeling;
@@ -68,6 +69,33 @@ builder.Services.AddSingleton(provider =>
 builder.Services.AddSingleton(provider =>
     ScoreReference.Load(provider.GetRequiredService<ApiOptions>().ScoreReferencePath));
 
+// Arka plan is altyapisi. Gecersiz bir es zamanlilik ayari acilista durduruyor;
+// sessizce sinira cekmek, kullanicinin istedigi degerle kostugunu sanmasina yol acardi.
+AnalysisOptions analysis = new();
+builder.Configuration.GetSection(AnalysisOptions.Section).Bind(analysis);
+
+if (analysis.Validate() is string invalid)
+{
+    Console.Error.WriteLine(invalid);
+
+    return 2;
+}
+
+builder.Services.AddSingleton(analysis);
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IAnalysisJobQueue>(provider =>
+    new AnalysisJobQueue(provider.GetRequiredService<AnalysisOptions>()));
+builder.Services.AddSingleton<JobCancellationRegistry>();
+builder.Services.AddSingleton<RecoveryState>();
+builder.Services.AddScoped<AnalysisJobStore>();
+builder.Services.AddScoped<IAnalysisJobHandler, StaticScanHandler>();
+builder.Services.AddScoped<IAnalysisJobHandler, RiskScoreAllHandler>();
+
+// Once kurtarma, sonra worker: kuyrukta bekleyen isler worker basladiginda kuyruga
+// alinmis olmali.
+builder.Services.AddHostedService<AnalysisJobRecovery>();
+builder.Services.AddHostedService<AnalysisJobWorker>();
+
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
@@ -105,6 +133,7 @@ api.MapHealth();
 api.MapModels();
 api.MapRepositories();
 api.MapRisk();
+api.MapAnalyses();
 
 app.Run();
 

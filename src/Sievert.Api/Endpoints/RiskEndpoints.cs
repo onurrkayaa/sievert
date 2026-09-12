@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+using Sievert.Api.Analysis;
+
 using Sievert.Data;
 using Sievert.Data.Entities;
 using Sievert.Modeling;
@@ -124,13 +126,17 @@ public static class RiskEndpoints
                     ApiError.ScoreReferenceNotReady);
             }
 
-            SnapshotRow row = CommitFeatures.ToSnapshotRow(repository, commit, metric);
-
-            ModelExplanation explanation = ModelExplainer.Explain(
+            // Risk ucu ile arka plan isi ayni hesaptan geciyor; ayrisamasinlar diye.
+            CommitRiskResult assessment = CommitRiskCalculator.Compute(
                 profile,
                 registry.ScalerFor(profile),
                 registry.Load(profile.ProfileCode),
-                row);
+                distribution,
+                repository,
+                commit,
+                metric);
+
+            ModelExplanation explanation = assessment.Explanation;
 
             if (!explanation.IsWithinTolerance)
             {
@@ -148,7 +154,7 @@ public static class RiskEndpoints
                     ApiError.ModelExplanationMismatch);
             }
 
-            return Results.Ok(Assess(repository, commit, metric, profile, explanation, distribution));
+            return Results.Ok(Assess(repository, commit, profile, assessment, distribution));
         })
         .WithName("CommitRisk")
         .WithSummary("Tek bir commit icin ham model skoru, kararlar, goreli endeks ve katkilar")
@@ -162,22 +168,11 @@ public static class RiskEndpoints
     private static CommitRiskAssessment Assess(
         RepositoryRow repository,
         CommitRow commit,
-        CommitMetricRow metric,
         ModelProfile profile,
-        ModelExplanation explanation,
+        CommitRiskResult assessment,
         ScoreDistribution distribution)
     {
-        List<string> warnings = [.. RiskWarning.Always];
-
-        if (metric.CsFilesChanged == 0)
-        {
-            warnings.Add(RiskWarning.CsLabelCoverageLimit);
-        }
-
-        if (explanation.AnyOutsideTrainRange)
-        {
-            warnings.Add(RiskWarning.OutsideTrainRange);
-        }
+        ModelExplanation explanation = assessment.Explanation;
 
         List<FeatureContribution> positive = Rank(explanation.Effects, above: true);
         List<FeatureContribution> negative = Rank(explanation.Effects, above: false);
@@ -191,7 +186,7 @@ public static class RiskEndpoints
             profile.ShortChecksum,
             explanation.RawModelScore,
             profile.IsCalibrated,
-            distribution.RiskIndex(explanation.RawModelScore),
+            assessment.RiskIndex,
             $"{profile.ProfileCode} profilinin egitim bolumundeki {distribution.TrainCount} skorun "
             + "ampirik yuzdeligi; esitlikte orta sira",
             explanation.RawModelScore >= 0.5,
@@ -202,8 +197,8 @@ public static class RiskEndpoints
                 new FeatureValue(effect.Name, effect.RawValue, effect.TransformedValue))],
             positive,
             negative,
-            warnings,
-            RiskWarning.Describe(warnings),
+            assessment.Warnings,
+            RiskWarning.Describe(assessment.Warnings),
             new StaticAnalysisSection("not-run", [], IncludedInModelScore: false),
             new AuditSection(commit.IsBugIntroducing, commit.LabelSource));
     }

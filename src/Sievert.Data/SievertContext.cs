@@ -104,6 +104,7 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
             job.Property(row => row.IdempotencyKey).HasMaxLength(128);
             job.Property(row => row.ActiveDeduplicationKey).HasMaxLength(80);
             job.Property(row => row.WorkerInstanceId).HasMaxLength(80);
+            job.Property(row => row.ResultSummary).HasMaxLength(2000);
 
             // PostgreSQL'in satir surumu; iki worker ayni isi alamasin diye.
             job.Property(row => row.Version).IsRowVersion();

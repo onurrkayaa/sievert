@@ -166,6 +166,7 @@ public sealed class AnalysisJobStore(SievertContext context)
         string? errorCode,
         string? errorMessage,
         DateTimeOffset now,
+        string? resultSummary = null,
         CancellationToken cancellation = default)
     {
         if (!AnalysisJobTransitions.IsTerminal(status))
@@ -188,6 +189,7 @@ public sealed class AnalysisJobStore(SievertContext context)
                     .SetProperty(job => job.ErrorCode, errorCode)
                     .SetProperty(job => job.ErrorMessage, errorMessage)
                     .SetProperty(job => job.CurrentPhase, AnalysisJobRow.Name(status))
+                    .SetProperty(job => job.ResultSummary, resultSummary)
                     .SetProperty(job => job.ActiveDeduplicationKey, (string?)null),
                 cancellation) == 1;
     }

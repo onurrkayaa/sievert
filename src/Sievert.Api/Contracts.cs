@@ -6,7 +6,8 @@ public sealed record HealthResponse(
     string Version,
     DatabaseHealth Database,
     string ModelMetadataVersion,
-    IReadOnlyList<ModelHealth> Models);
+    IReadOnlyList<ModelHealth> Models,
+    AnalysisHealth Analysis);
 
 public sealed record DatabaseHealth(bool Reachable, bool MigrationsApplied, string? Detail);
 

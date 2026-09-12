@@ -92,6 +92,15 @@ public sealed class AnalysisJobRow
     /// <summary>Sonuc tam mi. Yalnizca <see cref="AnalysisJobStatus.Succeeded"/> durumunda true.</summary>
     public bool IsResultComplete { get; set; }
 
+    /// <summary>
+    /// Is turune ozel sayilar, JSON nesnesi olarak. Static scan icin susturma, muafiyet,
+    /// elenen dosya ve atlanan klasor sayilari; risk skorlamasi icin kullanilan profil.
+    ///
+    /// Her tur icin ayri sutun acmak yerine tek bir alan: sutunlar acilsaydi tablonun
+    /// yarisi her satirda bos kalirdi ve ucuncu bir is turu eklemek semayi degistirirdi.
+    /// </summary>
+    public string? ResultSummary { get; set; }
+
     /// <summary>Isi kosan surecin kimligi. Hangi surecin yarida biraktigi gorulsun diye.</summary>
     public string? WorkerInstanceId { get; set; }
 

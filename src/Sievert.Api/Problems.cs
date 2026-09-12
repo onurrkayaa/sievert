@@ -12,7 +12,13 @@ namespace Sievert.Api;
 /// </summary>
 public static class Problems
 {
-    public static IResult Create(HttpContext context, int status, string title, string detail, string errorCode)
+    public static IResult Create(
+        HttpContext context,
+        int status,
+        string title,
+        string detail,
+        string errorCode,
+        IReadOnlyDictionary<string, object?>? extensions = null)
     {
         ProblemDetails problem = new()
         {
@@ -24,6 +30,11 @@ public static class Problems
 
         problem.Extensions["errorCode"] = errorCode;
         problem.Extensions["traceId"] = context.TraceIdentifier;
+
+        foreach ((string key, object? value) in extensions ?? new Dictionary<string, object?>(StringComparer.Ordinal))
+        {
+            problem.Extensions[key] = value;
+        }
 
         return Results.Problem(
             title: problem.Title,

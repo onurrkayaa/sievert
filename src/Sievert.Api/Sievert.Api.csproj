@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <!--
-    Salt-okunur API. Yazma islemi, repo klonlama ve uzun suren analiz isi yok; onlar
-    yol haritasinin 3. adiminda (docs/planlar/asama6-api-ve-panel.md).
+    Adim 3'te Sievert.Analysis referansi eklendi: static-scan arka plan isi CLI ile ayni
+    tarama servisini cagiriyor. Ayri bir surec baslatmak istemedim, o zaman API'nin
+    sonucu baska bir programin cikti bicimini ayristirmaya baglanirdi.
 
-    Sievert.Analysis'e referans YOK: statik tarama endpoint'i bu turda yazilmadi ve
-    referans vermek "birazdan gelecek" izlenimi verirdi. Statik bulgular cevapta
-    yalnizca "not-run" durumu olarak duruyor (ADR 0023).
+    Repo klonlama ve git tarihi okuma hala YOK, o yuzden Sievert.Mining referansi da yok.
+    Commit risk cevabindaki statik bulgu bolumu yine "not-run" (ADR 0023).
   -->
 
   <ItemGroup>
@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Sievert.Analysis\Sievert.Analysis.csproj" />
     <ProjectReference Include="..\Sievert.Data\Sievert.Data.csproj" />
     <ProjectReference Include="..\Sievert.Modeling\Sievert.Modeling.csproj" />
   </ItemGroup>

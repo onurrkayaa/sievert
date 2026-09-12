@@ -10,8 +10,15 @@
     hangi veriyle egitildigi o gunku veritabaninin haline baglanirdi; anlik goruntunun
     varlik sebebi tam olarak bunu engellemek (docs/olcumler/asama5-veri-kumesi.md).
 
-    Yeni paket de yok. CSV okuma framework'un kendisiyle yazildi; tek ihtiyac tirnaklama
-    kurallari ve onlar RFC 4180'de birkac satirlik is.
+    CSV okuma framework'un kendisiyle yazildi; tek ihtiyac tirnaklama kurallari ve onlar
+    RFC 4180'de birkac satirlik is.
+
+    Tek paket Microsoft.ML: Adim 3'te lojistik regresyon buraya girdi. Surum
+    Directory.Packages.props icinde sabit (ADR 0018).
   -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML" />
+  </ItemGroup>
 
 </Project>

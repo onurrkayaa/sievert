@@ -54,6 +54,18 @@ if (args[0] == "model")
     return ModelCommand.Run(args);
 }
 
+// Adim 3b: kalibrasyon ve bootstrap. args: calibration <veri-klasoru> <commit> <grafik-klasoru>
+if (args[0] == "calibration")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure calibration <veri-klasoru> <commit> <grafik-klasoru>");
+        return 2;
+    }
+
+    return CalibrationCommand.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

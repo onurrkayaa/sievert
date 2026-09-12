@@ -1,0 +1,47 @@
+{
+  "codeCommit": "7f32a27",
+  "seed": 20260913,
+  "peakSampledWorkingSetBytes": 1328562176,
+  "staticScan": [
+    { "repository": "polly-full", "ran": true, "scannedFiles": 797, "findingCount": 203, "suppressedCount": 0, "exemptionCount": 972, "excludedFileCount": 0, "skippedDirectoryCount": 1, "queueWaitMs": 94.245, "runMs": 2149.759, "totalMs": 2289.6212, "directScanMs": 1877.1909, "progressWrites": 5, "directFindingCount": 203, "differenceCount": 0 },
+    { "repository": "jellyfin-full", "ran": true, "scannedFiles": 2184, "findingCount": 687, "suppressedCount": 0, "exemptionCount": 534, "excludedFileCount": 0, "skippedDirectoryCount": 1, "queueWaitMs": 4.298, "runMs": 3737.619, "totalMs": 3745.3405, "directScanMs": 4222.8584, "progressWrites": 8, "directFindingCount": 687, "differenceCount": 0 },
+    { "repository": "sharex-full", "ran": true, "scannedFiles": 1138, "findingCount": 248, "suppressedCount": 0, "exemptionCount": 308, "excludedFileCount": 0, "skippedDirectoryCount": 1, "queueWaitMs": 1.849, "runMs": 1940.339, "totalMs": 1944.0331, "directScanMs": 1008.2637, "progressWrites": 4, "directFindingCount": 248, "differenceCount": 0 }
+  ],
+  "riskScoreAll": [
+    { "repository": "polly-full", "ran": true, "expectedCommits": 2759, "resultCount": 2759, "queueWaitMs": 3.366, "runMs": 1172.327, "totalMs": 1178.9481, "commitsPerSecond": 2353.438929581934, "progressWrites": 5, "modelLoads": 1, "explanationMismatches": 0, "comparedCommits": 100, "mismatchedCommits": 0, "worstScoreDifference": 0 },
+    { "repository": "jellyfin-full", "ran": true, "expectedCommits": 22917, "resultCount": 22917, "queueWaitMs": 1.898, "runMs": 8829.572, "totalMs": 8833.3611, "commitsPerSecond": 2595.4825443407676, "progressWrites": 18, "modelLoads": 1, "explanationMismatches": 0, "comparedCommits": 100, "mismatchedCommits": 0, "worstScoreDifference": 0 },
+    { "repository": "sharex-full", "ran": true, "expectedCommits": 8490, "resultCount": 8490, "queueWaitMs": 2.082, "runMs": 2384.389, "totalMs": 2389.407, "commitsPerSecond": 3560.6606136834216, "progressWrites": 7, "modelLoads": 1, "explanationMismatches": 0, "comparedCommits": 100, "mismatchedCommits": 0, "worstScoreDifference": 0 }
+  ],
+  "cancellation": {
+    "queuedStatusCode": 200,
+    "queuedStatus": "canceled",
+    "queuedCancelMs": 4.0303,
+    "queuedNeverStarted": true,
+    "runningStatusCode": 202,
+    "runningStatus": "canceled",
+    "runningCancelMs": 69.0291,
+    "processedBeforeCancel": 2500,
+    "processedAtTerminal": 2500,
+    "processedAfterCancel": 0,
+    "partialResultCount": 2500,
+    "isResultComplete": false,
+    "terminalCancelStatus": "canceled",
+    "terminalCancelIdempotent": true
+  },
+  "idempotency": {
+    "sequentialDistinctJobs": 1,
+    "concurrentSameKeyDistinctJobs": 1,
+    "raceAccepted": 1,
+    "raceConflicted": 9,
+    "newJobRows": 2
+  },
+  "restartRecovery": {
+    "interruptedStatus": "failed",
+    "interruptedErrorCode": "PROCESS_INTERRUPTED",
+    "interruptedResultComplete": false,
+    "recoveredInterrupted": 1,
+    "recoveredRequeued": 1,
+    "secondRecoveryChanges": 0,
+    "queuedJobStatus": "running"
+  }
+}

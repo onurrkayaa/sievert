@@ -144,7 +144,10 @@ public static class ApiBaselineCommand
 
         List<double> durations = [];
         List<int> sizes = [];
-        List<(double Score, double Index)> points = [];
+        // Endeks profil basina olceklendigi icin monotonluk da profil basina bakiliyor.
+        // Uc deponun noktalarini tek listede siralamak, karsilastirilamaz iki endeksi
+        // karsilastirmak olurdu - sozlesme bunu acikca soyluyor.
+        Dictionary<int, List<(double Score, double Index)>> points = [];
         int missing = 0;
         int coverage = 0;
         int outside = 0;
@@ -175,7 +178,13 @@ public static class ApiBaselineCommand
             coverage += warnings.Contains("CS_LABEL_COVERAGE_LIMIT") ? 1 : 0;
             outside += warnings.Contains("OUTSIDE_TRAIN_RANGE") ? 1 : 0;
 
-            points.Add((root.GetProperty("rawModelScore").GetDouble(), root.GetProperty("riskIndex").GetDouble()));
+            if (!points.TryGetValue(target.RepositoryId, out List<(double Score, double Index)>? repository))
+            {
+                repository = [];
+                points[target.RepositoryId] = repository;
+            }
+
+            repository.Add((root.GetProperty("rawModelScore").GetDouble(), root.GetProperty("riskIndex").GetDouble()));
         }
 
         long peak = api.PeakWorkingSetBytes;
@@ -197,7 +206,7 @@ public static class ApiBaselineCommand
             coverage,
             outside,
             peak,
-            MonotonicityViolations(points));
+            points.Values.Sum(MonotonicityViolations));
     }
 
     /// <summary>

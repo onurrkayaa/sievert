@@ -151,6 +151,18 @@ if (args[0] == "tally")
     return TallyCommand.Run(args);
 }
 
+// Asama 5 kapanis kaniti. args: stage5-summary <veri> <commit> <test> <susturma> <ci>
+if (args[0] == "stage5-summary")
+{
+    if (args.Length < 6)
+    {
+        Console.Error.WriteLine("Kullanim: measure stage5-summary <veri> <commit> <test> <susturma> <ci>");
+        return 2;
+    }
+
+    return StageSummary.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

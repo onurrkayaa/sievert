@@ -1,0 +1,194 @@
+{
+  "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+  "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+  "codeCommit": "fab7f8e",
+  "note": "git yeniden okundu; ana snapshot ve veritabani degismedi. Etiketler SHA ile dondurulmus hedeften baglandi. Commit sirasi bu ara\u00E7ta tarih \u002B SHA ordinal.",
+  "repositories": [
+    {
+      "repository": "github.com/app-vnext/polly",
+      "chainEffect": {
+        "commits": 2759,
+        "affectedCommits": 1234,
+        "priorChangesDifferent": 1233,
+        "priorChangesLargestDifference": 3047,
+        "priorChangesTotalFollowed": 361826,
+        "priorChangesTotalPlain": 263506,
+        "maxFileAgeDifferent": 875,
+        "maxFileAgeLargestDifference": 3636,
+        "maxFileAgeTotalFollowed": 3009436,
+        "maxFileAgeTotalPlain": 2494802
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "commitsDifferentFromMain": 197,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.24324850738048553,
+          "tp": 7,
+          "fp": 38,
+          "fn": 3,
+          "tn": 780,
+          "f1": 0.2545454545454545,
+          "prAuc": 0.29063810981303695,
+          "brier": 0.013208579089620304,
+          "ece": 0.03059746836519357
+        },
+        {
+          "threshold": 50,
+          "commitsDifferentFromMain": 0,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.2310595065355301,
+          "tp": 7,
+          "fp": 40,
+          "fn": 3,
+          "tn": 778,
+          "f1": 0.24561403508771928,
+          "prAuc": 0.3015340254915613,
+          "brier": 0.01321996829162656,
+          "ece": 0.030644096632289546
+        },
+        {
+          "threshold": 60,
+          "commitsDifferentFromMain": 109,
+          "rows": 828,
+          "positives": 10,
+          "chosenThreshold": 0.2341535985469818,
+          "tp": 7,
+          "fp": 40,
+          "fn": 3,
+          "tn": 778,
+          "f1": 0.24561403508771928,
+          "prAuc": 0.30277861423615005,
+          "brier": 0.013094090959553979,
+          "ece": 0.029096444753284906
+        }
+      ]
+    },
+    {
+      "repository": "github.com/jellyfin/jellyfin",
+      "chainEffect": {
+        "commits": 22917,
+        "affectedCommits": 13340,
+        "priorChangesDifferent": 13305,
+        "priorChangesLargestDifference": 8682,
+        "priorChangesTotalFollowed": 8123060,
+        "priorChangesTotalPlain": 6421480,
+        "maxFileAgeDifferent": 10585,
+        "maxFileAgeLargestDifference": 4448,
+        "maxFileAgeTotalFollowed": 31675274,
+        "maxFileAgeTotalPlain": 26567001
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "commitsDifferentFromMain": 2757,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.31912392377853394,
+          "tp": 654,
+          "fp": 1091,
+          "fn": 273,
+          "tn": 4858,
+          "f1": 0.48952095808383234,
+          "prAuc": 0.5196983396374737,
+          "brier": 0.09984945463149661,
+          "ece": 0.08091766798185436
+        },
+        {
+          "threshold": 50,
+          "commitsDifferentFromMain": 0,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.3198124170303345,
+          "tp": 654,
+          "fp": 1091,
+          "fn": 273,
+          "tn": 4858,
+          "f1": 0.48952095808383234,
+          "prAuc": 0.5199531627159977,
+          "brier": 0.09985457297706363,
+          "ece": 0.08101420888122679
+        },
+        {
+          "threshold": 60,
+          "commitsDifferentFromMain": 2514,
+          "rows": 6876,
+          "positives": 927,
+          "chosenThreshold": 0.31951650977134705,
+          "tp": 653,
+          "fp": 1088,
+          "fn": 274,
+          "tn": 4861,
+          "f1": 0.4895052473763119,
+          "prAuc": 0.5202310111783384,
+          "brier": 0.09986730870998708,
+          "ece": 0.08112660770665396
+        }
+      ]
+    },
+    {
+      "repository": "github.com/sharex/sharex",
+      "chainEffect": {
+        "commits": 8490,
+        "affectedCommits": 3978,
+        "priorChangesDifferent": 3978,
+        "priorChangesLargestDifference": 2669,
+        "priorChangesTotalFollowed": 2500811,
+        "priorChangesTotalPlain": 2183940,
+        "maxFileAgeDifferent": 2009,
+        "maxFileAgeLargestDifference": 4590,
+        "maxFileAgeTotalFollowed": 11243593,
+        "maxFileAgeTotalPlain": 10163122
+      },
+      "thresholds": [
+        {
+          "threshold": 40,
+          "commitsDifferentFromMain": 598,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.20764046907424927,
+          "tp": 46,
+          "fp": 326,
+          "fn": 83,
+          "tn": 2092,
+          "f1": 0.18363273453093812,
+          "prAuc": 0.11869476079810429,
+          "brier": 0.055887471876459954,
+          "ece": 0.062436885898909965
+        },
+        {
+          "threshold": 50,
+          "commitsDifferentFromMain": 0,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.21701978147029877,
+          "tp": 44,
+          "fp": 297,
+          "fn": 85,
+          "tn": 2121,
+          "f1": 0.18723404255319148,
+          "prAuc": 0.11915368844040976,
+          "brier": 0.05587092406460998,
+          "ece": 0.06252189360276382
+        },
+        {
+          "threshold": 60,
+          "commitsDifferentFromMain": 245,
+          "rows": 2547,
+          "positives": 129,
+          "chosenThreshold": 0.21682702004909515,
+          "tp": 43,
+          "fp": 300,
+          "fn": 86,
+          "tn": 2118,
+          "f1": 0.1822033898305085,
+          "prAuc": 0.11966454931979598,
+          "brier": 0.05587189255860911,
+          "ece": 0.06281684240677358
+        }
+      ]
+    }
+  ]
+}

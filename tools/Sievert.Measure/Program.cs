@@ -231,6 +231,19 @@ if (args[0] == "api-baseline")
     return await ApiBaselineCommand.RunAsync(context, args);
 }
 
+// Asama 6 Adim 3: arka plan isleri olcumu. Gercek API sureci baslatiyor.
+// args: background-jobs <repo-koku> <commit> <cikti.json>
+if (args[0] == "background-jobs")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure background-jobs <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await BackgroundJobsCommand.RunAsync(context, args);
+}
+
 // Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.
 // args: history-check <anlik-goruntu.csv> <ozet.sha256>
 if (args[0] == "history-check")

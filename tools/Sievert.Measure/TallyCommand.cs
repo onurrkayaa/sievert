@@ -158,7 +158,9 @@ public static class TallyCommand
 
                 writer.WriteStartObject();
                 writer.WriteString("repository", identity);
-                WriteCounts(writer, "all", ValidationTally.Count(identity, forRepository));
+                // sievert:disable SV004 forRepository bellekte bir liste, veritabani sorgusu degil
+                TallyCounts all = ValidationTally.Count(identity, forRepository);
+                WriteCounts(writer, "all", all);
                 writer.WriteStartArray("byPredictionClass");
                 WriteGroup(writer, "model-pozitif", "precisionSignal", forRepository.Where(row => row.ModelPrediction));
                 WriteGroup(writer, "model-negatif", "missSignal", forRepository.Where(row => !row.ModelPrediction));
@@ -277,9 +279,12 @@ public static class TallyCommand
             // sievert:disable SV004 rows bellekte bir liste, veritabani sorgusu degil
             List<ValidationDecision> group = [.. rows.Where(row => confusion[row.SampleId] == cell)];
 
+            // sievert:disable SV004 group bellekte bir liste, veritabani sorgusu degil
+            TallyCounts counts = ValidationTally.Count(cell, group);
+
             writer.WriteStartObject();
             writer.WriteString("cell", cell);
-            WriteCounts(writer, "counts", ValidationTally.Count(cell, group));
+            WriteCounts(writer, "counts", counts);
             writer.WriteEndObject();
         }
 

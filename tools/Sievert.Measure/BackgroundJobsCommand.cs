@@ -371,8 +371,10 @@ public static class BackgroundJobsCommand
 
         bool queuedNeverStarted = queuedJob.GetProperty("startedAtUtc").ValueKind == JsonValueKind.Null;
 
-        // Kosan isin o ana kadar yazdigi satir sayisi.
-        JsonElement before = await ReadAsync(client, $"/api/v1/analyses/{running.Id}");
+        // Is gercekten ilerlesin: hemen iptal edersek "iptal sonrasi kac oge islendi"
+        // sorusu anlamsiz cikiyor, cunku hic oge islenmemis oluyor. Ilk kosumda tam
+        // boyle oldu ve sayi 0 - 0 cikti.
+        JsonElement before = await WaitForProgressAsync(client, running.Id);
         int processedBefore = before.GetProperty("processedItems").GetInt32();
 
         Stopwatch runningWatch = Stopwatch.StartNew();
@@ -402,6 +404,7 @@ public static class BackgroundJobsCommand
             processedBefore,
             processedAfter,
             processedAfter - processedBefore,
+            terminal.GetProperty("resultCount").GetInt32(),
             terminal.GetProperty("isResultComplete").GetBoolean(),
             unchanged.GetProperty("status").GetString()!,
             string.Equals(
@@ -416,7 +419,8 @@ public static class BackgroundJobsCommand
             $"  kosan is: {result.RunningStatusCode} -> {result.RunningStatus}, {result.RunningCancelMs:F0} ms, "
             + $"iptal sonrasi islenen ek oge {result.ProcessedAfterCancel}");
         Console.WriteLine(
-            $"  sonuc tam mi: {result.IsResultComplete}, terminal iptal: {result.TerminalStatus}, "
+            $"  kismi sonuc {result.PartialResultCount} satir, sonuc tam mi: {result.IsResultComplete}, "
+            + $"terminal iptal: {result.TerminalStatus}, "
             + $"idempotent: {result.TerminalIdempotent}");
 
         return result;
@@ -623,6 +627,21 @@ public static class BackgroundJobsCommand
         }
     }
 
+    /// <summary>Is ilerleme yazana kadar bekler; terminal olursa oldugu gibi doner.</summary>
+    private static async Task<JsonElement> WaitForProgressAsync(HttpClient client, Guid jobId)
+    {
+        while (true)
+        {
+            JsonElement job = await ReadAsync(client, $"/api/v1/analyses/{jobId}");
+
+            if (job.GetProperty("processedItems").GetInt32() > 0
+                || job.GetProperty("status").GetString() is "succeeded" or "failed" or "canceled")
+            {
+                return job;
+            }
+        }
+    }
+
     /// <summary>Butun isler bitene kadar bekler.</summary>
     private static async Task WaitForIdleAsync(HttpClient client)
     {
@@ -766,6 +785,7 @@ public static class BackgroundJobsCommand
         text.Append("    \"processedBeforeCancel\": ").Append(cancellation.ProcessedBefore).Append(",\n");
         text.Append("    \"processedAtTerminal\": ").Append(cancellation.ProcessedAfter).Append(",\n");
         text.Append("    \"processedAfterCancel\": ").Append(cancellation.ProcessedAfterCancel).Append(",\n");
+        text.Append("    \"partialResultCount\": ").Append(cancellation.PartialResultCount).Append(",\n");
         text.Append("    \"isResultComplete\": ").Append(cancellation.IsResultComplete ? "true" : "false").Append(",\n");
         text.Append("    \"terminalCancelStatus\": \"").Append(cancellation.TerminalStatus).Append("\",\n");
         text.Append("    \"terminalCancelIdempotent\": ").Append(cancellation.TerminalIdempotent ? "true" : "false").Append('\n');
@@ -848,6 +868,7 @@ public static class BackgroundJobsCommand
         int ProcessedBefore,
         int ProcessedAfter,
         int ProcessedAfterCancel,
+        int PartialResultCount,
         bool IsResultComplete,
         string TerminalStatus,
         bool TerminalIdempotent);

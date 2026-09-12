@@ -343,8 +343,13 @@ dotnet run --project src/Sievert.Api
 ```
 
 It listens on the ASP.NET Core default ports and serves an OpenAPI document at
-`/openapi/v1.json`. The model files are read relative to the content root, so if you start
-it from somewhere else, pass `--contentRoot <repo root>`.
+`/openapi/v1.json`.
+
+The model files and the score reference live in `data/`, so the API looks for them by
+walking up from its content root until it finds `Sievert.slnx`. That is why the command
+above works even though `dotnet run --project` sets the content root to the project
+folder. If it cannot find them it says so and stops instead of failing on the first
+request; you can point it somewhere else with `Sievert:ArtifactRoot`.
 
 | Endpoint | What |
 |---|---|

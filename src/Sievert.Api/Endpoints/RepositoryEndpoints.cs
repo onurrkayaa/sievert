@@ -42,7 +42,10 @@ public static class RepositoryEndpoints
             return Results.Ok(new PagedResponse<RepositoryListItem>(paging.Page, paging.PageSize, total, items));
         })
         .WithName("Repositories")
-        .WithSummary("Taranmis depolar");
+        .WithSummary("Taranmis depolar")
+        .Produces<PagedResponse<RepositoryListItem>>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
         api.MapGet("/repositories/{id:int}", async (
             int id,
@@ -99,7 +102,10 @@ public static class RepositoryEndpoints
                 notes));
         })
         .WithName("Repository")
-        .WithSummary("Tek bir depo ve etiket sayimlari");
+        .WithSummary("Tek bir depo ve etiket sayimlari")
+        .Produces<RepositoryDetail>()
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
         api.MapGet("/repositories/{id:int}/commits", async (
             int id,
@@ -155,7 +161,11 @@ public static class RepositoryEndpoints
             return Results.Ok(new PagedResponse<CommitListItem>(paging.Page, paging.PageSize, total, items));
         })
         .WithName("RepositoryCommits")
-        .WithSummary("Bir deponun commit'leri, en yeniden eskiye");
+        .WithSummary("Bir deponun commit'leri, en yeniden eskiye")
+        .Produces<PagedResponse<CommitListItem>>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
     }
 
     private static RepositoryListItem Describe(RepositoryRow row, ModelRegistry registry) => new(

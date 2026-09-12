@@ -151,7 +151,13 @@ public static class RiskEndpoints
             return Results.Ok(Assess(repository, commit, metric, profile, owner, explanation, distribution));
         })
         .WithName("CommitRisk")
-        .WithSummary("Tek bir commit icin ham model skoru, kararlar, goreli endeks ve katkilar");
+        .WithSummary("Tek bir commit icin ham model skoru, kararlar, goreli endeks ve katkilar")
+        .Produces<CommitRiskAssessment>()
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
     private static CommitRiskAssessment Assess(
         RepositoryRow repository,

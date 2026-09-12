@@ -12,7 +12,23 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // klasorden baslatinca modelleri sessizce bulamamak demek olurdu.
 ApiOptions options = new();
 builder.Configuration.GetSection(ApiOptions.Section).Bind(options);
-builder.Services.AddSingleton(options.Resolve(builder.Environment.ContentRootPath));
+options = options.Resolve(builder.Environment.ContentRootPath);
+
+// Kanit dosyalari olmadan sunulacak bir sey yok. Ilk istekte "beklenmeyen hata"
+// donmektense burada acik bir mesajla durmak daha dogru: kullanici neyin eksik
+// oldugunu ve hangi ayari verecegini goruyor.
+if (!File.Exists(options.ModelResultsPath) || !File.Exists(options.ScoreReferencePath))
+{
+    Console.Error.WriteLine(
+        $"Kanit dosyalari bulunamadi. Arandigi kok: {options.ArtifactRoot}\n"
+        + $"  {options.ModelResultsPath}\n"
+        + $"  {options.ScoreReferencePath}\n"
+        + "Repo kokunden calistir ya da Sievert:ArtifactRoot ayarini ver.");
+
+    return 2;
+}
+
+builder.Services.AddSingleton(options);
 
 // Baglanti dizesi SIEVERT_DB'den okunuyor; koda yazilmiyor ve gunluge basilmiyor.
 builder.Services.AddSingleton(DatabaseSettings.Resolve(builder.Environment.ContentRootPath));
@@ -73,6 +89,8 @@ api.MapRepositories();
 api.MapRisk();
 
 app.Run();
+
+return 0;
 
 /// <summary>Test sunucusunun (WebApplicationFactory) tutunacagi giris noktasi.</summary>
 public partial class Program;

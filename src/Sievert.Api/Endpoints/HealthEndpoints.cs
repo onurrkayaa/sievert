@@ -34,7 +34,8 @@ public static class HealthEndpoints
                 models));
         })
         .WithName("Health")
-        .WithSummary("Veritabani ve model profillerinin durumu");
+        .WithSummary("Veritabani ve model profillerinin durumu")
+        .Produces<HealthResponse>();
 
     private static async Task<DatabaseHealth> CheckDatabase(
         HttpContext context,

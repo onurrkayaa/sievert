@@ -22,14 +22,17 @@ public static class ModelEndpoints
         api.MapGet("/models", (ModelRegistry registry) =>
             Results.Ok(registry.Profiles.Select(Describe).ToList()))
             .WithName("Models")
-            .WithSummary("Egitilmis model profilleri ve sinirliliklari");
+            .WithSummary("Egitilmis model profilleri ve sinirliliklari")
+            .Produces<List<ModelResponse>>();
 
         api.MapGet("/models/{code}", (string code, ModelRegistry registry, HttpContext context) =>
             registry.Find(code) is ModelProfile profile
                 ? Results.Ok(Describe(profile))
                 : Problems.NotFound(context, $"Boyle bir model profili yok: {code}", ApiError.ModelProfileNotFound))
             .WithName("Model")
-            .WithSummary("Tek bir model profili");
+            .WithSummary("Tek bir model profili")
+            .Produces<ModelResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static ModelResponse Describe(ModelProfile profile) => new(

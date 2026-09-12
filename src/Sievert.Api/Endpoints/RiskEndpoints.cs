@@ -136,15 +136,19 @@ public static class RiskEndpoints
                 registry.Load(profile.ProfileCode),
                 row);
 
-            if (explanation.Difference > ModelExplainer.Tolerance)
+            if (!explanation.IsWithinTolerance)
             {
                 // Aciklama modelle tutmuyorsa cevap DONMUYOR. Yanlis bir aciklama,
-                // aciklama olmamasindan kotu.
+                // aciklama olmamasindan kotu. Tolerans sozlesmesi surum 2.0:
+                // docs/urun/model-aciklama-sayisal-tolerans.md.
+                //
+                // Ayrintida sayisal ic durum, katsayi ya da oznitelik degeri YOK; onlar
+                // gunluge gidiyor, cevaba degil.
                 return Problems.Create(
                     context,
                     StatusCodes.Status500InternalServerError,
                     "Aciklama modelle tutmadi",
-                    "Oznitelik katkilarinin toplami modelin logit'ini vermedi; degerlendirme donulmedi.",
+                    "Model aciklamasi dogrulanamadi, bu yuzden aciklama uretilmedi.",
                     ApiError.ModelExplanationMismatch);
             }
 

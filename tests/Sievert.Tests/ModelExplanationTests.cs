@@ -38,14 +38,13 @@ public sealed class ModelExplanationTests
         {
             ModelExplanation explanation = ModelExplainer.Explain(profile, scaler, model, rows[index]);
 
-            worst = Math.Max(worst, explanation.Difference);
+            worst = Math.Max(worst, explanation.NormalizedError);
 
             Assert.Equal(15, explanation.Effects.Count);
         }
 
-        Assert.True(
-            worst <= ModelExplainer.Tolerance,
-            $"{code}: en buyuk logit farki {worst:R}, tolerans {ModelExplainer.Tolerance:R}");
+        // Sozlesme surum 2.0; sayisal ayrinti ExplanationToleranceTests icinde.
+        Assert.True(worst <= 1.0, $"{code}: en buyuk normalize hata {worst:R}");
     }
 
     [Fact]
@@ -75,7 +74,7 @@ public sealed class ModelExplanationTests
         // Kirpilmadi: deger degistigi icin skor da degisti.
         Assert.NotEqual(plain.RawModelScore, extreme.RawModelScore);
         Assert.Equal(5_000_000.0, flagged.RawValue);
-        Assert.True(extreme.Difference <= ModelExplainer.Tolerance);
+        Assert.True(extreme.IsWithinTolerance);
     }
 
     [Fact]

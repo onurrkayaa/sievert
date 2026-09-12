@@ -325,7 +325,7 @@ public static class ApiBaselineCommand
                     worstAbsolute = absolute;
                 }
 
-                if (difference > ModelExplainer.Tolerance)
+                if (difference > ModelExplainer.AbsoluteToleranceV1)
                 {
                     violatingMagnitudes.Add(magnitude);
                     smallestViolatingMagnitude = Math.Min(smallestViolatingMagnitude, magnitude);
@@ -389,7 +389,7 @@ public static class ApiBaselineCommand
             + $"commit listesi {queries.CommitList}, depo listesi {queries.RepositoryList}");
         Console.WriteLine();
         Console.WriteLine($"butun veritabani: {whole.Rows} satir");
-        Console.WriteLine($"  en buyuk logit farki: {whole.WorstLogitDifference:E3} (tolerans {ModelExplainer.Tolerance:E0})");
+        Console.WriteLine($"  en buyuk logit farki: {whole.WorstLogitDifference:E3} (tolerans {ModelExplainer.AbsoluteToleranceV1:E0})");
         Console.WriteLine($"  o satirin |logit| degeri: {whole.WorstLogitMagnitude:F2}, "
             + $"mutlak katki toplami: {whole.WorstRowAbsoluteContributionSum:F2}");
         Console.WriteLine($"  toleransi asan satir : {whole.LogitViolations}");
@@ -435,7 +435,7 @@ public static class ApiBaselineCommand
         text.Append("  },\n");
         text.Append("  \"wholeDatabase\": {\n");
         text.Append("    \"rows\": ").Append(whole.Rows).Append(",\n");
-        text.Append("    \"tolerance\": ").Append(Number(ModelExplainer.Tolerance)).Append(",\n");
+        text.Append("    \"tolerance\": ").Append(Number(ModelExplainer.AbsoluteToleranceV1)).Append(",\n");
         text.Append("    \"worstLogitDifference\": ").Append(Number(whole.WorstLogitDifference)).Append(",\n");
         text.Append("    \"worstLogitMagnitude\": ").Append(Number(whole.WorstLogitMagnitude)).Append(",\n");
         text.Append("    \"worstRowAbsoluteContributionSum\": ")

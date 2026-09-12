@@ -102,6 +102,19 @@ if (args[0] == "rename")
     return RenameSensitivity.Run(args);
 }
 
+// Asama 6 Adim 3: aciklama toleransinin v1/v2 karsilastirmasi.
+// args: explanation-tolerance <repo-koku> <commit> <cikti.json>
+if (args[0] == "explanation-tolerance")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure explanation-tolerance <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return ExplanationToleranceCommand.Run(args);
+}
+
 // Asama 6 Adim 2: goreli risk endeksi icin egitim skor dagilimi.
 // args: score-reference <veri-klasoru> <commit> <cikti.json>
 if (args[0] == "score-reference")

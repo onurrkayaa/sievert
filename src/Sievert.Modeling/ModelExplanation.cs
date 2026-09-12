@@ -32,7 +32,34 @@ public sealed record ModelExplanation(
     IReadOnlyList<FeatureEffect> Effects)
 {
     /// <summary>Aciklamanin modelin kendi logit'inden sapmasi.</summary>
-    public double Difference => Math.Abs(ModelLogit - ExplainedLogit);
+    public double AbsoluteError => Math.Abs(ModelLogit - ExplainedLogit);
+
+    /// <summary>Eski ad; olcum ve rapor kodu bunu kullaniyordu.</summary>
+    public double Difference => AbsoluteError;
+
+    /// <summary>
+    /// Toplamanin sayisal olcegi: kesisim ve katkilarin MUTLAK toplami, en az 1.
+    ///
+    /// Logit'in kendisi olcek degil. Buyuk pozitif ve buyuk negatif katkilar birbirini
+    /// goturdugunde sonuc kucuk kaliyor ama temsil hatasi buyuk terimlerin olceginde
+    /// olusuyor; Adim 2'de olculen en kotu satir tam olarak boyleydi.
+    /// </summary>
+    public double Scale => Math.Max(
+        1.0,
+        Math.Abs(Intercept) + Effects.Sum(effect => Math.Abs(effect.Contribution)));
+
+    /// <summary>Bu satirda kabul edilen en buyuk fark. Sozlesme surum 2.0.</summary>
+    public double AllowedError =>
+        ModelExplainer.AbsoluteToleranceV1 + (ModelExplainer.FloatUnitRoundoff * Scale);
+
+    /// <summary>
+    /// Farkin izin verilen paya orani. Butun satirlarda ayni anlama geldigi icin
+    /// raporlanan olcu bu; ham mutlak fark olcege gore yaniltici olurdu.
+    /// </summary>
+    public double NormalizedError => AbsoluteError / AllowedError;
+
+    /// <summary>Aciklama modelle tutuyor mu.</summary>
+    public bool IsWithinTolerance => NormalizedError <= 1.0;
 
     /// <summary>En az bir oznitelik egitim araliginin disinda mi.</summary>
     public bool AnyOutsideTrainRange => Effects.Any(effect => effect.OutsideTrainRange);
@@ -50,8 +77,22 @@ public sealed record ModelExplanation(
 /// </summary>
 public static class ModelExplainer
 {
-    /// <summary>Aciklamanin modelin logit'ine ne kadar yaklasmasi gerektigi.</summary>
-    public const double Tolerance = 1e-6;
+    /// <summary>
+    /// Surum 1.0'in mutlak toleransi. Surum 2.0'da taban olarak duruyor.
+    ///
+    /// Tek basina kullanildiginda 34 166 satirin 11'inde tutmamisti; olculen sonuc
+    /// docs/olcumler/asama6-api-temel.md bolum 7'de duruyor ve silinmedi.
+    /// </summary>
+    public const double AbsoluteToleranceV1 = 1e-6;
+
+    /// <summary>
+    /// <c>float</c> makine epsilonu, yani 2^-23.
+    ///
+    /// <c>float.Epsilon</c> DEGIL: o sabit temsil edilebilir en kucuk pozitif subnormal
+    /// sayi (yaklasik 1,4e-45) ve buraya konursa tolerans pratikte sifirlanir. Deger
+    /// burada acikca 2 uzeri -23 olarak yaziliyor.
+    /// </summary>
+    public const double FloatUnitRoundoff = 1.0 / (1 << 23);
 
     public static ModelExplanation Explain(
         ModelProfile profile,

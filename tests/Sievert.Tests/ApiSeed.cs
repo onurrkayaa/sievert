@@ -30,6 +30,27 @@ public static class ApiSeed
         return (known.Id, unknown.Id);
     }
 
+    /// <summary>Olcusu hesaplanmamis bir commit ekler ve sha'sini verir.</summary>
+    public static string AddCommitWithoutMetrics(SievertContext database, int repositoryId)
+    {
+        CommitRow commit = new()
+        {
+            RepositoryId = repositoryId,
+            Sha = ShaFor(90),
+            AuthorName = "Yazar 90",
+            AuthorEmail = "yazar90@ornek.test",
+            AuthorDateUtc = new DateTimeOffset(2020, 2, 1, 0, 0, 0, TimeSpan.Zero),
+            MessageSubject = "olcusu hesaplanmamis commit",
+            MessageFull = "govde",
+            ParentCount = 1,
+        };
+
+        database.Commits.Add(commit);
+        database.SaveChanges();
+
+        return commit.Sha;
+    }
+
     /// <summary>Sha'lar sayilabilir olsun diye sabit bir kaliptan uretiliyor.</summary>
     public static string ShaFor(int index) => index.ToString("x2").PadLeft(2, '0') + new string('a', 38);
 

@@ -33,9 +33,11 @@ public static class RiskWarning
 
     private static readonly Dictionary<string, string> Texts = new(StringComparer.Ordinal)
     {
+        // Metinler yasak ifadeleri olumsuzlayarak bile ICERMIYOR. Sebep pratik: yasagi
+        // sinayan test metnin icinde geciyor mu diye bakiyor, cumlenin anlamina degil.
         [UncalibratedScore] =
-            "Ham model skoru kalibre edilmedi. Bu sayi bir hata olasiligi degil; ayni modelin "
-            + "commit'leri kendi arasinda siralamasi icin uretilmis bir skordur.",
+            "Ham model skoru kalibre edilmedi. Sayiyi yuzde gibi okuma: ayni modelin commit'leri "
+            + "kendi arasinda siralamasi icin uretildi, gercek hata oranina karsi dogrulanmadi.",
         [SzzTarget] =
             "Model, SZZ ile uretilmis bir hedefe gore egitildi. Hedef, gercek hatalarin kendisi "
             + "degil, duzeltme commit'lerinden geriye dogru isaretlenmis satirlardir.",
@@ -44,7 +46,7 @@ public static class RiskWarning
             + "skoru degistirmez.",
         [HumanValidationLimited] =
             "Kor insan ornekleminde model-pozitif isareti 14 ornekte 1 idi. Bu bir populasyon "
-            + "precision'i degil, ama skorun gercek hata olasiligi gibi okunmasini engelleyen bir sinirliliktir.",
+            + "precision'i degil, ama skorun gercek hata orani gibi okunmasini engelleyen bir sinirliliktir.",
         [CsLabelCoverageLimit] =
             "Bu commit hic C# dosyasi degistirmiyor. Egitim verisinde bu grupta 8607 satirin "
             + "hicbiri pozitif etiketli degil; skor bu grup icin dogrulanmadi.",

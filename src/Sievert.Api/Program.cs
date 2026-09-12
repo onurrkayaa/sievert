@@ -36,6 +36,11 @@ builder.Services.AddSingleton(provider =>
     return ModelRegistry.Create(resolved.ModelResultsPath, resolved.ModelDirectory);
 });
 
+// Egitim skor dagilimi bir kez okunuyor; her istekte 24 bin satirlik dosyayi
+// yeniden ayristirmanin anlami yok.
+builder.Services.AddSingleton(provider =>
+    ScoreReference.Load(provider.GetRequiredService<ApiOptions>().ScoreReferencePath));
+
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
@@ -65,6 +70,7 @@ RouteGroupBuilder api = app.MapGroup("/api/v1");
 api.MapHealth();
 api.MapModels();
 api.MapRepositories();
+api.MapRisk();
 
 app.Run();
 

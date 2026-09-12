@@ -16,6 +16,15 @@ public static class ApiError
 
     public const string ModelProfileNotFound = "MODEL_PROFILE_NOT_FOUND";
 
+    /// <summary>Depo uc egitim reposundan biri degil. Varsayilan profil SECILMIYOR.</summary>
+    public const string UnknownRepositoryModel = "UNKNOWN_REPOSITORY_MODEL";
+
+    /// <summary>Verilen sha oneki birden fazla commit'e uyuyor.</summary>
+    public const string AmbiguousSha = "AMBIGUOUS_SHA";
+
+    /// <summary>Egitim skor dagilimi okunamadi; goreli endeks uretilemez.</summary>
+    public const string ScoreReferenceNotReady = "SCORE_REFERENCE_NOT_READY";
+
     public const string ModelChecksumMismatch = "MODEL_CHECKSUM_MISMATCH";
 
     public const string ModelNotReady = "MODEL_NOT_READY";

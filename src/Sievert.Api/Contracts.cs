@@ -74,6 +74,7 @@ public sealed record FeatureContribution(
     string Direction,
     int RankByAbsoluteContribution,
     string ExplanationKey,
+    string Explanation,
     bool OutsideTrainRange,
     string? OutsideDirection);
 

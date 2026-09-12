@@ -1,8 +1,9 @@
 # Urun dili ve risk sozlesmesi
 
-**Surum:** 1.0
-**Tarih:** 2026-09-12
-**Durum:** API yazilmadan once sabitlendi.
+**Surum:** 1.1
+**Tarih:** 2026-09-12 (surum 1.0), 2026-09-13 (surum 1.1)
+**Durum:** Surum 1.0 API yazilmadan once sabitlendi. Surum 1.1 uygulamadan sonra iki
+maddeyi duzeltti; degisenler ve sebepleri "Surum gecmisi" bolumunde yaziyor.
 
 Bu dosya, modelin ciktisinin urunde nasil adlandirilacagini soyluyor. Amaci teknik degil:
 Asama 5'in olctugu sinirlar urun diline gecmezse, kullanici elindeki sayiyi olmadigi bir
@@ -127,9 +128,10 @@ otomatik secilir.
 
 - Sessizce profil **secilmez**.
 - Bu turda bilinmeyen repo icin **skorlama yok**; API `422` doner.
-- Gelecekte kullanici profili acikca secebilir ya da ayri bir genel model karari
-  verilebilir.
 - **Varsayilan profil yok.**
+- Bilinen bir repo icin disaridan **baska bir profil zorlanamaz** (surum 1.1).
+- Gelecekte ayri bir genel model karari verilebilir; verilirse bu sozlesme yeniden
+  surumlenir.
 
 Gerekce: repo-arasi deneyler tutarli bir evrensel profil gostermedi (tek kaynak 3 / 6,
 leave-one-out 1 / 3 ayni-repo F1'inin ustunde).
@@ -158,8 +160,10 @@ bir sinirliliktir. Kod: `HUMAN_VALIDATION_LIMITED`.
 | `HUMAN_VALIDATION_LIMITED` | her degerlendirmede |
 | `CS_LABEL_COVERAGE_LIMIT` | `CsFilesChanged = 0` oldugunda |
 | `OUTSIDE_TRAIN_RANGE` | en az bir surekli oznitelik egitim araliginin disindaysa |
-| `EXTERNAL_MODEL_PROFILE` | kullanilan profil, commit'in reposundan farkliysa |
-| `UNKNOWN_REPOSITORY_MODEL` | bilinmeyen repo icin profil istendiginde |
+| `EXTERNAL_MODEL_PROFILE` | kullanilan profil, commit'in reposundan farkliysa (surum 1.1: bu turda ulasilamiyor) |
+
+`UNKNOWN_REPOSITORY_MODEL` surum 1.1'de bu tablodan **cikarildi**; artik bir uyari degil,
+istegi engelleyen bir hata kodu. Gerekce asagida.
 
 Ilk **uc** uyari (`UNCALIBRATED_SCORE`, `SZZ_TARGET`, `STATIC_ANALYSIS_NOT_INCLUDED`)
 **her cevapta zorunlu**.
@@ -175,3 +179,39 @@ egitim ortalamasinin ustundeydi".
 
 `FilesChanged` katsayisi negatif, `CsFilesChanged` pozitif cikabilir; bu bir hata degil
 (ADR 0018) ve isaret degistirilmez.
+
+## Surum gecmisi
+
+### Surum 1.1 - 2026-09-13
+
+Uygulama yazildiktan sonra iki madde tutarsiz cikti. Ikisi de duzeltildi ve sebepleri
+burada duruyor; surum 1.0 metni sessizce degistirilmedi.
+
+**1. `UNKNOWN_REPOSITORY_MODEL` artik uyari degil, hata kodu.**
+
+Surum 1.0 bu kodu uyari tablosunda listeliyordu. Ama ayni dosya "bilinmeyen repo icin
+skorlama yok, API `422` doner" diyordu ve bu ikisi bir arada duramaz: uyari bir
+degerlendirmenin **yaninda** doner, oysa burada degerlendirme hic uretilmiyor. Uyari
+olarak tasarlanmasi, cevabin iceriginde duracak bir sey gibi dusunulmesinden geliyordu;
+uygulamada boyle bir cevap yok.
+
+Artik: `422` cevabinin `errorCode` alani. Anlami ayni kaldi - bilinmeyen bir depo icin
+guvenilir bir profil otomatik secilemez.
+
+**2. Disaridan profil secimi kaldirildi.**
+
+Adim 2'de risk ucuna `?profile=` diye bir sorgu parametresi eklemistim. Gerekcem
+`EXTERNAL_MODEL_PROFILE` uyarisini ulasilabilir yapmakti; yani uyariyi ulasilabilir
+kilmak icin API yuzeyi acmistim. Bu ters bir gerekce: sozlesmede bir kod duruyor diye
+urune kapi acilmaz.
+
+Ustelik acilan kapi, sozlesmenin kendi kararina aykiri calisiyordu. Repo-arasi aktarim
+tutarsiz olculdu (ADR 0021); bilinen bir commit'i baska bir reponun modeliyle skorlamak,
+olculmemis bir aktarimi kullaniciya secenek olarak sunmak demek.
+
+Artik politika tek cumle: **repo kimligi profili belirler.** Bilinen repo kendi
+profilini alir, bilinmeyen repo `422` alir, arada secim yok.
+
+`EXTERNAL_MODEL_PROFILE` kodu tanimlarda kaliyor ama bu turda **ulasilamiyor**. Bunu
+bilerek boyle biraktim: kodu silmek, gelecekte gercekten baska bir profil kullanilan bir
+akis cikarsa uyariyi yeniden icat etmek olurdu.

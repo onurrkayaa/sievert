@@ -83,13 +83,24 @@ Sebep ADR 0021'de: tek kaynakli alti yonun ucu ayni-repo F1'inin ustunde, ucu al
 Yani "hangi profili sececegimizi bilmiyoruz" cumlesi olculmus bir cumle. Sessizce bir
 profil secmek, olculmemis bir aktarimi olculmus gibi gostermek olurdu.
 
-Kullanici acikca `?profile=` ile baska bir profil secebiliyor; o zaman cevapta
-`EXTERNAL_MODEL_PROFILE` uyarisi cikiyor. Secim gizli degil, isaretli.
+**Guncelleme (Adim 3, risk sozlesmesi surum 1.1).** Bu bolumu iki noktada duzelttim.
 
-Sozlesmede kucuk bir sapma var ve yazmak gerekiyor: risk sozlesmesi
-`UNKNOWN_REPOSITORY_MODEL` kodunu **uyari** tablosunda listeliyor, API'de ise `422`
-cevabinin **hata kodu** olarak duruyor. Sebep sudur: uyari bir degerlendirmenin yaninda
-doner, burada ise degerlendirme hic uretilmiyor. Kod ayni, durdugu yer farkli.
+Adim 2'de risk ucuna `?profile=` diye bir sorgu parametresi eklemistim ve gerekcem
+`EXTERNAL_MODEL_PROFILE` uyarisini ulasilabilir yapmakti. Gerekce tersine donmus:
+sozlesmede bir uyari kodu duruyor diye urune kapi acilmaz. Ustelik acilan kapi
+sozlesmenin kendi kararina aykiriydi - repo-arasi aktarim tutarsiz olculdugu icin
+(ADR 0021) bilinen bir commit'i baska bir reponun modeliyle skorlamak, olculmemis bir
+aktarimi kullaniciya secenek diye sunmak oluyordu. Parametre **kaldirildi**.
+
+Politika artik tek cumle: **repo kimligi profili belirler.** Bilinen repo kendi
+profilini alir, bilinmeyen repo `422` alir, arada secim yok. `EXTERNAL_MODEL_PROFILE`
+kodu tanimlarda kaliyor ama bu turda ulasilamiyor; silmedim cunku gelecekte gercekten
+baska bir profille skorlayan bir akis cikarsa uyariyi yeniden icat etmek gerekirdi.
+
+Ikincisi: risk sozlesmesi `UNKNOWN_REPOSITORY_MODEL` kodunu **uyari** tablosunda
+listeliyordu, API'de ise `422` cevabinin hata kodu olarak duruyordu. Bu tutarsizdi ve
+sozlesme tarafi duzeltildi (surum 1.1). Sebep: uyari bir degerlendirmenin yaninda doner,
+burada ise degerlendirme hic uretilmiyor. Kod artik sozlesmede de hata kodu.
 
 ## Neden statik bulgular ayri bolumde ve birlesik skor yok
 

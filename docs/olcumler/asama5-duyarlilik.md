@@ -134,13 +134,18 @@ Ayni alt kumede `LinesAdded` tabani da train'de yeniden secilip testte hesapland
 | ShareX | 35 | 87 | 805 | 42 | 0,1704 | 0,1247 |
 | Jellyfin | 25 | 593 | 795 | 334 | 0,5123 | 0,5015 |
 
-**C# alt kumesinde model tabani F1'de iki repoda geciyor** (ShareX +0,0118, Jellyfin
--0,0306 → geride; Polly 0,2642 - 0,2979 = -0,0337 → geride). Yani C# alt kumesinde model
-F1 acisindan uc repodan ikisinde `LinesAdded` tabanini **geride kaldi**. PR-AUC'de model
-uc repoda da onde (0,2841 / 0,2750, 0,1178 / 0,1247 → geride, 0,5202 / 0,5015).
+**C# alt kumesinde model ile taban karsilastirmasi karisik:**
 
-Duzeltme: PR-AUC'de model Polly'de (+0,0091) ve Jellyfin'de (+0,0187) onde, ShareX'te
-(-0,0069) geride.
+| Repo | Model F1 | Taban F1 | Fark | Model PR-AUC | Taban PR-AUC | Fark |
+|---|---|---|---|---|---|---|
+| Polly | 0,2642 | 0,2979 | **-0,0337** | 0,2841 | 0,2750 | **+0,0091** |
+| ShareX | 0,1822 | 0,1704 | **+0,0118** | 0,1178 | 0,1247 | **-0,0069** |
+| Jellyfin | 0,4817 | 0,5123 | **-0,0306** | 0,5202 | 0,5015 | **+0,0187** |
+
+F1'de model uc repodan **birinde** (ShareX) onde, ikisinde geride. PR-AUC'de **ikisinde**
+(Polly, Jellyfin) onde, birinde geride. Yani C# alt kumesinde modelin tabana ustunlugu -
+tum veride uc toplu olcutte saglanmisti (Adim 3) - **kaybolmuyor ama tek yonlu da
+kalmiyor**.
 
 ### Ne kanitlamiyor
 

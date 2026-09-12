@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sievert.Data\Sievert.Data.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Mining\Sievert.Mining.csproj" />
+    <ProjectReference Include="..\..\src\Sievert.Modeling\Sievert.Modeling.csproj" />
   </ItemGroup>
 
 </Project>

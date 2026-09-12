@@ -9,7 +9,8 @@ using Sievert.Mining;
 if (args.Length < 2)
 {
     Console.Error.WriteLine("Kullanim: measure <isfix|bot|szz|blame-w|dogrulama|sizinti|satir-kontrol|malzeme|sayim> <repo-adi>\n"
-        + "         measure snapshot <cikti-dosyasi>");
+        + "         measure snapshot <cikti-dosyasi>\n"
+        + "         measure split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>");
     return 2;
 }
 
@@ -18,6 +19,19 @@ if (args[0] == "sayim")
 {
     Tally.Report(args[1]);
     return 0;
+}
+
+// Bolme de veritabanina bakmiyor: dondurulmus dosyayi okuyup manifest yaziyor.
+// args: split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>
+if (args[0] == "split")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure split <anlik-goruntu.csv> <ozet.sha256> <manifest.csv>");
+        return 2;
+    }
+
+    return SplitWriter.Write(args[1], args[2], args[3]);
 }
 
 string? connection = Environment.GetEnvironmentVariable(ConnectionString.EnvironmentVariable);

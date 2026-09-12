@@ -90,6 +90,18 @@ if (args[0] == "generalization")
     return GeneralizationCommand.Run(args);
 }
 
+// Adim 4.5: ad degisimi duyarliligi. args: rename <veri> <commit> <cikti> <kimlik=yol;...>
+if (args[0] == "rename")
+{
+    if (args.Length < 5)
+    {
+        Console.Error.WriteLine("Kullanim: measure rename <veri-klasoru> <commit> <cikti-klasoru> <kimlik=yol;...>");
+        return 2;
+    }
+
+    return RenameSensitivity.Run(args);
+}
+
 if (args[0] == "split")
 {
     if (args.Length < 4)

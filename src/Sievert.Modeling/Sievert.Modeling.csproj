@@ -21,4 +21,8 @@
     <PackageReference Include="Microsoft.ML" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sievert.Tests" />
+  </ItemGroup>
+
 </Project>

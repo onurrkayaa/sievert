@@ -83,6 +83,34 @@ public sealed class FeatureScaler
     public static FeatureScaler Fit(string identity, IReadOnlyList<SnapshotRow> train) =>
         Fit(identity, train, ModelFeatures.Candidates);
 
+    /// <summary>
+    /// Dondurulmus kanit dosyasindaki egitim istatistiklerinden olcekleyiciyi kurar.
+    /// Egitim verisini yeniden okumadan ayni donusumu uygulamak icin: istatistikler
+    /// <c>model-results.json</c> icinde kayitli ve o dosya dondurulmus.
+    /// </summary>
+    public static FeatureScaler FromStatistics(string identity, IReadOnlyList<FeatureStatistics> statistics)
+    {
+        Dictionary<string, FeatureStatistics> learned = new(StringComparer.Ordinal);
+
+        foreach (FeatureStatistics entry in statistics)
+        {
+            learned[entry.Name] = entry.StandardDeviation > 0
+                ? entry
+                : throw new InvalidDataException(
+                    $"{identity}: {entry.Name} ozniteligi sifir varyansli kaydedilmis.");
+        }
+
+        foreach (string name in Continuous(ModelFeatures.Candidates))
+        {
+            if (!learned.ContainsKey(name))
+            {
+                throw new InvalidDataException($"{identity}: {name} ozniteligi icin egitim istatistigi yok.");
+            }
+        }
+
+        return new FeatureScaler(identity, learned);
+    }
+
     public static FeatureScaler Fit(
         string identity,
         IReadOnlyList<SnapshotRow> train,

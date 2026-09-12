@@ -155,7 +155,8 @@ public static class LogisticRegressionModel
             .Fit(Load(context, rows));
     }
 
-    private static IReadOnlyList<double> Probabilities(
+    /// <summary>Yuklenmis bir modelle puanlama; <see cref="LoadedModel"/> icin acik.</summary>
+    internal static IReadOnlyList<double> Probabilities(
         MLContext context,
         ITransformer transformer,
         IReadOnlyList<ModelInput> rows)

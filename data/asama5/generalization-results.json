@@ -1,0 +1,992 @@
+{
+  "snapshotSha256": "1b8e5a5c64ff9ccc6f8495f90711a05b95b5340b2e778dce59a9c6cea4d46e95",
+  "manifestSha256": "01b5cafa2c82cde3dffc98afc0ed571918ebbc648bb8c74fad2bc071b601b8cb",
+  "codeCommit": "6604d58",
+  "note": "repo kimligi oznitelik degil; kaynak repolar dogal satir sayilariyla birlesti",
+  "experiments": [
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "sourceRows": 1931,
+      "sourcePositives": 251,
+      "targetRows": 6876,
+      "targetPositives": 927,
+      "sourceThreshold": 0.23811133205890656,
+      "atSourceThreshold": {
+        "tp": 442,
+        "fp": 447,
+        "fn": 485,
+        "tn": 5502,
+        "precision": 0.49718785151856015,
+        "recall": 0.47680690399137,
+        "f1": 0.48678414096916295
+      },
+      "atHalf": {
+        "tp": 229,
+        "fp": 123,
+        "fn": 698,
+        "tn": 5826,
+        "precision": 0.6505681818181818,
+        "recall": 0.24703344120819848,
+        "f1": 0.35809225957779517
+      },
+      "prAuc": 0.48864372764926267,
+      "brier": 0.09158784470712969,
+      "ece": 0.03497137271420843,
+      "meanPrediction": 0.10629546470716499,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.4895,
+        "sameRepoPrAuc": 0.5199,
+        "deltaF1": -0.0027158590308370423,
+        "deltaPrAuc": -0.03125627235073736,
+        "deltaBrier": -0.00821215529287031,
+        "deltaEce": -0.046028627285791573,
+        "retainedF1": 0.9944517690891991,
+        "retainedPrAuc": 0.9398802224452061
+      },
+      "coefficients": {
+        "intercept": -3.071260690689087,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 1.0927828550338745
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.03334965929389
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.5044341087341309
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 2.0783698558807373
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.12950927019119263
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": -0.11035280674695969
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.2837411165237427
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": 0.07815469801425934
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.21237611770629883
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.4093973934650421
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": -0.41798555850982666
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": 0.202060729265213
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.1935744732618332
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.07453179359436035
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.28073129057884216
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly"
+      ],
+      "target": "github.com/sharex/sharex",
+      "sourceRows": 1931,
+      "sourcePositives": 251,
+      "targetRows": 2547,
+      "targetPositives": 129,
+      "sourceThreshold": 0.23811133205890656,
+      "atSourceThreshold": {
+        "tp": 52,
+        "fp": 269,
+        "fn": 77,
+        "tn": 2149,
+        "precision": 0.16199376947040497,
+        "recall": 0.40310077519379844,
+        "f1": 0.2311111111111111
+      },
+      "atHalf": {
+        "tp": 13,
+        "fp": 82,
+        "fn": 116,
+        "tn": 2336,
+        "precision": 0.1368421052631579,
+        "recall": 0.10077519379844961,
+        "f1": 0.11607142857142858
+      },
+      "prAuc": 0.13121289036275083,
+      "brier": 0.060229413533588995,
+      "ece": 0.05573219952878097,
+      "meanPrediction": 0.10638002049462313,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.1868,
+        "sameRepoPrAuc": 0.1192,
+        "deltaF1": 0.04431111111111111,
+        "deltaPrAuc": 0.012012890362750828,
+        "deltaBrier": 0.004329413533588997,
+        "deltaEce": -0.0067678004712190334,
+        "retainedF1": 1.2372115155841066,
+        "retainedPrAuc": 1.1007792815667017
+      },
+      "coefficients": {
+        "intercept": -3.071260690689087,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 1.0927828550338745
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.03334965929389
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.5044341087341309
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 2.0783698558807373
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.12950927019119263
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": -0.11035280674695969
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.2837411165237427
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": 0.07815469801425934
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.21237611770629883
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.4093973934650421
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": -0.41798555850982666
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": 0.202060729265213
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.1935744732618332
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.07453179359436035
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.28073129057884216
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "sourceRows": 16041,
+      "sourcePositives": 3761,
+      "targetRows": 828,
+      "targetPositives": 10,
+      "sourceThreshold": 0.31998512148857117,
+      "atSourceThreshold": {
+        "tp": 10,
+        "fp": 62,
+        "fn": 0,
+        "tn": 756,
+        "precision": 0.1388888888888889,
+        "recall": 1,
+        "f1": 0.24390243902439027
+      },
+      "atHalf": {
+        "tp": 8,
+        "fp": 36,
+        "fn": 2,
+        "tn": 782,
+        "precision": 0.18181818181818182,
+        "recall": 0.8,
+        "f1": 0.2962962962962963
+      },
+      "prAuc": 0.32019476204945524,
+      "brier": 0.03220347502889499,
+      "ece": 0.06879601476698267,
+      "meanPrediction": 0.08087330945297302,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.25,
+        "sameRepoPrAuc": 0.3033,
+        "deltaF1": -0.006097560975609734,
+        "deltaPrAuc": 0.016894762049455225,
+        "deltaBrier": 0.019003475028894993,
+        "deltaEce": 0.03959601476698267,
+        "retainedF1": 0.9756097560975611,
+        "retainedPrAuc": 1.0557031389695193
+      },
+      "coefficients": {
+        "intercept": -1.7119593620300293,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 1.0399888753890991
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.075534388422966
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.640197515487671
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 1.4920212030410767
+          },
+          {
+            "feature": "Entropy",
+            "weight": 0.05278423801064491
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": 0.25030937790870667
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.08720759302377701
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": -0.045472998172044754
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.055168479681015015
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": -0.005511316005140543
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.45105627179145813
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": 0.04818820580840111
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.16205456852912903
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.01862499862909317
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.24337811768054962
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/sharex/sharex",
+      "sourceRows": 16041,
+      "sourcePositives": 3761,
+      "targetRows": 2547,
+      "targetPositives": 129,
+      "sourceThreshold": 0.31998512148857117,
+      "atSourceThreshold": {
+        "tp": 80,
+        "fp": 554,
+        "fn": 49,
+        "tn": 1864,
+        "precision": 0.12618296529968454,
+        "recall": 0.6201550387596899,
+        "f1": 0.20969855832241155
+      },
+      "atHalf": {
+        "tp": 52,
+        "fp": 268,
+        "fn": 77,
+        "tn": 2150,
+        "precision": 0.1625,
+        "recall": 0.40310077519379844,
+        "f1": 0.23162583518930957
+      },
+      "prAuc": 0.14571350874517497,
+      "brier": 0.10112844357861991,
+      "ece": 0.16381851335333894,
+      "meanPrediction": 0.2144663343191811,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.1868,
+        "sameRepoPrAuc": 0.1192,
+        "deltaF1": 0.022898558322411555,
+        "deltaPrAuc": 0.02651350874517497,
+        "deltaBrier": 0.045228443578619916,
+        "deltaEce": 0.10131851335333894,
+        "retainedF1": 1.1225832886638734,
+        "retainedPrAuc": 1.2224287646407297
+      },
+      "coefficients": {
+        "intercept": -1.7119593620300293,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 1.0399888753890991
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.075534388422966
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.640197515487671
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 1.4920212030410767
+          },
+          {
+            "feature": "Entropy",
+            "weight": 0.05278423801064491
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": 0.25030937790870667
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.08720759302377701
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": -0.045472998172044754
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.055168479681015015
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": -0.005511316005140543
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.45105627179145813
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": 0.04818820580840111
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.16205456852912903
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.01862499862909317
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.24337811768054962
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "sourceRows": 5943,
+      "sourcePositives": 884,
+      "targetRows": 828,
+      "targetPositives": 10,
+      "sourceThreshold": 0.2169155329465866,
+      "atSourceThreshold": {
+        "tp": 6,
+        "fp": 16,
+        "fn": 4,
+        "tn": 802,
+        "precision": 0.2727272727272727,
+        "recall": 0.6,
+        "f1": 0.37499999999999994
+      },
+      "atHalf": {
+        "tp": 4,
+        "fp": 3,
+        "fn": 6,
+        "tn": 815,
+        "precision": 0.5714285714285714,
+        "recall": 0.4,
+        "f1": 0.47058823529411764
+      },
+      "prAuc": 0.3166379734091958,
+      "brier": 0.011163355483067829,
+      "ece": 0.03760610350940809,
+      "meanPrediction": 0.04880852971376698,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.25,
+        "sameRepoPrAuc": 0.3033,
+        "deltaF1": 0.12499999999999994,
+        "deltaPrAuc": 0.013337973409195791,
+        "deltaBrier": -0.0020366445169321713,
+        "deltaEce": 0.008406103509408087,
+        "retainedF1": 1.4999999999999998,
+        "retainedPrAuc": 1.0439761734559703
+      },
+      "coefficients": {
+        "intercept": -2.159668445587158,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 0.6006214618682861
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.0024403720162808895
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -0.7369450926780701
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 0.9704528450965881
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.05620652809739113
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": -0.1235407143831253
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": -0.027386754751205444
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": -0.024357641115784645
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.24308796226978302
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.5910871624946594
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.02993018552660942
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": -0.5205463171005249
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.3620774447917938
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.25928837060928345
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.29777055978775024
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "sourceRows": 5943,
+      "sourcePositives": 884,
+      "targetRows": 6876,
+      "targetPositives": 927,
+      "sourceThreshold": 0.2169155329465866,
+      "atSourceThreshold": {
+        "tp": 255,
+        "fp": 174,
+        "fn": 672,
+        "tn": 5775,
+        "precision": 0.5944055944055944,
+        "recall": 0.2750809061488673,
+        "f1": 0.37610619469026546
+      },
+      "atHalf": {
+        "tp": 38,
+        "fp": 3,
+        "fn": 889,
+        "tn": 5946,
+        "precision": 0.926829268292683,
+        "recall": 0.040992448759439054,
+        "f1": 0.07851239669421488
+      },
+      "prAuc": 0.4941098528776324,
+      "brier": 0.10018614007480339,
+      "ece": 0.06384491309289482,
+      "meanPrediction": 0.07097184083380675,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.4895,
+        "sameRepoPrAuc": 0.5199,
+        "deltaF1": -0.11339380530973453,
+        "deltaPrAuc": -0.0257901471223676,
+        "deltaBrier": 0.00038614007480339274,
+        "deltaEce": -0.017155086907105183,
+        "retainedF1": 0.7683476908892042,
+        "retainedPrAuc": 0.950394023615373
+      },
+      "coefficients": {
+        "intercept": -2.159668445587158,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 0.6006214618682861
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.0024403720162808895
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -0.7369450926780701
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 0.9704528450965881
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.05620652809739113
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": -0.1235407143831253
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": -0.027386754751205444
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": -0.024357641115784645
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.24308796226978302
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.5910871624946594
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.02993018552660942
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": -0.5205463171005249
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.3620774447917938
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.25928837060928345
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.29777055978775024
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin",
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "sourceRows": 21984,
+      "sourcePositives": 4645,
+      "targetRows": 828,
+      "targetPositives": 10,
+      "sourceThreshold": 0.281375914812088,
+      "atSourceThreshold": {
+        "tp": 9,
+        "fp": 58,
+        "fn": 1,
+        "tn": 760,
+        "precision": 0.13432835820895522,
+        "recall": 0.9,
+        "f1": 0.23376623376623376
+      },
+      "atHalf": {
+        "tp": 6,
+        "fp": 28,
+        "fn": 4,
+        "tn": 790,
+        "precision": 0.17647058823529413,
+        "recall": 0.6,
+        "f1": 0.2727272727272727
+      },
+      "prAuc": 0.29229687851407954,
+      "brier": 0.026230044440681402,
+      "ece": 0.05855220172988422,
+      "meanPrediction": 0.07062949641587456,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.25,
+        "sameRepoPrAuc": 0.3033,
+        "deltaF1": -0.01623376623376624,
+        "deltaPrAuc": -0.011003121485920475,
+        "deltaBrier": 0.013030044440681402,
+        "deltaEce": 0.02935220172988422,
+        "retainedF1": 0.935064935064935,
+        "retainedPrAuc": 0.9637219865284521
+      },
+      "coefficients": {
+        "intercept": -1.8249659538269043,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 0.8591191172599792
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.013203909620642662
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.6228697299957275
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 1.3828091621398926
+          },
+          {
+            "feature": "Entropy",
+            "weight": 0.18959969282150269
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": 0.21906611323356628
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.2197330892086029
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": 0.0435672327876091
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.1541023701429367
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.04263683781027794
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.5923042893409729
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": -0.26732954382896423
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.1571146696805954
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": -0.15552373230457306
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.30707064270973206
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly",
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "sourceRows": 7874,
+      "sourcePositives": 1135,
+      "targetRows": 6876,
+      "targetPositives": 927,
+      "sourceThreshold": 0.22775378823280334,
+      "atSourceThreshold": {
+        "tp": 302,
+        "fp": 220,
+        "fn": 625,
+        "tn": 5729,
+        "precision": 0.578544061302682,
+        "recall": 0.325782092772384,
+        "f1": 0.41683919944789505
+      },
+      "atHalf": {
+        "tp": 75,
+        "fp": 25,
+        "fn": 852,
+        "tn": 5924,
+        "precision": 0.75,
+        "recall": 0.08090614886731391,
+        "f1": 0.1460564751703992
+      },
+      "prAuc": 0.4952514283624373,
+      "brier": 0.09702148178292822,
+      "ece": 0.056605460358770364,
+      "meanPrediction": 0.0782112935679312,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.4895,
+        "sameRepoPrAuc": 0.5199,
+        "deltaF1": -0.07266080055210494,
+        "deltaPrAuc": -0.024648571637562733,
+        "deltaBrier": -0.002778518217071785,
+        "deltaEce": -0.02439453964122964,
+        "retainedF1": 0.8515611837546375,
+        "retainedPrAuc": 0.9525897833476386
+      },
+      "coefficients": {
+        "intercept": -2.334526538848877,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 0.7458483576774597
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": -0.06531717628240585
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -0.9275893568992615
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 1.2595597505569458
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.07112041860818863
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": -0.17331816256046295
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.07608527690172195
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": 0.0487091951072216
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.2847582995891571
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.611676812171936
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": -0.04211004823446274
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": -0.42437997460365295
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.2976139485836029
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": 0.16898927092552185
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.310441792011261
+          }
+        ]
+      }
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly",
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/sharex/sharex",
+      "sourceRows": 17972,
+      "sourcePositives": 4012,
+      "targetRows": 2547,
+      "targetPositives": 129,
+      "sourceThreshold": 0.2964857518672943,
+      "atSourceThreshold": {
+        "tp": 82,
+        "fp": 561,
+        "fn": 47,
+        "tn": 1857,
+        "precision": 0.12752721617418353,
+        "recall": 0.6356589147286822,
+        "f1": 0.2124352331606218
+      },
+      "atHalf": {
+        "tp": 50,
+        "fp": 223,
+        "fn": 79,
+        "tn": 2195,
+        "precision": 0.18315018315018314,
+        "recall": 0.3875968992248062,
+        "f1": 0.24875621890547261
+      },
+      "prAuc": 0.14685538637809076,
+      "brier": 0.0940092426535164,
+      "ece": 0.1528187510672629,
+      "meanPrediction": 0.20346657203310506,
+      "sameRepositoryComparison": {
+        "sameRepoF1": 0.1868,
+        "sameRepoPrAuc": 0.1192,
+        "deltaF1": 0.0256352331606218,
+        "deltaPrAuc": 0.027655386378090757,
+        "deltaBrier": 0.0381092426535164,
+        "deltaEce": 0.09031875106726289,
+        "retainedF1": 1.1372335822303095,
+        "retainedPrAuc": 1.232008274983983
+      },
+      "coefficients": {
+        "intercept": -1.835822343826294,
+        "weights": [
+          {
+            "feature": "LinesAdded",
+            "weight": 1.023321270942688
+          },
+          {
+            "feature": "LinesDeleted",
+            "weight": 0.0990757942199707
+          },
+          {
+            "feature": "FilesChanged",
+            "weight": -1.7789497375488281
+          },
+          {
+            "feature": "CsFilesChanged",
+            "weight": 1.6105164289474487
+          },
+          {
+            "feature": "Entropy",
+            "weight": -0.003665556898340583
+          },
+          {
+            "feature": "DirectoryCount",
+            "weight": 0.1451030820608139
+          },
+          {
+            "feature": "SubsystemCount",
+            "weight": 0.23892389237880707
+          },
+          {
+            "feature": "MaxFileAgeDays",
+            "weight": -0.07322726398706436
+          },
+          {
+            "feature": "MinFileAgeDays",
+            "weight": -0.10377524048089981
+          },
+          {
+            "feature": "PriorChanges",
+            "weight": 0.16240228712558746
+          },
+          {
+            "feature": "PriorFixes",
+            "weight": 0.39586248993873596
+          },
+          {
+            "feature": "DistinctAuthorsOnFiles",
+            "weight": 0.039724089205265045
+          },
+          {
+            "feature": "AuthorCommitCount",
+            "weight": -0.09061353653669357
+          },
+          {
+            "feature": "AuthorFileExperience",
+            "weight": -0.05206979438662529
+          },
+          {
+            "feature": "IsFix",
+            "weight": 0.222418874502182
+          }
+        ]
+      }
+    }
+  ]
+}

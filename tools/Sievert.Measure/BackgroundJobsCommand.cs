@@ -75,6 +75,10 @@ public static class BackgroundJobsCommand
             cancellation = await MeasureCancellationAsync(client, targets);
             idempotency = await MeasureIdempotencyAsync(client, context, targets[0]);
 
+            // Onceki asamalarin actigi isler bitmeden yeniden baslatma olcumune
+            // gecilemez: ayni repo ve tur icin tekillik kisiti yeni isi reddeder.
+            await WaitForIdleAsync(client);
+
             peak = api.PeakWorkingSetBytes;
             api.Stop();
         }
@@ -612,17 +616,35 @@ public static class BackgroundJobsCommand
         }
     }
 
+    /// <summary>Butun isler bitene kadar bekler.</summary>
+    private static async Task WaitForIdleAsync(HttpClient client)
+    {
+        while (true)
+        {
+            JsonElement analysis = (await ReadAsync(client, "/api/v1/health")).GetProperty("analysis");
+
+            if (analysis.GetProperty("queuedJobs").GetInt32() == 0
+                && analysis.GetProperty("runningJobs").GetInt32() == 0)
+            {
+                return;
+            }
+        }
+    }
+
     private static async Task<JobHandle> StartAsync(HttpClient client, int repositoryId, string kind)
     {
         using HttpResponseMessage response = await client.PostAsJsonAsync(
             $"/api/v1/repositories/{repositoryId}/analyses",
             new { kind });
 
-        JsonElement body = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+        string raw = await response.Content.ReadAsStringAsync();
+        JsonElement body = JsonDocument.Parse(raw).RootElement;
 
-        return new JobHandle(
-            body.TryGetProperty("id", out JsonElement id) ? id.GetGuid() : Guid.Empty,
-            response.StatusCode);
+        // Kimlik yoksa istek reddedilmistir. Guid.Empty ile devam etmek, sonraki
+        // olcumu sessizce anlamsiz kilardi.
+        return body.TryGetProperty("id", out JsonElement id)
+            ? new JobHandle(id.GetGuid(), response.StatusCode)
+            : throw new InvalidOperationException($"Is acilamadi ({(int)response.StatusCode}): {raw}");
     }
 
     private static async Task<JsonElement> WaitAsync(HttpClient client, Guid jobId)

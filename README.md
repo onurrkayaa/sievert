@@ -296,3 +296,30 @@ only precision number this project has.
 Stage 4 has started with git history. There is a `mine` command that walks a repository's
 commits and writes one JSON object per commit to a file; it does not touch a database yet.
 Risk scoring, the API and the dashboard have not been written.
+
+### Stage 5 result
+
+Stage 5 built the risk model on a frozen snapshot of 34 166 commits from three C# repos
+(Polly, ShareX, Jellyfin), split in time order per repository: 23 915 train, 10 251 test.
+Three logistic regression models, one per repo, 15 commit features, no class weighting.
+
+Against the `LinesAdded` threshold baseline the model reached micro F1 0,4408 (baseline
+0,3754), macro F1 0,3088 (baseline 0,2999) and micro PR-AUC 0,4775 (baseline 0,2611), so
+it passed all three conditions that were declared before the measurement. A paired
+circular moving-block bootstrap (2000 repeats) put the micro delta F1 interval at
+[0,0485, 0,0823] and the micro delta PR-AUC interval at [0,1818, 0,2513], both above the
+baseline; the macro delta F1 interval [-0,0296, 0,0563] contains zero. So the model beats
+the baseline in the volume-weighted totals, and at the per-repository level the difference
+is not separated from noise — in Polly its F1 (0,2500) is below the baseline (0,2667).
+
+Three repositories is not enough to say anything general about transfer: of six
+single-source cross-repo directions, three land above the target's own model and three
+below. Calibration was measured but stays experimental — Platt and isotonic both lowered
+micro Brier and ECE, both gave a mixed result on Jellyfin, and no calibrator was picked
+for production, so the probabilities are uncalibrated.
+
+Thirty test predictions were checked by hand, blind to the model output and the SZZ label;
+25 were decided. Within that sample, the human-validation precision signal was 1/14 and
+the miss signal 1/11. These are sample-bound signals, not the model's precision or recall.
+
+Numbers and their sources: `docs/raporlar/asama5-kapanis.md`.

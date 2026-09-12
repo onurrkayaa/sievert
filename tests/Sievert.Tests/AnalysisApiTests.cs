@@ -110,10 +110,8 @@ public sealed class AnalysisApiTests(PostgresFixture postgres)
             Assert.Equal(live.GetProperty("modelProfile").GetString(), snapshot.GetProperty("modelProfile").GetString());
             Assert.False(snapshot.GetProperty("isCalibrated").GetBoolean());
 
-            // sievert:disable SV004 bellekteki JSON dizisi, veritabani sorgusu degil
             List<string?> expectedWarnings = [.. live.GetProperty("warnings").EnumerateArray().Select(item => item.GetString())];
 
-            // sievert:disable SV004 bellekteki JSON dizisi, veritabani sorgusu degil
             List<string?> actualWarnings = [.. snapshot.GetProperty("warningCodes").EnumerateArray().Select(item => item.GetString())];
 
             Assert.Equal(expectedWarnings, actualWarnings);

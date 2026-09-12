@@ -1,0 +1,172 @@
+{
+  "generalizationSha256": "515f561c797c22c296c07c1ca4e7c7412309a1f12896ee2b8d08dc3014159b89",
+  "codeCommit": "49c896b",
+  "materialDropThreshold": -0.05,
+  "note": "betimsel ayristirma; neden kanitlamaz, yeni model ya da esik uretmez",
+  "experiments": [
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "deltaPrAuc": -0.03125627235073736,
+      "deltaF1AtSourceThreshold": -0.0027158590308370423,
+      "deltaF1AtHalf": -0.13930774042220484,
+      "meanPrediction": 0.10629546470716499,
+      "targetPositiveRate": 0.13481675392670156,
+      "absoluteMeanMinusTargetRate": 0.028521289219536575,
+      "sourceTrainPositiveRate": 0.12998446400828587,
+      "sourceMinusTargetRate": -0.004832289918415694,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": false
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly"
+      ],
+      "target": "github.com/sharex/sharex",
+      "deltaPrAuc": 0.012012890362750828,
+      "deltaF1AtSourceThreshold": 0.04431111111111111,
+      "deltaF1AtHalf": 0.031771428571428575,
+      "meanPrediction": 0.10638002049462313,
+      "targetPositiveRate": 0.050647820965842166,
+      "absoluteMeanMinusTargetRate": 0.05573219952878096,
+      "sourceTrainPositiveRate": 0.12998446400828587,
+      "sourceMinusTargetRate": 0.0793366430424437,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": false
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "deltaPrAuc": 0.016894762049455225,
+      "deltaF1AtSourceThreshold": -0.006097560975609734,
+      "deltaF1AtHalf": -0.17430370370370374,
+      "meanPrediction": 0.08087330945297302,
+      "targetPositiveRate": 0.012077294685990338,
+      "absoluteMeanMinusTargetRate": 0.06879601476698269,
+      "sourceTrainPositiveRate": 0.23446169191446917,
+      "sourceMinusTargetRate": 0.22238439722847883,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": true
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/sharex/sharex",
+      "deltaPrAuc": 0.02651350874517497,
+      "deltaF1AtSourceThreshold": 0.022898558322411555,
+      "deltaF1AtHalf": 0.14732583518930958,
+      "meanPrediction": 0.2144663343191811,
+      "targetPositiveRate": 0.050647820965842166,
+      "absoluteMeanMinusTargetRate": 0.16381851335333894,
+      "sourceTrainPositiveRate": 0.23446169191446917,
+      "sourceMinusTargetRate": 0.183813870948627,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": true
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "deltaPrAuc": 0.013337973409195791,
+      "deltaF1AtSourceThreshold": 0.12499999999999994,
+      "deltaF1AtHalf": -1.1764705882377768E-05,
+      "meanPrediction": 0.04880852971376698,
+      "targetPositiveRate": 0.012077294685990338,
+      "absoluteMeanMinusTargetRate": 0.03673123502777664,
+      "sourceTrainPositiveRate": 0.14874642436479893,
+      "sourceMinusTargetRate": 0.1366691296788086,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": true
+    },
+    {
+      "experiment": "tek-kaynak",
+      "sources": [
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "deltaPrAuc": -0.0257901471223676,
+      "deltaF1AtSourceThreshold": -0.11339380530973453,
+      "deltaF1AtHalf": -0.4188876033057851,
+      "meanPrediction": 0.07097184083380675,
+      "targetPositiveRate": 0.13481675392670156,
+      "absoluteMeanMinusTargetRate": 0.0638449130928948,
+      "sourceTrainPositiveRate": 0.14874642436479893,
+      "sourceMinusTargetRate": 0.013929670438097369,
+      "prAucKeptF1MateriallyDropped": true,
+      "halfThresholdBetter": false
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/jellyfin/jellyfin",
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/app-vnext/polly",
+      "deltaPrAuc": -0.011003121485920475,
+      "deltaF1AtSourceThreshold": -0.01623376623376624,
+      "deltaF1AtHalf": -0.1978727272727273,
+      "meanPrediction": 0.07062949641587456,
+      "targetPositiveRate": 0.012077294685990338,
+      "absoluteMeanMinusTargetRate": 0.05855220172988422,
+      "sourceTrainPositiveRate": 0.2112900291120815,
+      "sourceMinusTargetRate": 0.19921273442609116,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": true
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly",
+        "github.com/sharex/sharex"
+      ],
+      "target": "github.com/jellyfin/jellyfin",
+      "deltaPrAuc": -0.024648571637562733,
+      "deltaF1AtSourceThreshold": -0.07266080055210494,
+      "deltaF1AtHalf": -0.3513435248296008,
+      "meanPrediction": 0.0782112935679312,
+      "targetPositiveRate": 0.13481675392670156,
+      "absoluteMeanMinusTargetRate": 0.05660546035877036,
+      "sourceTrainPositiveRate": 0.14414528829057657,
+      "sourceMinusTargetRate": 0.009328534363875013,
+      "prAucKeptF1MateriallyDropped": true,
+      "halfThresholdBetter": false
+    },
+    {
+      "experiment": "iki-kaynak",
+      "sources": [
+        "github.com/app-vnext/polly",
+        "github.com/jellyfin/jellyfin"
+      ],
+      "target": "github.com/sharex/sharex",
+      "deltaPrAuc": 0.027655386378090757,
+      "deltaF1AtSourceThreshold": 0.0256352331606218,
+      "deltaF1AtHalf": 0.16445621890547263,
+      "meanPrediction": 0.20346657203310506,
+      "targetPositiveRate": 0.050647820965842166,
+      "absoluteMeanMinusTargetRate": 0.1528187510672629,
+      "sourceTrainPositiveRate": 0.22323614511462275,
+      "sourceMinusTargetRate": 0.1725883241487806,
+      "prAucKeptF1MateriallyDropped": false,
+      "halfThresholdBetter": true
+    }
+  ],
+  "counts": {
+    "prAucKeptF1MateriallyDropped": 2,
+    "halfThresholdBetter": 5,
+    "meanPredictionAboveTargetRate": 6,
+    "meanPredictionBelowTargetRate": 3,
+    "singleSourceAboveSameRepoF1": 3,
+    "leaveOneOutAboveSameRepoF1": 1
+  }
+}

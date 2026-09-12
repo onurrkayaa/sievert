@@ -36,6 +36,7 @@ public static class ApiBaselineCommand
 
     private const string BaseUrl = "http://127.0.0.1:5199";
 
+    // sievert:disable SV006 komut satirindan tek sefer kosuyor; iptali Ctrl+C yapiyor
     public static async Task<int> RunAsync(SievertContext context, string[] args)
     {
         string repositoryRoot = Path.GetFullPath(args[1]);
@@ -282,6 +283,7 @@ public static class ApiBaselineCommand
 
             List<SnapshotRow> snapshot =
             [
+                // sievert:disable SV004 depo basina tek sorgu; dongu uc depo uzerinde, satirlar uzerinde degil
                 .. context.Commits
                     .AsNoTracking()
                     .Where(commit => commit.RepositoryId == repository.Id)

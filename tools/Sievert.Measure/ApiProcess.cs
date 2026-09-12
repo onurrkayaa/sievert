@@ -72,6 +72,7 @@ public sealed class ApiProcess : IDisposable
         return api;
     }
 
+    // sievert:disable SV006 kendi zaman asimi var (30 sn); disaridan iptal edilecek bir cagiran yok
     public async Task WaitUntilHealthyAsync(HttpClient client)
     {
         for (int attempt = 0; attempt < 300; attempt++)

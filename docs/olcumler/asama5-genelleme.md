@@ -11,11 +11,17 @@ Girdiler dondurulmus: `commit-metrics.csv` (`1b8e5a5c…`), `split-manifest.csv`
 
 | Dosya | SHA-256 |
 |---|---|
-| `generalization-results.json` | `87506b05292b4e59f87e63cc7f05397ab776dc12fa11c04720d327396dff8a64` |
+| `generalization-results.json` | `515f561c797c22c296c07c1ca4e7c7412309a1f12896ee2b8d08dc3014159b89` |
 | `generalization-predictions.csv` | `99e82ca974c75b32d91ecb87ee25e3a5063359ed53577b73720bd98e27f863ef` |
 
 Ureten commit `6604d58`. Iki dosya da iki kez uretildi; CSV bayt bayt ayni, JSON
 `codeCommit` disinda ayni.
+
+> Duzeltme (Adim 7): bu tabloda `generalization-results.json` icin once
+> `87506b05…` yaziliydi. O deger dosyanin ilk uretimine aitti; dosya determinizm
+> kontrolu sirasinda `codeCommit` alani `6604d58` yazilarak yeniden uretildi ve
+> commit edilen surumun ozeti `515f561c…`. Kapanis dogrulamasinda fark edildi ve
+> tablo commit edilen dosyaya gore duzeltildi.
 
 Tahmin dosyasi: **30 753 satir** (tek-kaynak 20 502 + iki-kaynak 10 251), deney + hedef +
 SHA tekrari **0**. Hedef basina satir sayilari: tek-kaynakta Polly 1656, ShareX 5094,

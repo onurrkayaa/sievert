@@ -5,6 +5,7 @@
     <Project Path="src/Sievert.Core/Sievert.Core.csproj" />
     <Project Path="src/Sievert.Data/Sievert.Data.csproj" />
     <Project Path="src/Sievert.Mining/Sievert.Mining.csproj" />
+    <Project Path="src/Sievert.Modeling/Sievert.Modeling.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Sievert.Measure/Sievert.Measure.csproj" />

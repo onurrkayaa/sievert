@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <!--
+    Bilerek bagimsiz: Sievert.Data'ya, Sievert.Mining'e ya da PostgreSQL'e referans yok.
+    Bu proje yalnizca dondurulmus dosyayi okuyor. Veritabanina baglansaydi bir modelin
+    hangi veriyle egitildigi o gunku veritabaninin haline baglanirdi; anlik goruntunun
+    varlik sebebi tam olarak bunu engellemek (docs/olcumler/asama5-veri-kumesi.md).
+
+    Yeni paket de yok. CSV okuma framework'un kendisiyle yazildi; tek ihtiyac tirnaklama
+    kurallari ve onlar RFC 4180'de birkac satirlik is.
+  -->
+
+</Project>

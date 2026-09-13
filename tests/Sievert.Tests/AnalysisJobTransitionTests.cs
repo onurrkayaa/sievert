@@ -116,11 +116,26 @@ public sealed class AnalysisJobTransitionTests
     [Fact]
     public void TheKindNamesRoundTrip()
     {
+        // Listeleme suzgeci butun turleri taniyor: rapor isleri de is listesinde
+        // gorunmeli, yoksa kullanicinin gecmisi eksik gorunur.
         foreach (AnalysisJobKind kind in Enum.GetValues<AnalysisJobKind>())
         {
-            Assert.Equal(kind, AnalysisJobRow.Parse(AnalysisJobRow.Name(kind)));
+            Assert.Equal(kind, AnalysisJobRow.ParseFilter(AnalysisJobRow.Name(kind)));
         }
 
+        Assert.Null(AnalysisJobRow.ParseFilter("boyle-bir-tur-yok"));
+        Assert.Null(AnalysisJobRow.ParseFilter(null));
+    }
+
+    [Fact]
+    public void OnlyStartableKindsAreAcceptedByTheGenericStartEndpoint()
+    {
+        Assert.Equal(AnalysisJobKind.StaticScan, AnalysisJobRow.Parse("static-scan"));
+        Assert.Equal(AnalysisJobKind.RiskScoreAll, AnalysisJobRow.Parse("risk-score-all"));
+
+        // Rapor isinin kendi zorunlu parametreleri var; genel uctan baslatilamaz.
+        // Baslatilabilseydi kuyruga, uretecek bir sey bulamayan bir is girerdi.
+        Assert.Null(AnalysisJobRow.Parse("report-generate"));
         Assert.Null(AnalysisJobRow.Parse("boyle-bir-tur-yok"));
         Assert.Null(AnalysisJobRow.Parse(null));
     }

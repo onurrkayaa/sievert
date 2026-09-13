@@ -113,6 +113,16 @@ karsilastirma yapiliyor. Sebep: ayni istegin iki kez ayni sonucu vermesi. Esitli
 olmasaydi veritabaninin dondurdugu sira degistiginde harita da degisirdi ve bu "veri
 degisti" gibi gorunurdu.
 
+## `ANALYSIS_NOT_CANCELABLE` sozlesmeden cikarildi
+
+ADR 0025'te bu hata kodunun "savunma olarak durdugunu" yazmistim. Iki tur boyunca hicbir
+kosuda uretilemedi. Sozlesmede duran ama hic donmeyen bir kod, istemciyi olmayan bir
+duruma karsi dallanmaya davet ediyor; bu turda kaldirildi.
+
+Geri gelmesin diye sozlesme testi hata kodlari arasinda onu ariyor ve bulursa dusuyor.
+ADR 0025'in ilgili bolumu **silinmedi**: o zaman alinan karar oyleydi, bu ADR onu
+degistiriyor.
+
 ## Sayilarin bagimsiz dogrulanmasi
 
 Uclerin dondugu sayilar, ayni kodu tekrar cagirarak degil, **ham tablolardan yeniden

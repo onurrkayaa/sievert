@@ -197,6 +197,7 @@ Onceki bolumden iki madde bu turda ele alindi. **Satirlar silinmedi.**
 | Sayfa acilisinda veri iki kez cekiliyor | **Kapandi.** `PersistentComponentState` eklendi; genel bakista API cagrisi 14'ten 8'e dustu. Harita ve zaman cizelgesi ise veriyi yalniz devre acikken cekiyor, yani sayfa basina tek istek (`asama6-gorsellestirme.md` bolum 7). |
 | Kismi sonuc sayfalarinda siralama sonucun tamamina degil kaydedilene gore | **Kapandi.** Iki gorsellestirme ucu de cevapta `rankingScope` donuyor ve kismi bir iste `written-results-only` yaziyor; panelde banner olarak gorunuyor. |
 | Tarayicidaki boyama suresi olculmedi | **Kapandi (gorsellestirme sayfalari icin).** Gercek tarayicida ilk boyama ve grafigin ekrana gelme ani olculdu. Diger sayfalar icin hala olculmedi. |
+| `ANALYSIS_NOT_CANCELABLE` normal akista ulasilamiyor | **Kapandi.** Kod kaldirildi. Adim 3'te "yaris durumunda ulasilabilir" yazmistim, Adim 4'te de ulasilamadigi halde savunma olarak birakmistim; bu turda sozlesmeden cikarildi ve geri gelmemesi icin `ContractShapeTests` iceride onu ariyor. Karari veren ADR 0025 yerinde duruyor, silinmedi. |
 
 Bu turda eklenen sinirliliklar:
 

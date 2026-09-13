@@ -74,14 +74,29 @@ public static class FileActivityBuilder
 
             Touch latest = list[0];
 
+            // Dort ayri LINQ cagrisi yerine tek gecis: listeyi dort kez dolasmanin
+            // anlami yok ve kural kontrolu de bunu dongu icinde sorgu saniyordu.
+            int added = 0;
+            int deleted = 0;
+            double indexSum = 0;
+            double indexMax = double.MinValue;
+
+            foreach (Touch touch in list)
+            {
+                added += touch.LinesAdded;
+                deleted += touch.LinesDeleted;
+                indexSum += touch.Commit.RiskIndex;
+                indexMax = Math.Max(indexMax, touch.Commit.RiskIndex);
+            }
+
             items.Add(new FileActivityItem(
                 path,
                 list.Count,
-                list.Sum(item => item.LinesAdded),
-                list.Sum(item => item.LinesDeleted),
-                list.Sum(item => item.LinesAdded + item.LinesDeleted),
-                Round(list.Average(item => item.Commit.RiskIndex)),
-                list.Max(item => item.Commit.RiskIndex),
+                added,
+                deleted,
+                added + deleted,
+                Round(indexSum / list.Count),
+                indexMax,
                 latest.Commit.RiskIndex,
                 latest.Commit.Sha,
                 latest.Commit.AuthorDateUtc,

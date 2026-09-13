@@ -74,6 +74,7 @@ public static class PageStateExtensions
     /// Bilerek <see cref="Sievert.Web.Api.ApiResult{T}"/> donuyor: cagiran taraf iki
     /// yolu ayirt etmek zorunda kalmasin ve hata gosterimi tek yerde kalsin.
     /// </summary>
+    // sievert:disable SV006 iptal jetonu fetch kapaniminin icinde; burada ayri bir parametre tekrar olurdu
     public static async Task<Api.ApiResult<T>> TakeOrFetchAsync<T>(
         this IPageState state,
         string key,

@@ -521,6 +521,11 @@ public static class AnalysisEndpoints
             partial
                 ? "Is basariyla bitmedi; bu satirlar kismi olabilir ve tam sonuc gibi kullanilmamali."
                 : null,
+            job.SourceHeadSha,
+            job.SourceHeadShortSha,
+            job.SourceTreeState,
+            job.SourceStateVerifiedAtUtc is not null,
+            job.SourceCommitChangedDuringAnalysis,
             paging.Page,
             paging.PageSize,
             total,
@@ -574,6 +579,11 @@ public static class AnalysisEndpoints
             job.ErrorCode,
             job.ErrorMessage,
             job.ResultSummary is null ? null : JsonDocument.Parse(job.ResultSummary).RootElement.Clone(),
+            job.SourceHeadSha,
+            job.SourceHeadShortSha,
+            job.SourceTreeState,
+            job.SourceStateVerifiedAtUtc is not null,
+            job.SourceCommitChangedDuringAnalysis,
             links);
     }
 }

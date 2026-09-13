@@ -9,8 +9,10 @@
     tarama servisini cagiriyor. Ayri bir surec baslatmak istemedim, o zaman API'nin
     sonucu baska bir programin cikti bicimini ayristirmaya baglanirdi.
 
-    Repo klonlama ve git tarihi okuma hala YOK, o yuzden Sievert.Mining referansi da yok.
-    Commit risk cevabindaki statik bulgu bolumu yine "not-run" (ADR 0023).
+    Adim 3b'de Sievert.Mining referansi eklendi ama yalnizca WorktreeState icin: static
+    tarama hangi HEAD'i ve hangi calisma agacini taradigini kaydediyor. Klonlama, tarih
+    madenciligi ve SZZ hala API'den cagrilmiyor; commit risk cevabindaki statik bulgu
+    bolumu yine "not-run" (ADR 0023).
   -->
 
   <ItemGroup>
@@ -20,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Sievert.Analysis\Sievert.Analysis.csproj" />
     <ProjectReference Include="..\Sievert.Data\Sievert.Data.csproj" />
+    <ProjectReference Include="..\Sievert.Mining\Sievert.Mining.csproj" />
     <ProjectReference Include="..\Sievert.Modeling\Sievert.Modeling.csproj" />
   </ItemGroup>
 

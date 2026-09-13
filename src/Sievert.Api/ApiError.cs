@@ -83,4 +83,15 @@ public static class ApiError
 
     /// <summary>Kimlik dogrulama olmadan loopback disinda dinleme istegi.</summary>
     public const string RemoteAccessNotAllowed = "REMOTE_ACCESS_NOT_ALLOWED";
+
+    // Kaynak durumu (Asama 6 Adim 3b).
+
+    /// <summary>Calisma agacinda kaydedilmemis degisiklik var; tarama baslatilmadi.</summary>
+    public const string RepositoryWorktreeDirty = "REPOSITORY_WORKTREE_DIRTY";
+
+    /// <summary>Tarama sirasinda HEAD ya da calisma agaci degisti; sonuc tam degil.</summary>
+    public const string RepositoryChangedDuringAnalysis = "REPOSITORY_CHANGED_DURING_ANALYSIS";
+
+    /// <summary>Depo bir git deposu ama HEAD okunamadi; taranacak bir surum yok.</summary>
+    public const string RepositoryHeadUnavailable = "REPOSITORY_HEAD_UNAVAILABLE";
 }

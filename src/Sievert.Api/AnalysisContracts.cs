@@ -28,11 +28,19 @@ public sealed record AnalysisJobResponse(
     string? ErrorCode,
     string? ErrorMessage,
     JsonElement? ResultSummary,
+    string? SourceHeadSha,
+    string? SourceHeadShortSha,
+    string? SourceTreeState,
+    bool SourceVerified,
+    bool SourceCommitChangedDuringAnalysis,
     IReadOnlyList<AnalysisLink> Links);
 
 /// <summary>
 /// Sonuc sayfasi. <paramref name="IsResultComplete"/> false ise satirlar kismi:
 /// is iptal edildi ya da basarisiz oldu. Kismi sonuc tam sonuc gibi sunulmuyor.
+///
+/// Kaynak alanlari yalnizca <c>static-scan</c> isinde dolu; risk skorlamasi calisma
+/// agacini hic okumuyor.
 /// </summary>
 public sealed record AnalysisResultPage<T>(
     Guid AnalysisJobId,
@@ -40,6 +48,11 @@ public sealed record AnalysisResultPage<T>(
     bool IsResultComplete,
     bool Partial,
     string? PartialWarning,
+    string? SourceHeadSha,
+    string? SourceHeadShortSha,
+    string? SourceTreeState,
+    bool SourceVerified,
+    bool SourceCommitChangedDuringAnalysis,
     int Page,
     int PageSize,
     int TotalCount,

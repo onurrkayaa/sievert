@@ -6,6 +6,7 @@ using Sievert.Analysis;
 using Sievert.Core.Rules;
 using Sievert.Data;
 using Sievert.Data.Entities;
+using Sievert.Mining;
 
 namespace Sievert.Api.Analysis;
 
@@ -18,9 +19,15 @@ namespace Sievert.Api.Analysis;
 ///
 /// Tarama CLI ile **ayni servisten** geciyor (<see cref="ScanService"/>). CLI'yi ayri
 /// bir surec olarak baslatmiyoruz.
+///
+/// Tarama diskteki dosyalari okuyor, veritabanindaki commit tarihini degil. O yuzden
+/// hangi surumun tarandigi is kaydina yaziliyor ve tarama yalnizca **temiz** bir calisma
+/// agacinda basliyor: kaydedilen SHA diskteki dosyalari anlatmiyorsa sonuc tekrar
+/// uretilemez.
 /// </summary>
 public sealed class StaticScanHandler(
     SievertContext context,
+    AnalysisJobStore jobs,
     AnalysisOptions options,
     TimeProvider clock) : IAnalysisJobHandler
 {
@@ -35,7 +42,7 @@ public sealed class StaticScanHandler(
         if (repository?.LocalPath is not string localPath || string.IsNullOrWhiteSpace(localPath))
         {
             return JobOutcome.Failed(
-                "REPOSITORY_PATH_UNAVAILABLE",
+                ApiError.RepositoryPathUnavailable,
                 "Bu depo icin yerel klasor kayitli degil; tarama yapilamadi.");
         }
 
@@ -45,15 +52,47 @@ public sealed class StaticScanHandler(
         if (!Directory.Exists(fullPath))
         {
             return JobOutcome.Failed(
-                "REPOSITORY_PATH_UNAVAILABLE",
+                ApiError.RepositoryPathUnavailable,
                 "Depo icin kayitli klasor bu makinede bulunamadi.");
         }
 
-        if (!IsGitRepository(fullPath))
+        WorktreeSnapshot before = WorktreeState.Read(fullPath);
+
+        if (!before.IsGitRepository)
         {
             return JobOutcome.Failed(
-                "REPOSITORY_NOT_GIT",
+                ApiError.RepositoryNotGit,
                 "Kayitli klasor bir git deposu degil.");
+        }
+
+        DateTimeOffset checkedAt = clock.GetUtcNow();
+
+        await jobs.RecordSourceStartAsync(
+            run.JobId,
+            before.State,
+            before.HeadSha,
+            before.ShortSha,
+            before.Identity,
+            before.DirtyFileCount,
+            checkedAt,
+            cancellation);
+
+        if (before.HeadSha is null)
+        {
+            return JobOutcome.Failed(
+                ApiError.RepositoryHeadUnavailable,
+                "Deponun HEAD commit'i okunamadi; taranacak bir surum yok.");
+        }
+
+        if (!before.IsClean)
+        {
+            // Kirli agacta taramak calisir ama sonucu kimse tekrar uretemez: kaydedilen
+            // SHA diskteki dosyalari anlatmiyor. Degisen dosyalarin adlari cevaba
+            // girmiyor, yalniz sayilari.
+            return JobOutcome.Failed(
+                ApiError.RepositoryWorktreeDirty,
+                $"Calisma agacinda kaydedilmemis {before.DirtyFileCount} degisiklik var. "
+                + "Statik tarama yalniz temiz bir calisma agacinda calisir.");
         }
 
         // Tarama, isleyicinin gozunden tek ve bolunmez bir cagri: basladiktan sonraki
@@ -93,8 +132,22 @@ public sealed class StaticScanHandler(
 
         if (!outcome.Ok)
         {
-            return JobOutcome.Failed("ANALYSIS_FAILED", outcome.Error!);
+            return JobOutcome.Failed(ApiError.AnalysisFailed, outcome.Error!);
         }
+
+        // Kaynak hala ayni mi. Tarama dakikalar surebiliyor ve bu sure icinde biri
+        // checkout yapabilir; o zaman elimizdeki bulgular iki ayri agacin karisimi olur.
+        WorktreeSnapshot after = WorktreeState.Read(fullPath);
+
+        bool changed = !after.IsClean
+            || !string.Equals(after.HeadSha, before.HeadSha, StringComparison.Ordinal);
+
+        await jobs.RecordSourceVerifiedAsync(
+            run.JobId,
+            changed ? WorktreeState.ChangedDuringAnalysis : WorktreeState.Clean,
+            changed,
+            clock.GetUtcNow(),
+            cancellation);
 
         await run.Progress.FlushAsync(
             ScanPhase.SavingResults,
@@ -102,13 +155,25 @@ public sealed class StaticScanHandler(
             outcome.Summary.FileCount,
             cancellation);
 
+        // Bulgular degisiklik halinde de yaziliyor. Gercekten hesaplanmis satirlari atip
+        // "0 sonuc" demek, Adim 3'te bir kez yaptigim hatanin aynisi olurdu; satirlar
+        // duruyor ama is basarili sayilmiyor ve sonuc kismi isaretleniyor.
         int saved = await SaveAsync(run.JobId, outcome, cancellation);
+
+        if (changed)
+        {
+            return JobOutcome.Failed(
+                ApiError.RepositoryChangedDuringAnalysis,
+                "Tarama sirasinda deponun HEAD'i ya da calisma agaci degisti; sonuc tam degil.",
+                saved,
+                outcome.Summary.FileCount);
+        }
 
         return new JobOutcome(
             AnalysisJobStatus.Succeeded,
             saved,
             outcome.Summary.FileCount,
-            ResultSummary: Summarise(outcome, run.Progress));
+            ResultSummary: Summarise(outcome, run.Progress, before));
     }
 
     /// <summary>
@@ -193,12 +258,13 @@ public sealed class StaticScanHandler(
         return saved;
     }
 
-    private static string Summarise(ScanOutcome outcome, JobProgress progress)
+    private static string Summarise(ScanOutcome outcome, JobProgress progress, WorktreeSnapshot source)
     {
         CheckSummary summary = outcome.Summary;
 
         return JsonSerializer.Serialize(new Dictionary<string, object?>(StringComparer.Ordinal)
         {
+            ["sourceHeadShortSha"] = source.ShortSha,
             // Ilerlemenin kac kez yazildigi: oge basina yazilmadigini gosteren sayi.
             ["progressWrites"] = progress.WriteCount,
             ["cancellationChecks"] = progress.CancellationCheckCount,
@@ -215,15 +281,6 @@ public sealed class StaticScanHandler(
             ["infoCount"] = summary.BySeverity.Info,
         });
     }
-
-    /// <summary>
-    /// Klasorde <c>.git</c> var mi. LibGit2Sharp'i bu kontrol icin API'ye baglamadim:
-    /// tek bir dogru/yanlis icin git kutuphanesi eklemek, repo klonlama ve tarih okumanin
-    /// bu turda olmadigi kararini bulaniklastirirdi. Worktree'lerde <c>.git</c> bir dosya
-    /// oldugu icin ikisi de kabul ediliyor.
-    /// </summary>
-    private static bool IsGitRepository(string path) =>
-        Directory.Exists(Path.Combine(path, ".git")) || File.Exists(Path.Combine(path, ".git"));
 
     /// <summary>Senkron taramadan gelen ilerlemeyi tutar; yazmayi cagiran taraf yapiyor.</summary>
     private sealed class ScanRelay : IProgress<ScanProgress>

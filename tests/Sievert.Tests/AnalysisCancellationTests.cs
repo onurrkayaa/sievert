@@ -137,7 +137,7 @@ public sealed class AnalysisCancellationTests(PostgresFixture postgres)
 
         AnalysisOptions options = new() { ProgressInterval = TimeSpan.Zero };
 
-        StaticScanHandler handler = new(context, options, TimeProvider.System);
+        StaticScanHandler handler = new(context, store, options, TimeProvider.System);
 
         JobOutcome outcome = await handler.RunAsync(
             new AnalysisJobRun(jobId, known, Progress(store, jobId, options)),

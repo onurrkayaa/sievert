@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Sievert.Data;
@@ -11,9 +12,11 @@ using Sievert.Data;
 namespace Sievert.Data.Migrations
 {
     [DbContext(typeof(SievertContext))]
-    partial class SievertContextModelSnapshot : ModelSnapshot
+    [Migration("20260913064302_AnalizKaynakDurumu")]
+    partial class AnalizKaynakDurumu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

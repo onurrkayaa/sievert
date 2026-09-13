@@ -264,6 +264,54 @@ public sealed class AnalysisJobStore(SievertContext context)
     }
 
     /// <summary>
+    /// Taramanin hangi kaynak uzerinde basladigini yazar: HEAD, calisma agacinin durumu
+    /// ve kaydedilmemis degisiklik sayisi.
+    ///
+    /// Sonucun tekrar uretilebilmesi buna bagli. "203 bulgu" cumlesi, hangi agacta 203
+    /// bulgu oldugu yazilmadan bir sey anlatmiyor.
+    /// </summary>
+    public async Task<bool> RecordSourceStartAsync(
+        Guid id,
+        string treeState,
+        string? headSha,
+        string? shortSha,
+        string? identity,
+        int? dirtyFileCount,
+        DateTimeOffset now,
+        CancellationToken cancellation = default) =>
+        await context.AnalysisJobs
+            .Where(job => job.Id == id && job.Status == AnalysisJobStatus.Running)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(job => job.SourceTreeState, treeState)
+                    .SetProperty(job => job.SourceHeadSha, headSha)
+                    .SetProperty(job => job.SourceHeadShortSha, shortSha)
+                    .SetProperty(job => job.SourceRepositoryIdentity, identity)
+                    .SetProperty(job => job.SourceDirtyFileCount, dirtyFileCount)
+                    .SetProperty(job => job.SourceStateCheckedAtUtc, now),
+                cancellation) == 1;
+
+    /// <summary>
+    /// Tarama bittikten sonra kaynagin hala ayni olup olmadigini yazar. Degistiyse
+    /// <paramref name="treeState"/> <c>changed-during-analysis</c> geliyor ve is
+    /// basariyla bitmiyor.
+    /// </summary>
+    public async Task<bool> RecordSourceVerifiedAsync(
+        Guid id,
+        string treeState,
+        bool changed,
+        DateTimeOffset now,
+        CancellationToken cancellation = default) =>
+        await context.AnalysisJobs
+            .Where(job => job.Id == id && job.Status == AnalysisJobStatus.Running)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(job => job.SourceTreeState, treeState)
+                    .SetProperty(job => job.SourceCommitChangedDuringAnalysis, changed)
+                    .SetProperty(job => job.SourceStateVerifiedAtUtc, now),
+                cancellation) == 1;
+
+    /// <summary>
     /// Uygulama acilirken onceki surecten kalan isleri toparlar.
     ///
     /// Calisan bir is otomatik DEVAM ETMIYOR. Nerede kaldigini bilmiyoruz ve yarim kalan

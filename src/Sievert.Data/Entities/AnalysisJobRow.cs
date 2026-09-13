@@ -104,6 +104,41 @@ public sealed class AnalysisJobRow
     /// <summary>Isi kosan surecin kimligi. Hangi surecin yarida biraktigi gorulsun diye.</summary>
     public string? WorkerInstanceId { get; set; }
 
+    /// <summary>
+    /// Taramanin basladigi andaki HEAD commit'i. Yalnizca <c>static-scan</c> doldurur.
+    ///
+    /// Risk skorlamasi calisma agacini hic okumuyor - onun girdisi veritabanindaki
+    /// commit'ler ve model dosyasi, ikisinin de ozeti sonuc satirlarinda duruyor.
+    /// </summary>
+    public string? SourceHeadSha { get; set; }
+
+    /// <summary>HEAD'in ilk 12 karakteri; gosterimde kullanilan kisa hali.</summary>
+    public string? SourceHeadShortSha { get; set; }
+
+    /// <summary>
+    /// Calisma agacinin durumu: <c>clean</c>, <c>dirty</c>,
+    /// <c>changed-during-analysis</c> ya da <c>unavailable</c>.
+    /// </summary>
+    public string? SourceTreeState { get; set; }
+
+    /// <summary>Durumun ilk okundugu an; tarama baslamadan once.</summary>
+    public DateTimeOffset? SourceStateCheckedAtUtc { get; set; }
+
+    /// <summary>Durumun yeniden okundugu an; tarama bittikten sonra.</summary>
+    public DateTimeOffset? SourceStateVerifiedAtUtc { get; set; }
+
+    /// <summary>Taranan deponun uzak adresi. Tam dosya yolu DEGIL; o cevaba girmiyor.</summary>
+    public string? SourceRepositoryIdentity { get; set; }
+
+    /// <summary>Tarama sirasinda HEAD ya da calisma agaci degisti mi.</summary>
+    public bool SourceCommitChangedDuringAnalysis { get; set; }
+
+    /// <summary>
+    /// Ilk okumada bulunan kaydedilmemis degisiklik sayisi. Dosya adlari saklanmiyor:
+    /// adlar cevaba sizarsa sunucudaki calisma agacinin icerigi disari cikardi.
+    /// </summary>
+    public int? SourceDirtyFileCount { get; set; }
+
     /// <summary>Iyimser es zamanlilik jetonu; iki worker ayni isi alamasin diye.</summary>
     public uint Version { get; set; }
 

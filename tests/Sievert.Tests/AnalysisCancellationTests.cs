@@ -164,12 +164,18 @@ public sealed class AnalysisCancellationTests(PostgresFixture postgres)
 
         (int known, int _) = ApiSeed.Write(context);
 
+        // Bes commit yetmiyor: gozcu iki satiri gorene kadar is bitebiliyor ve o zaman
+        // iptal butun satirlar yazildiktan SONRA dusuyor. Bir kez tam bunu yasadim -
+        // test "iptal edilmesine ragmen butun satirlar yazildi: 5" diye dustu. Kume
+        // buyutulunce iptalin arada kalmasi icin genis bir pay oluyor.
+        ApiSeed.AddManyCommits(context, known, 400);
+
         AnalysisJobStore store = new(context);
         Guid jobId = (await store.CreateAsync(known, AnalysisJobKind.RiskScoreAll, null, DateTimeOffset.UtcNow)).Job!.Id;
 
         await store.TryStartAsync(jobId, "test", DateTimeOffset.UtcNow);
 
-        AnalysisOptions options = new() { RiskBatchSize = 2 };
+        AnalysisOptions options = new() { RiskBatchSize = 25 };
 
         using CancellationTokenSource source = new();
 
@@ -202,11 +208,9 @@ public sealed class AnalysisCancellationTests(PostgresFixture postgres)
         // sayisiyla ayni olmali.
         Assert.Equal(actual, outcome.ResultCount);
 
-        if (outcome.Status == AnalysisJobStatus.Canceled)
-        {
-            Assert.True(actual > 0, "hicbir satir yazilmadan iptal edildi; test bir sey sinamadi");
-            Assert.True(actual < 5, $"iptal edilmesine ragmen butun satirlar yazildi: {actual}");
-        }
+        Assert.Equal(AnalysisJobStatus.Canceled, outcome.Status);
+        Assert.True(actual > 0, "hicbir satir yazilmadan iptal edildi; test bir sey sinamadi");
+        Assert.True(actual < 405, $"iptal edilmesine ragmen butun satirlar yazildi: {actual}");
     }
 
     [DockerFact]

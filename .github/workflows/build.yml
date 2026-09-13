@@ -19,7 +19,10 @@ jobs:
       # Test sonuclari artefakt olarak saklaniyor. Sebep: bir kosuda tek bir test
       # dustu ve hangisi oldugu gorulemedi, cunku ozet disinda kayit kalmiyordu.
       # Zaman asimi degerine dokunmadim; once hangi testin dustugunu bilmek gerekiyor.
-      - run: dotnet test --no-build --logger "trx;LogFileName=test-sonuclari.trx" --results-directory test-sonuclari
+      # LogFileName VERILMIYOR. Iki test projesi var ve sabit bir ad verilince ikincisi
+      # birincinin dosyasini eziyor; artefaktta tek projenin sonucu kaliyor. Adsiz
+      # birakilinca her proje kendi dosyasini yaziyor.
+      - run: dotnet test --no-build --logger trx --results-directory test-sonuclari
 
       - uses: actions/upload-artifact@v4
         if: always()

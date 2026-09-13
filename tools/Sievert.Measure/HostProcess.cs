@@ -19,6 +19,8 @@ public sealed partial class HostProcess : IDisposable
 
     private int apiRequests;
 
+    private int databaseCommands;
+
     private double slowestApi;
 
     private HostProcess(Process process)
@@ -34,6 +36,21 @@ public sealed partial class HostProcess : IDisposable
             lock (gate)
             {
                 return apiRequests;
+            }
+        }
+    }
+
+    /// <summary>
+    /// EF Core'un calistirdigi komut sayisi. Yalniz komut gunlugu acikken artiyor;
+    /// varsayilan gunluk seviyesinde 0 kalir.
+    /// </summary>
+    public int DatabaseCommandCount
+    {
+        get
+        {
+            lock (gate)
+            {
+                return databaseCommands;
             }
         }
     }
@@ -94,7 +111,13 @@ public sealed partial class HostProcess : IDisposable
     /// API icin kanit dosyalarinin bulundugu kok; panel icin null, cunku panelin icerik
     /// koku kendi yayim klasoru olmali (statik varliklar orada).
     /// </param>
-    public static HostProcess Start(string dll, string url, string? contentRoot, string? apiUrl)
+    /// <param name="environment">Surece eklenecek ortam degiskenleri; gunluk seviyesi gibi.</param>
+    public static HostProcess Start(
+        string dll,
+        string url,
+        string? contentRoot,
+        string? apiUrl,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         if (!File.Exists(dll))
         {
@@ -124,6 +147,12 @@ public sealed partial class HostProcess : IDisposable
             start.Environment["SIEVERT_API_URL"] = apiUrl;
         }
 
+        foreach ((string key, string value) in environment
+            ?? new Dictionary<string, string>(StringComparer.Ordinal))
+        {
+            start.Environment[key] = value;
+        }
+
         HostProcess host = new(Process.Start(start)
             ?? throw new InvalidOperationException($"{dll} baslatilamadi."));
 
@@ -150,6 +179,16 @@ public sealed partial class HostProcess : IDisposable
     {
         if (message.Data is not string line)
         {
+            return;
+        }
+
+        if (line.Contains("Executed DbCommand", StringComparison.Ordinal))
+        {
+            lock (gate)
+            {
+                databaseCommands++;
+            }
+
             return;
         }
 

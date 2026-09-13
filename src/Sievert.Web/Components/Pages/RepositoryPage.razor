@@ -99,7 +99,43 @@ else if (detail is not null)
         </div>
     }
 
-    <div class="section">
+    <nav class="tabs section" aria-label="Depo bolumleri">
+        @foreach ((string key, string label) in Tabs)
+        {
+            <button type="button"
+                    class="tab @(key == CurrentTab ? "tab-open" : string.Empty)"
+                    aria-current="@(key == CurrentTab ? "page" : null)"
+                    @onclick="() => Go(tab: key)">@label</button>
+        }
+    </nav>
+
+    @if (CurrentTab == "dosyalar")
+    {
+        <FileActivitySection RepositoryId="RepositoryId"
+                             Jobs="RiskJobs"
+                             Scans="ScanJobs"
+                             JobId="SelectedJob"
+                             Window="SelectedWindow"
+                             Limit="SelectedLimit"
+                             Sort="@SelectedSort"
+                             Overlay="Overlay"
+                             JobChanged="value => Go(job: value)"
+                             WindowChanged="value => Go(window: value)"
+                             LimitChanged="value => Go(limit: value)"
+                             SortChanged="value => Go(sort: value)"
+                             OverlayChanged="value => Go(overlay: value, clearOverlay: value is null)" />
+    }
+    else if (CurrentTab == "zaman")
+    {
+        <TimelineSection RepositoryId="RepositoryId"
+                         Jobs="RiskJobs"
+                         JobId="SelectedJob"
+                         Count="SelectedCount"
+                         JobChanged="value => Go(job: value)"
+                         CountChanged="value => Go(count: value)" />
+    }
+
+    <div class="section" hidden="@(CurrentTab is not ("genel" or "analizler"))">
         <h2>Bu deponun isleri</h2>
 
         @if (jobs is null || jobs.Items.Count == 0)
@@ -136,7 +172,7 @@ else if (detail is not null)
         }
     </div>
 
-    <div class="section">
+    <div class="section" hidden="@(CurrentTab is not ("genel" or "commitler"))">
         <h2>Commit'ler</h2>
 
         <div class="row" style="margin-bottom:var(--space-3)">
@@ -244,11 +280,40 @@ else if (detail is not null)
     [Parameter]
     public int RepositoryId { get; set; }
 
+    /// <summary>
+    /// Butun gorsellestirme secimleri adres cubugunda.
+    ///
+    /// Boylece bir harita baglantisi paylasilabiliyor, geri/ileri tuslari calisiyor ve
+    /// sayfa yenilendiginde ayni sey geliyor.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "tab")]
+    private string? Tab { get; set; }
+
+    [SupplyParameterFromQuery(Name = "job")]
+    private Guid? Job { get; set; }
+
+    [SupplyParameterFromQuery(Name = "window")]
+    private int? Window { get; set; }
+
+    [SupplyParameterFromQuery(Name = "limit")]
+    private int? Limit { get; set; }
+
+    [SupplyParameterFromQuery(Name = "sort")]
+    private string? Sort { get; set; }
+
+    [SupplyParameterFromQuery(Name = "count")]
+    private int? Count { get; set; }
+
+    [SupplyParameterFromQuery(Name = "overlay")]
+    private Guid? OverlayJob { get; set; }
+
     private IDisposable? persisting;
     private bool loading = true;
     private IProblemView? failure;
     private RepositoryDetail? detail;
     private PagedResponse<AnalysisJobResponse>? jobs;
+    private PagedResponse<AnalysisJobResponse>? riskJobs;
+    private PagedResponse<AnalysisJobResponse>? scanJobs;
     private PagedResponse<CommitListItem>? commits;
 
     private string? busy;
@@ -300,7 +365,85 @@ else if (detail is not null)
             JobsKey,
             () => Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token))).Value;
 
+        riskJobs = (await State.TakeOrFetchAsync(
+            PageStateKey.For("repository", ("repo", RepositoryId), ("part", "risk-jobs")),
+            () => Api.AnalysesAsync(RepositoryId, 1, 50, "succeeded", "risk-score-all", closing.Token))).Value;
+
+        scanJobs = (await State.TakeOrFetchAsync(
+            PageStateKey.For("repository", ("repo", RepositoryId), ("part", "scan-jobs")),
+            () => Api.AnalysesAsync(RepositoryId, 1, 50, "succeeded", "static-scan", closing.Token))).Value;
+
         await LoadCommitsAsync();
+    }
+
+    private static readonly (string Key, string Label)[] Tabs =
+    [
+        ("genel", "Genel"),
+        ("dosyalar", "Dosya Etkinligi"),
+        ("zaman", "Risk Zaman Cizelgesi"),
+        ("commitler", "Commitler"),
+        ("analizler", "Analizler"),
+    ];
+
+    private string CurrentTab => Tabs.Any(tab => tab.Key == Tab) ? Tab! : "genel";
+
+    /// <summary>Yalnizca sonuc yazmis risk isleri; bos bir is gosterilecek bir sey uretmiyor.</summary>
+    private IReadOnlyList<AnalysisJobResponse> RiskJobs =>
+        riskJobs?.Items.Where(job => job.ResultCount > 0).ToList() ?? [];
+
+    private IReadOnlyList<AnalysisJobResponse> ScanJobs =>
+        scanJobs?.Items.Where(job => job.IsResultComplete).ToList() ?? [];
+
+    /// <summary>
+    /// Secili is.
+    ///
+    /// Varsayilan **tamamlanmis** olan: kismi bir isi kendiliginden secmek, eksik bir
+    /// siralamayi sayfanin normal hali gibi gostermek olurdu. Yalniz kismi isler varsa
+    /// kullanici acikca secebiliyor.
+    /// </summary>
+    private Guid? SelectedJob => Job is Guid chosen && RiskJobs.Any(job => job.Id == chosen)
+        ? chosen
+        : RiskJobs.FirstOrDefault(job => job.IsResultComplete)?.Id;
+
+    private int SelectedWindow =>
+        Window is int value && VisualizationLimits.IsWindow(value) ? value : VisualizationLimits.DefaultCommitWindow;
+
+    private int SelectedLimit =>
+        Limit is int value && VisualizationLimits.IsFileLimit(value) ? value : VisualizationLimits.DefaultFileLimit;
+
+    private int SelectedCount =>
+        Count is int value && VisualizationLimits.IsTimelineCount(value)
+            ? value
+            : VisualizationLimits.DefaultTimelineCount;
+
+    private string SelectedSort =>
+        VisualizationLimits.IsSort(Sort) ? Sort! : FileActivitySort.MeanRiskDescending;
+
+    private Guid? Overlay => OverlayJob is Guid chosen && ScanJobs.Any(job => job.Id == chosen) ? chosen : null;
+
+    /// <summary>Secimleri adres cubuguna yazar; geri/ileri tuslari boylece calisiyor.</summary>
+    private void Go(
+        string? tab = null,
+        Guid? job = null,
+        int? window = null,
+        int? limit = null,
+        string? sort = null,
+        int? count = null,
+        Guid? overlay = null,
+        bool clearOverlay = false)
+    {
+        Dictionary<string, object?> query = new(StringComparer.Ordinal)
+        {
+            ["tab"] = tab ?? CurrentTab,
+            ["job"] = (job ?? SelectedJob)?.ToString(),
+            ["window"] = window ?? SelectedWindow,
+            ["limit"] = limit ?? SelectedLimit,
+            ["sort"] = sort ?? SelectedSort,
+            ["count"] = count ?? SelectedCount,
+            ["overlay"] = clearOverlay ? null : (overlay ?? Overlay)?.ToString(),
+        };
+
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(query));
     }
 
     private string DetailKey => PageStateKey.For("repository", ("repo", RepositoryId));
@@ -339,6 +482,8 @@ else if (detail is not null)
         persisting = new Subscriptions(
             State.Persist(DetailKey, () => detail),
             State.Persist(JobsKey, () => jobs),
+            State.Persist(PageStateKey.For("repository", ("repo", RepositoryId), ("part", "risk-jobs")), () => riskJobs),
+            State.Persist(PageStateKey.For("repository", ("repo", RepositoryId), ("part", "scan-jobs")), () => scanJobs),
             State.Persist(key, () => commits));
     }
 

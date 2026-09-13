@@ -1,0 +1,135 @@
+@implements IDisposable
+@inject SievertApiClient Api
+@inject IPageState State
+
+@*
+    Zaman cizelgesi bolumu. Yukleme kurallari dosya haritasiyla ayni: onceki istek iptal
+    ediliyor ve gec donen eski bir cevap yeni secimi ezemiyor.
+*@
+@if (Jobs.Count == 0)
+{
+    <VisualizationEmptyState Title="Bu depo icin skorlanmis bir is yok"
+                            Detail="Cizelge, bir risk skorlamasinin kaydettigi endekslerden uretiliyor."
+                            RepositoryId="RepositoryId" />
+}
+else
+{
+    <VisualizationToolbar Jobs="Jobs"
+                          Job="JobId"
+                          ShowWindow="false"
+                          Count="Count"
+                          JobChanged="JobChanged"
+                          CountChanged="CountChanged"
+                          OnRefresh="ReloadAsync" />
+
+    @if (timeline is not null)
+    {
+        <PartialResultBanner Partial="timeline.IsPartial" RankingScope="@timeline.RankingScope" />
+    }
+
+    @if (loading)
+    {
+        <Loading Message="Cizelge hazirlaniyor..." />
+    }
+    else if (failure is not null)
+    {
+        <VisualizationErrorState Result="failure" OnRetry="ReloadAsync" />
+    }
+    else if (timeline is not null)
+    {
+        <RiskTimeline Timeline="timeline" />
+    }
+}
+
+@code {
+    private CancellationTokenSource? inflight;
+    private IDisposable? persisting;
+    private int sequence;
+    private bool loading;
+    private IProblemView? failure;
+    private RiskTimelineResponse? timeline;
+    private string loaded = string.Empty;
+
+    [Parameter, EditorRequired]
+    public int RepositoryId { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AnalysisJobResponse> Jobs { get; set; } = [];
+
+    [Parameter]
+    public Guid? JobId { get; set; }
+
+    [Parameter]
+    public int Count { get; set; } = VisualizationLimits.DefaultTimelineCount;
+
+    [Parameter]
+    public EventCallback<Guid> JobChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CountChanged { get; set; }
+
+    private string Key => PageStateKey.For(
+        "risk-timeline",
+        ("repo", RepositoryId),
+        ("job", JobId),
+        ("count", Count));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (JobId is not null && Key != loaded)
+        {
+            await ReloadAsync();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (JobId is not Guid job)
+        {
+            return;
+        }
+
+        string key = Key;
+        loaded = key;
+
+        inflight?.Cancel();
+        inflight?.Dispose();
+        inflight = new CancellationTokenSource();
+
+        int mine = ++sequence;
+
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<RiskTimelineResponse> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.RiskTimelineAsync(RepositoryId, job, Count, inflight.Token));
+
+        if (mine != sequence)
+        {
+            return;
+        }
+
+        if (result.IsSuccess)
+        {
+            timeline = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        loading = false;
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => timeline);
+    }
+
+    public void Dispose()
+    {
+        persisting?.Dispose();
+        inflight?.Cancel();
+        inflight?.Dispose();
+    }
+}

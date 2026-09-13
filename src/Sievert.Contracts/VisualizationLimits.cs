@@ -1,12 +1,14 @@
-using Sievert.Contracts;
-
-namespace Sievert.Api.Visualizations;
+namespace Sievert.Contracts;
 
 /// <summary>
 /// Gorsellestirme uclarinin sinirlari.
 ///
 /// Hicbiri olcum sonucuna bakilarak secilmedi; hepsi sorgu yazilmadan once sabitlendi ve
 /// gerekceleri ADR 0026'da.
+///
+/// Sozlesme projesinde duruyor cunku iki taraf da ayni sinirlari bilmek zorunda: panel,
+/// API'nin reddedecegi bir secenegi listeye koymamali. Adim 4'te ayni sebeple sayfa
+/// boyutu ust siniri da istemci tarafina tasinmisti.
 /// </summary>
 public static class VisualizationLimits
 {

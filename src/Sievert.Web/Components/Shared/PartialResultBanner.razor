@@ -1,0 +1,26 @@
+@*
+    Kismi analiz uyarisi.
+
+    Metin her yerde ayni ve her yerde gorunuyor: harita, cizelge, risk listesi ve is
+    ayrintisi. Sebep tek cumle: yarida kalmis bir iste "en yuksek" demek, "kaydedilmis
+    sonuclarin en yuksegi" demek ve bu sinir sayinin yanindan ayrilmamali.
+*@
+@if (Partial)
+{
+    <div class="notice warning" role="status">
+        <h3>Bu analiz tamamlanmadi</h3>
+        <p>Siralama ve ozetler yalnizca su ana kadar kaydedilmis sonuclara aittir.</p>
+        @if (RankingScope is string scope)
+        {
+            <p class="faint" style="margin-bottom:0">Siralama kapsami: <code>@scope</code></p>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Partial { get; set; }
+
+    [Parameter]
+    public string? RankingScope { get; set; }
+}

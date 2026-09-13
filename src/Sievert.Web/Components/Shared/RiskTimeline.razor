@@ -1,0 +1,318 @@
+@*
+    Commit risk zaman cizelgesi.
+
+    SVG C# ile uretiliyor; harici grafik kutuphanesi yok. Cizilecek tek sey bir nokta
+    serisi ve iki referans cizgisi; bunun icin bir paket eklemek, olculecek bir fayda
+    olmadan yuzey buyutmek olurdu (ADR 0026).
+
+    Y ekseni yalniz goreli endeks. Ham skor ayni eksende cizilmiyor: ikisi farkli seyler
+    ve tek egri gibi gorunurlerse birlestirilmis bir sayi sanilir.
+*@
+<div class="row-spread">
+    <div>
+        <h3 style="margin-bottom:var(--space-1)">Commit risk zaman cizelgesi</h3>
+        <p class="muted" style="max-width:72ch">
+            Endeks, secilen model profilinin egitim dagilimindaki goreli sirayi gosterir;
+            kalibre edilmis bir tahmin degildir.
+        </p>
+    </div>
+</div>
+
+@if (Timeline.Points.Count == 0)
+{
+    <VisualizationEmptyState Title="Bu iste gosterilecek commit yok"
+                            Detail="Skorlama hic satir yazmamis." />
+}
+else
+{
+    <p class="faint">
+        @Display.Count(Timeline.ReturnedCount) commit &middot;
+        @Display.Day(Timeline.StartDateUtc) - @Display.Day(Timeline.EndDateUtc)
+        @if (Ordinal)
+        {
+            <text>&middot; butun commit'ler ayni tarihte, yatay eksen sira numarasi</text>
+        }
+    </p>
+
+    <div class="chart-wrap">
+        <svg class="chart"
+             viewBox="0 0 @VisualizationScale.Number(VisualizationScale.Width) @VisualizationScale.Number(VisualizationScale.Height)"
+             preserveAspectRatio="xMidYMid meet"
+             role="img"
+             aria-label="@Summary()">
+
+            @* Izgara ve eksen etiketleri. *@
+            @foreach (double mark in Marks)
+            {
+                <line x1="@VisualizationScale.Number(VisualizationScale.PlotLeft)"
+                      x2="@VisualizationScale.Number(VisualizationScale.PlotRight)"
+                      y1="@VisualizationScale.Number(VisualizationScale.Y(mark))"
+                      y2="@VisualizationScale.Number(VisualizationScale.Y(mark))"
+                      class="chart-grid" />
+                @Caption(
+                    VisualizationScale.PlotLeft - 10,
+                    VisualizationScale.Y(mark) + 4,
+                    "end",
+                    Display.Index(mark))
+            }
+
+            @AxisTitle()
+
+            @* Referans cizgileri. Ayni degere dusuyorlarsa tek cizgi ve birlesik etiket. *@
+            @if (Coincide)
+            {
+                <line x1="@VisualizationScale.Number(VisualizationScale.PlotLeft)"
+                      x2="@VisualizationScale.Number(VisualizationScale.PlotRight)"
+                      y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
+                      y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
+                      class="chart-threshold chart-threshold-both" />
+                @Caption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
+                    "end",
+                    "Iki esik de " + Display.Index(Timeline.DecisionAt05RiskIndex))
+            }
+            else
+            {
+                <line x1="@VisualizationScale.Number(VisualizationScale.PlotLeft)"
+                      x2="@VisualizationScale.Number(VisualizationScale.PlotRight)"
+                      y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex))"
+                      y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex))"
+                      class="chart-threshold chart-threshold-train" />
+                @Caption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex) - 6,
+                    "end",
+                    "Egitim esigi " + Display.Index(Timeline.DecisionAtTrainThresholdRiskIndex))
+
+                <line x1="@VisualizationScale.Number(VisualizationScale.PlotLeft)"
+                      x2="@VisualizationScale.Number(VisualizationScale.PlotRight)"
+                      y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
+                      y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
+                      class="chart-threshold chart-threshold-half" />
+                @Caption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
+                    "end",
+                    "0,5 esigi " + Display.Index(Timeline.DecisionAt05RiskIndex))
+            }
+
+            @*
+                Noktalari birlestiren cizgi var ama ALAN DOLGUSU yok: commit'ler arasinda
+                surekli bir fiziksel surec yok, sadece sirali olaylar var.
+            *@
+            @if (Timeline.Points.Count > 1)
+            {
+                <polyline points="@Path()" class="chart-line" />
+            }
+
+            @foreach (RiskTimelinePoint point in Timeline.Points)
+            {
+                <g class="chart-point"
+                   tabindex="0"
+                   role="button"
+                   aria-label="@Label(point)"
+                   @onclick="() => Select(point)"
+                   @onfocus="() => Select(point)"
+                   @onkeydown="args => OnKey(args, point)">
+
+                    @* SZZ etiketli commit'ler halkali, duzeltmeler kare: sekil de bilgi tasiyor. *@
+                    @if (point.IsBugIntroducing)
+                    {
+                        <circle cx="@X(point)" cy="@Y(point)" r="8" class="chart-halo" />
+                    }
+
+                    @if (point.IsFix)
+                    {
+                        <rect x="@VisualizationScale.Number(Number(X(point)) - 4)"
+                              y="@VisualizationScale.Number(Number(Y(point)) - 4)"
+                              width="8" height="8"
+                              fill="@VisualizationScale.Fill(point.RiskIndex)"
+                              class="chart-mark" />
+                    }
+                    else
+                    {
+                        <circle cx="@X(point)" cy="@Y(point)" r="4.5"
+                                fill="@VisualizationScale.Fill(point.RiskIndex)"
+                                class="chart-mark" />
+                    }
+                </g>
+            }
+        </svg>
+    </div>
+
+    <div class="row" style="gap:var(--space-4)">
+        <span class="legend-key"><span class="legend-dot"></span> commit</span>
+        <span class="legend-key"><span class="legend-square"></span> duzeltme commit'i</span>
+        <span class="legend-key"><span class="legend-ring"></span> SZZ etiketli</span>
+        <span class="legend-key"><span class="legend-line legend-line-train"></span> egitim esigi</span>
+        <span class="legend-key"><span class="legend-line legend-line-half"></span> 0,5 esigi</span>
+    </div>
+
+    @if (Chosen is RiskTimelinePoint chosen)
+    {
+        <div class="card section" role="region" aria-label="Commit ayrintisi">
+            <div class="row-spread">
+                <h4 class="mono" style="margin:0">@chosen.ShortSha</h4>
+                <button class="btn quiet" type="button" @onclick="() => Chosen = null">Kapat</button>
+            </div>
+
+            <p class="muted" style="margin-top:var(--space-2)">@chosen.MessageSubject</p>
+
+            <dl class="facts">
+                <dt>Tarih</dt>
+                <dd>@Display.Moment(chosen.AuthorDateUtc)</dd>
+                <dt>Goreli risk endeksi</dt>
+                <dd class="mono">@Display.Index(chosen.RiskIndex)</dd>
+                <dt>Ham model skoru</dt>
+                <dd class="mono">@Display.Score(chosen.RawModelScore)</dd>
+                <dt>0,5 esigine gore karar</dt>
+                <dd>@Display.Decision(chosen.DecisionAt05)</dd>
+                <dt>Egitim esigine gore karar</dt>
+                <dd>@Display.Decision(chosen.DecisionAtTrainThreshold)</dd>
+                <dt>Degisen satir</dt>
+                <dd>+@Display.Count(chosen.LinesAdded) / -@Display.Count(chosen.LinesDeleted)</dd>
+                <dt>Degisen dosya</dt>
+                <dd>@Display.Count(chosen.FilesChanged) (@Display.Count(chosen.CsFilesChanged) C#)</dd>
+                <dt>Duzeltme commit'i</dt>
+                <dd>@(chosen.IsFix ? "Evet" : "Hayir")</dd>
+                <dt>Kayitli SZZ etiketi</dt>
+                <dd>@(chosen.IsBugIntroducing ? "Isaretli" : "Isaretsiz")</dd>
+                <dt>Bot</dt>
+                <dd>@(chosen.IsBot ? "Evet" : "Hayir")</dd>
+            </dl>
+
+            <p style="margin-top:var(--space-3);margin-bottom:0">
+                <a href="repositories/@Timeline.RepositoryId/commits/@chosen.Sha/risk">Commit risk sayfasi</a>
+            </p>
+        </div>
+    }
+
+    <details class="section">
+        <summary style="cursor:pointer;min-height:var(--target);display:flex;align-items:center">
+            Ayni veriyi tablo olarak goster (@Display.Count(Timeline.Points.Count) satir)
+        </summary>
+
+        @* Grafigin altindaki tablo ayni veriyi ayni sirada tasiyor; test bunu karsilastiriyor. *@
+        <div class="table-wrap" style="margin-top:var(--space-3)">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col" class="num">Sira</th>
+                        <th scope="col">Commit</th>
+                        <th scope="col">Tarih</th>
+                        <th scope="col" class="wrap">Mesaj</th>
+                        <th scope="col" class="num">Endeks</th>
+                        <th scope="col" class="num">Ham skor</th>
+                        <th scope="col">0,5 karari</th>
+                        <th scope="col">Egitim esigi karari</th>
+                        <th scope="col">Duzeltme</th>
+                        <th scope="col">SZZ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (RiskTimelinePoint point in Timeline.Points)
+                    {
+                        <tr>
+                            <td class="num">@point.Ordinal</td>
+                            <td><code>@point.ShortSha</code></td>
+                            <td>@Display.Day(point.AuthorDateUtc)</td>
+                            <td class="wrap">@point.MessageSubject</td>
+                            <td class="num mono">@Display.Index(point.RiskIndex)</td>
+                            <td class="num mono">@Display.Score(point.RawModelScore)</td>
+                            <td>@Display.Decision(point.DecisionAt05)</td>
+                            <td>@Display.Decision(point.DecisionAtTrainThreshold)</td>
+                            <td>@(point.IsFix ? "Evet" : "Hayir")</td>
+                            <td>@(point.IsBugIntroducing ? "Isaretli" : "Isaretsiz")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </details>
+}
+
+@code {
+    private static readonly double[] Marks = [0, 25, 50, 75, 100];
+
+    /// <summary>
+    /// SVG metin ogesi.
+    ///
+    /// Razor'da <c>&lt;text&gt;</c> kendi ozel isareti ve nitelik almiyor; SVG'nin metin
+    /// ogesiyle cakisiyor. O yuzden bu ogeler burada uretiliyor. Icerik kacisli yaziliyor:
+    /// sayilar ve sabit etiketler olsa da kacissiz birlestirme aliskanlik haline gelmemeli.
+    /// </summary>
+    private static MarkupString Caption(double x, double y, string anchor, string content) =>
+        new($"""<text x="{VisualizationScale.Number(x)}" y="{VisualizationScale.Number(y)}" """
+            + $"""class="chart-axis" text-anchor="{anchor}">{System.Net.WebUtility.HtmlEncode(content)}</text>""");
+
+    private static MarkupString AxisTitle()
+    {
+        string middle = VisualizationScale.Number(
+            (VisualizationScale.PlotTop + VisualizationScale.PlotBottom) / 2);
+
+        return new MarkupString(
+            $"""<text x="14" y="{middle}" class="chart-axis" text-anchor="middle" """
+            + $"""transform="rotate(-90 14 {middle})">Goreli risk endeksi</text>""");
+    }
+
+    [Parameter, EditorRequired]
+    public RiskTimelineResponse Timeline { get; set; } = default!;
+
+    private RiskTimelinePoint? Chosen { get; set; }
+
+    /// <summary>Iki esik ayni endekse dusuyorsa tek cizgi ciziliyor; ust uste iki etiket okunmaz.</summary>
+    private bool Coincide => Timeline.Warnings.Contains(VisualizationWarning.ThresholdsCoincide);
+
+    /// <summary>Butun commit'ler ayni damgadaysa yatay eksen sira numarasina dusuyor.</summary>
+    private bool Ordinal => Timeline.Warnings.Contains(VisualizationWarning.TimelineUsesOrdinalAxis);
+
+    private double Span => Timeline.StartDateUtc is DateTimeOffset start
+        && Timeline.EndDateUtc is DateTimeOffset end
+            ? (end - start).TotalSeconds
+            : 0;
+
+    private double Number(string value) => double.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+
+    private string X(RiskTimelinePoint point)
+    {
+        double elapsed = Timeline.StartDateUtc is DateTimeOffset start
+            ? (point.AuthorDateUtc - start).TotalSeconds
+            : 0;
+
+        return VisualizationScale.Number(
+            VisualizationScale.X(point.Ordinal, Timeline.Points.Count, elapsed, Span));
+    }
+
+    private string Y(RiskTimelinePoint point) => VisualizationScale.Number(VisualizationScale.Y(point.RiskIndex));
+
+    private string Path() => string.Join(' ', Timeline.Points.Select(point => $"{X(point)},{Y(point)}"));
+
+    private void Select(RiskTimelinePoint point) => Chosen = point;
+
+    private void OnKey(KeyboardEventArgs args, RiskTimelinePoint point)
+    {
+        if (args.Key is "Enter" or " ")
+        {
+            Select(point);
+        }
+    }
+
+    private string Summary() =>
+        $"{Timeline.Points.Count} commit'in goreli risk endeksi, "
+        + $"{Display.Day(Timeline.StartDateUtc)} ile {Display.Day(Timeline.EndDateUtc)} arasi. "
+        + "Ayni veri asagida tablo olarak da duruyor.";
+
+    /// <summary>
+    /// Her noktanin kendi cumlesi. Renkle anlatilan hicbir sey burada eksik degil:
+    /// duzeltme, SZZ etiketi ve iki karar da yazili.
+    /// </summary>
+    private static string Label(RiskTimelinePoint point) =>
+        $"{point.ShortSha}, {Display.Day(point.AuthorDateUtc)}, "
+        + $"endeks {Display.Index(point.RiskIndex)}, ham skor {Display.Score(point.RawModelScore)}, "
+        + $"0,5 esigi: {Display.Decision(point.DecisionAt05)}, "
+        + $"egitim esigi: {Display.Decision(point.DecisionAtTrainThreshold)}"
+        + (point.IsFix ? ", duzeltme commit'i" : string.Empty)
+        + (point.IsBugIntroducing ? ", SZZ etiketli" : string.Empty)
+        + (point.IsBot ? ", bot" : string.Empty);
+}

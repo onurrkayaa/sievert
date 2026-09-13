@@ -1,0 +1,173 @@
+@implements IDisposable
+@inject SievertApiClient Api
+@inject IPageState State
+
+@*
+    Dosya etkinlik bolumu: arac cubugu, kismi uyarisi ve harita.
+
+    Yeni bir istek baslarken onceki iptal ediliyor ve her istegin bir sira numarasi var;
+    gec donen eski bir cevap yeni filtreyi ezemiyor. Bu olmadan hizli tiklayan biri,
+    sectigi pencereyle uyusmayan bir harita gorebilir.
+*@
+@if (Jobs.Count == 0)
+{
+    <VisualizationEmptyState Title="Bu depo icin skorlanmis bir is yok"
+                            Detail="Harita, bir risk skorlamasinin kaydettigi endekslerden uretiliyor."
+                            RepositoryId="RepositoryId" />
+}
+else
+{
+    <VisualizationToolbar Jobs="Jobs"
+                          Scans="Scans"
+                          Job="JobId"
+                          ShowWindow="true"
+                          Window="Window"
+                          Limit="Limit"
+                          Sort="@Sort"
+                          Overlay="Overlay"
+                          JobChanged="JobChanged"
+                          WindowChanged="WindowChanged"
+                          LimitChanged="LimitChanged"
+                          SortChanged="SortChanged"
+                          OverlayChanged="OverlayChanged"
+                          OnRefresh="ReloadAsync" />
+
+    @if (map is not null)
+    {
+        <PartialResultBanner Partial="map.IsPartial" RankingScope="@map.RankingScope" />
+    }
+
+    @if (loading)
+    {
+        <Loading Message="Harita hesaplaniyor..." />
+    }
+    else if (failure is not null)
+    {
+        <VisualizationErrorState Result="failure" OnRetry="ReloadAsync" />
+    }
+    else if (map is not null)
+    {
+        <FileActivityMap Map="map" />
+    }
+}
+
+@code {
+    private CancellationTokenSource? inflight;
+    private IDisposable? persisting;
+    private int sequence;
+    private bool loading;
+    private IProblemView? failure;
+    private FileActivityResponse? map;
+    private string loaded = string.Empty;
+
+    [Parameter, EditorRequired]
+    public int RepositoryId { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AnalysisJobResponse> Jobs { get; set; } = [];
+
+    [Parameter]
+    public IReadOnlyList<AnalysisJobResponse> Scans { get; set; } = [];
+
+    [Parameter]
+    public Guid? JobId { get; set; }
+
+    [Parameter]
+    public int Window { get; set; } = VisualizationLimits.DefaultCommitWindow;
+
+    [Parameter]
+    public int Limit { get; set; } = VisualizationLimits.DefaultFileLimit;
+
+    [Parameter]
+    public string Sort { get; set; } = FileActivitySort.MeanRiskDescending;
+
+    [Parameter]
+    public Guid? Overlay { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> JobChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> WindowChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> LimitChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SortChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> OverlayChanged { get; set; }
+
+    private string Key => PageStateKey.For(
+        "file-activity",
+        ("repo", RepositoryId),
+        ("job", JobId),
+        ("window", Window),
+        ("limit", Limit),
+        ("sort", Sort),
+        ("overlay", Overlay));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Ayni anahtarla ikinci kez yuklemiyoruz; ust sayfanin her yeniden olusumunda
+        // istek atmak, filtre degismemisken de API'yi mesgul etmek olurdu.
+        if (JobId is not null && Key != loaded)
+        {
+            await ReloadAsync();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        if (JobId is not Guid job)
+        {
+            return;
+        }
+
+        string key = Key;
+        loaded = key;
+
+        // Onceki istek iptal ediliyor; gec donen cevabin yeni filtreyi ezmesini ayrica
+        // sira numarasi engelliyor.
+        inflight?.Cancel();
+        inflight?.Dispose();
+        inflight = new CancellationTokenSource();
+
+        int mine = ++sequence;
+
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<FileActivityResponse> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.FileActivityAsync(RepositoryId, job, Window, Limit, Sort, Overlay, inflight.Token));
+
+        if (mine != sequence)
+        {
+            return;
+        }
+
+        if (result.IsSuccess)
+        {
+            map = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        loading = false;
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => map);
+    }
+
+    public void Dispose()
+    {
+        persisting?.Dispose();
+        inflight?.Cancel();
+        inflight?.Dispose();
+    }
+}

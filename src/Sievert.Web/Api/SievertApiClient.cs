@@ -131,6 +131,43 @@ public sealed class SievertApiClient(HttpClient http, ILogger<SievertApiClient> 
             cancellation);
 
     /// <summary>
+    /// Dosya etkinlik haritasi.
+    ///
+    /// Pencere, limit ve siralama sunucuda da dogrulaniyor; burada kirpilmiyorlar.
+    /// Sessizce kirpsaydim kullanici verdigi degerle sonuc aldigini sanardi.
+    /// </summary>
+    public Task<ApiResult<FileActivityResponse>> FileActivityAsync(
+        int repositoryId,
+        Guid analysisJobId,
+        int commitWindow,
+        int limit,
+        string sort,
+        Guid? staticAnalysisJobId,
+        CancellationToken cancellation)
+    {
+        string query = $"/api/v1/repositories/{repositoryId}/visualizations/file-activity"
+            + $"?analysisJobId={analysisJobId}&commitWindow={commitWindow}&limit={limit}"
+            + $"&sort={Uri.EscapeDataString(sort)}";
+
+        if (staticAnalysisJobId is Guid overlay)
+        {
+            query += $"&staticAnalysisJobId={overlay}";
+        }
+
+        return GetAsync<FileActivityResponse>(query, cancellation);
+    }
+
+    public Task<ApiResult<RiskTimelineResponse>> RiskTimelineAsync(
+        int repositoryId,
+        Guid analysisJobId,
+        int count,
+        CancellationToken cancellation) =>
+        GetAsync<RiskTimelineResponse>(
+            $"/api/v1/repositories/{repositoryId}/visualizations/risk-timeline"
+            + $"?analysisJobId={analysisJobId}&count={count}",
+            cancellation);
+
+    /// <summary>
     /// Is baslatir.
     ///
     /// Tekrar anahtari **cagiran tarafindan** veriliyor ve istek basina bir kez

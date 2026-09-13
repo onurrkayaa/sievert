@@ -1,0 +1,163 @@
+@*
+    Gorsellestirme ayarlari.
+
+    Kismi bir is varsayilan olarak SECILMIYOR. Tamamlanmis bir is varsa o seciliyor;
+    yalniz kismi isler varsa kullanici acikca secebiliyor ve secenegin yaninda "Kismi"
+    yaziyor. Sebep: kismi bir sonucu varsayilan yapmak, eksik bir siralamayi sayfanin
+    normal hali gibi gostermek olurdu.
+*@
+<div class="row" style="gap:var(--space-3);align-items:flex-end;margin-bottom:var(--space-4)">
+    <label class="field">
+        Risk analizi isi
+        <select value="@Job?.ToString()" @onchange="ChangeJobAsync" aria-label="Risk analizi isi">
+            @foreach (AnalysisJobResponse job in Jobs)
+            {
+                <option value="@job.Id" selected="@(job.Id == Job)">@Describe(job)</option>
+            }
+        </select>
+    </label>
+
+    @if (ShowWindow)
+    {
+        <label class="field">
+            Commit penceresi
+            <select value="@Window" @onchange="ChangeWindowAsync" aria-label="Commit penceresi">
+                @foreach (int choice in VisualizationLimits.WindowChoices)
+                {
+                    <option value="@choice" selected="@(choice == Window)">@choice commit</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            En fazla dosya
+            <select value="@Limit" @onchange="ChangeLimitAsync" aria-label="En fazla dosya">
+                @foreach (int choice in VisualizationLimits.FileLimitChoices)
+                {
+                    <option value="@choice" selected="@(choice == Limit)">@choice dosya</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            Siralama
+            <select value="@Sort" @onchange="ChangeSortAsync" aria-label="Siralama">
+                @foreach ((string value, string label) in SortLabels)
+                {
+                    <option value="@value" selected="@(value == Sort)">@label</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            Statik bulgu katmani
+            <select value="@(Overlay?.ToString() ?? string.Empty)" @onchange="ChangeOverlayAsync"
+                    aria-label="Statik bulgu katmani">
+                <option value="">Yok</option>
+                @foreach (AnalysisJobResponse scan in Scans)
+                {
+                    <option value="@scan.Id" selected="@(scan.Id == Overlay)">
+                        @(scan.SourceHeadShortSha ?? "kaynak yok") &middot; @Display.Day(scan.CompletedAtUtc)
+                    </option>
+                }
+            </select>
+        </label>
+    }
+    else
+    {
+        <label class="field">
+            Commit sayisi
+            <select value="@Count" @onchange="ChangeCountAsync" aria-label="Commit sayisi">
+                @foreach (int choice in VisualizationLimits.TimelineChoices)
+                {
+                    <option value="@choice" selected="@(choice == Count)">@choice commit</option>
+                }
+            </select>
+        </label>
+    }
+
+    <button class="btn" type="button" @onclick="OnRefresh">Yenile</button>
+</div>
+
+@code {
+    private static readonly (string Value, string Label)[] SortLabels =
+    [
+        (FileActivitySort.MeanRiskDescending, "Ortalama endeks"),
+        (FileActivitySort.MaxRiskDescending, "En yuksek endeks"),
+        (FileActivitySort.LatestRiskDescending, "Son dokunusun endeksi"),
+        (FileActivitySort.ChurnDescending, "Degisen satir"),
+        (FileActivitySort.TouchCountDescending, "Dokunus sayisi"),
+        (FileActivitySort.PathAscending, "Yol"),
+    ];
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AnalysisJobResponse> Jobs { get; set; } = [];
+
+    [Parameter]
+    public IReadOnlyList<AnalysisJobResponse> Scans { get; set; } = [];
+
+    [Parameter]
+    public Guid? Job { get; set; }
+
+    [Parameter]
+    public bool ShowWindow { get; set; }
+
+    [Parameter]
+    public int Window { get; set; } = VisualizationLimits.DefaultCommitWindow;
+
+    [Parameter]
+    public int Limit { get; set; } = VisualizationLimits.DefaultFileLimit;
+
+    [Parameter]
+    public int Count { get; set; } = VisualizationLimits.DefaultTimelineCount;
+
+    [Parameter]
+    public string Sort { get; set; } = FileActivitySort.MeanRiskDescending;
+
+    [Parameter]
+    public Guid? Overlay { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> JobChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> WindowChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> LimitChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CountChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SortChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> OverlayChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnRefresh { get; set; }
+
+    /// <summary>Kismi isin yaninda bunu yazmak sart: secenek listesinde de gorunmeli.</summary>
+    private static string Describe(AnalysisJobResponse job) =>
+        $"{Display.Moment(job.CompletedAtUtc ?? job.RequestedAtUtc)} - {Display.Count(job.ResultCount)} commit"
+        + (job.IsResultComplete ? string.Empty : " (Kismi)");
+
+    private Task ChangeJobAsync(ChangeEventArgs args) =>
+        Guid.TryParse(args.Value?.ToString(), out Guid value) ? JobChanged.InvokeAsync(value) : Task.CompletedTask;
+
+    private Task ChangeWindowAsync(ChangeEventArgs args) => Number(args, WindowChanged);
+
+    private Task ChangeLimitAsync(ChangeEventArgs args) => Number(args, LimitChanged);
+
+    private Task ChangeCountAsync(ChangeEventArgs args) => Number(args, CountChanged);
+
+    private Task ChangeSortAsync(ChangeEventArgs args) =>
+        SortChanged.InvokeAsync(args.Value?.ToString() ?? FileActivitySort.MeanRiskDescending);
+
+    private Task ChangeOverlayAsync(ChangeEventArgs args) =>
+        OverlayChanged.InvokeAsync(Guid.TryParse(args.Value?.ToString(), out Guid value) ? value : null);
+
+    private static Task Number(ChangeEventArgs args, EventCallback<int> callback) =>
+        int.TryParse(args.Value?.ToString(), out int value) ? callback.InvokeAsync(value) : Task.CompletedTask;
+}

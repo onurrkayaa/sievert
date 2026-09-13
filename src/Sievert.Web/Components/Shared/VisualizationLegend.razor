@@ -1,0 +1,29 @@
+@*
+    Renk efsanesi.
+
+    Yalniz renk seridi degil, altinda sayilari da var. Renk tek bilgi tasiyicisi olmadigi
+    icin efsane de tek basina renkle anlatmiyor.
+*@
+<div class="legend">
+    <div class="legend-bar" aria-hidden="true">
+        @foreach (double stop in Stops)
+        {
+            <span style="background:@VisualizationScale.Fill(stop)"></span>
+        }
+    </div>
+    <div class="legend-marks">
+        @foreach (double stop in Stops)
+        {
+            <span>@Display.Index(stop)</span>
+        }
+    </div>
+    <p class="faint" style="margin:var(--space-2) 0 0 0">@Caption</p>
+</div>
+
+@code {
+    private static readonly double[] Stops = [0, 25, 50, 75, 100];
+
+    [Parameter]
+    public string Caption { get; set; } =
+        "Goreli risk endeksi, 0-100. Secilen model profilinin egitim dagilimindaki sira.";
+}

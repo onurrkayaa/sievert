@@ -507,3 +507,192 @@ ul.plain li { margin-bottom: var(--space-1); }
     cursor: pointer;
     float: right;
 }
+
+/* ---------------------------------------------------------------- sekmeler */
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-4);
+}
+
+.tab {
+    min-height: var(--target);
+    padding: 0 var(--space-4);
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.tab:hover { color: var(--text-primary); }
+
+.tab-open {
+    color: var(--accent-strong);
+    border-bottom-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- dosya haritasi */
+
+/*
+  Butun hucreler ayni buyuklukte. Treemap degil: alan da renk de bilgi tasisaydi
+  hangisinin ne anlattigi karisirdi (ADR 0026).
+*/
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.map-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 116px;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.map-cell:hover { border-color: var(--border-strong); }
+.map-cell-open { border-color: var(--accent); }
+
+/* Renk kodlamasi burada; metin her zaman koyu bir zeminin uzerinde duruyor. */
+.map-bar {
+    display: block;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+}
+
+.map-bar > span { display: block; height: 100%; }
+
+.map-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.map-folder {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    opacity: 0.75;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.map-index {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.95rem;
+    margin-top: var(--space-1);
+}
+
+.map-facts {
+    font-size: 0.75rem;
+    opacity: 0.85;
+    overflow-wrap: anywhere;
+}
+
+.map-findings { margin-top: var(--space-2); align-self: flex-start; }
+
+/* ---------------------------------------------------------------- efsane */
+
+.legend { min-width: 220px; }
+
+.legend-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.legend-bar > span { display: block; height: 100%; }
+
+.legend-marks {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.legend-key {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot, .legend-square, .legend-ring {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+}
+
+.legend-dot { border-radius: 50%; }
+.legend-ring { border-radius: 50%; background: transparent; border: 2px solid var(--warning); }
+.legend-line { display: inline-block; width: 18px; height: 0; border-top: 2px dashed var(--text-faint); }
+.legend-line-train { border-top-color: var(--accent); }
+.legend-line-half { border-top-style: dotted; border-top-color: var(--warning); }
+
+/* ---------------------------------------------------------------- zaman cizelgesi */
+
+/*
+  Grafik kendi kutusunda kaliyor. Dar ekranda kucultulmek yerine kaydirilabiliyor:
+  yuz nokta 390 pikselde okunmaz hale gelirdi.
+*/
+.chart-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.chart {
+    display: block;
+    width: 100%;
+    min-width: 640px;
+    height: auto;
+}
+
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-axis { fill: var(--text-secondary); font-size: 12px; }
+
+.chart-threshold { stroke-width: 2; fill: none; }
+.chart-threshold-train { stroke: var(--accent); stroke-dasharray: 8 5; }
+.chart-threshold-half { stroke: var(--warning); stroke-dasharray: 2 4; }
+.chart-threshold-both { stroke: var(--accent-strong); stroke-dasharray: 8 5; }
+
+.chart-line { fill: none; stroke: var(--border-strong); stroke-width: 1.5; }
+.chart-mark { stroke: var(--background); stroke-width: 1; }
+.chart-halo { fill: none; stroke: var(--warning); stroke-width: 2; }
+
+.chart-point { cursor: pointer; }
+.chart-point:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.chart-point:hover .chart-mark { stroke: var(--accent-strong); stroke-width: 2; }
+
+@media (max-width: 520px) {
+    .map-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .tab { padding: 0 var(--space-3); font-size: 0.85rem; }
+}

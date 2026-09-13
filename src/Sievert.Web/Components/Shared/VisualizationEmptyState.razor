@@ -1,0 +1,19 @@
+<div class="empty">
+    <p><strong>@Title</strong></p>
+    <p>@Detail</p>
+    @if (RepositoryId is int id)
+    {
+        <p><a href="repositories/@id">Depo sayfasindan yeni bir skorlama baslatabilirsin</a></p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Detail { get; set; } = string.Empty;
+
+    [Parameter]
+    public int? RepositoryId { get; set; }
+}

@@ -1,0 +1,181 @@
+@*
+    Dosya etkinlik haritasi.
+
+    Treemap DEGIL: butun hucreler ayni buyuklukte. Dosya boyutunu ya da churn'u alanla
+    kodlayip ayni anda rengi endeksle kodlamak, ilk surumde iki boyutlu bir yorum yuku
+    olusturur ve iki kodlamadan hangisinin ne anlattigi karisir (ADR 0026).
+
+    Renk tek bilgi tasiyicisi degil: her hucrede endeks sayi olarak yazili.
+*@
+<div class="row-spread">
+    <div>
+        <h3 style="margin-bottom:var(--space-1)">Dosya etkinlik haritasi</h3>
+        <p class="muted" style="max-width:72ch">
+            Renk, secilen commit penceresinde dosyaya dokunan commit'lerin ortalama goreli
+            risk endeksini gosterir. Statik bulgular bu renge dahil degildir.
+        </p>
+    </div>
+    <VisualizationLegend />
+</div>
+
+<p class="faint">
+    @Display.Count(Map.ConsideredCommitCount) commit incelendi &middot;
+    @Display.Count(Map.FileCountBeforeLimit) dosya bulundu &middot;
+    @Display.Count(Map.ReturnedFileCount) dosya gosteriliyor
+    @if (Map.SourceHeadSha is null)
+    {
+        <text>&middot; kaynak surum kaydi yok</text>
+    }
+</p>
+
+@if (Map.Items.Count == 0)
+{
+    <VisualizationEmptyState Title="Bu pencerede degistirilmis C# dosyasi yok"
+                            Detail="Pencereyi buyutup tekrar deneyebilirsin." />
+}
+else
+{
+    <div class="map-grid">
+        @foreach (FileActivityItem item in Map.Items)
+        {
+            <button type="button"
+                    class="map-cell @(Selected?.RelativePath == item.RelativePath ? "map-cell-open" : string.Empty)"
+                    style="background:@VisualizationScale.CellBackground(item.MeanRiskIndex);color:@VisualizationScale.TextOn(item.MeanRiskIndex)"
+                    aria-label="@Label(item)"
+                    @onclick="() => Toggle(item)">
+                @* Renk kodlamasi bu cubukta; metin her zaman koyu bir zeminin uzerinde. *@
+                <span class="map-bar" aria-hidden="true">
+                    <span style="width:@VisualizationScale.Percent(VisualizationScale.Position(item.MeanRiskIndex));background:@VisualizationScale.Fill(item.MeanRiskIndex)"></span>
+                </span>
+
+                <span class="map-name" title="@item.RelativePath">@Name(item.RelativePath)</span>
+                <span class="map-folder">@Folder(item.RelativePath)</span>
+
+                <span class="map-index">Endeks @Display.Index(item.MeanRiskIndex)</span>
+
+                <span class="map-facts">
+                    @Display.Count(item.TouchCount) dokunus &middot;
+                    @Display.Count(item.TotalChurn) satir &middot;
+                    en yuksek @Display.Index(item.MaxRiskIndex)
+                </span>
+
+                @if (item.StaticFindingCount is int findings and > 0)
+                {
+                    <span class="pill tone-warning map-findings">@findings statik bulgu</span>
+                }
+            </button>
+        }
+    </div>
+
+    @if (Map.Items.Any(item => item.StaticFindingCount is not null))
+    {
+        <p class="faint">
+            Statik bulgu sayilari ayri bir taramadan geliyor ve hucre rengine ya da
+            siralamaya girmiyor.
+        </p>
+    }
+
+    @if (Selected is FileActivityItem open)
+    {
+        <div class="card section" role="region" aria-label="Dosya ayrintisi">
+            <div class="row-spread">
+                <h4 class="mono" style="margin:0;overflow-wrap:anywhere">@open.RelativePath</h4>
+                <button class="btn quiet" type="button" @onclick="() => Selected = null">Kapat</button>
+            </div>
+
+            <dl class="facts" style="margin-top:var(--space-3)">
+                <dt>Ortalama endeks</dt>
+                <dd>@Display.Index(open.MeanRiskIndex)</dd>
+                <dt>En yuksek endeks</dt>
+                <dd>@Display.Index(open.MaxRiskIndex)</dd>
+                <dt>Son dokunusun endeksi</dt>
+                <dd>@Display.Index(open.LatestRiskIndex)</dd>
+                <dt>Dokunus</dt>
+                <dd>@Display.Count(open.TouchCount)</dd>
+                <dt>Eklenen / silinen satir</dt>
+                <dd>+@Display.Count(open.TotalLinesAdded) / -@Display.Count(open.TotalLinesDeleted)</dd>
+                @if (open.StaticFindingCount is int count)
+                {
+                    <dt>Statik bulgu</dt>
+                    <dd>@Display.Count(count) <span class="faint">(renge dahil degil)</span></dd>
+                }
+            </dl>
+
+            <h4 style="margin-top:var(--space-4)">Son dokunuslar</h4>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Commit</th>
+                            <th scope="col">Tarih</th>
+                            <th scope="col" class="wrap">Mesaj</th>
+                            <th scope="col" class="num">Endeks</th>
+                            <th scope="col" class="num">Ham skor</th>
+                            <th scope="col" class="num">+/-</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (FileActivityCommit commit in open.Commits)
+                        {
+                            <tr>
+                                <td><code>@commit.ShortSha</code></td>
+                                <td>@Display.Day(commit.AuthorDateUtc)</td>
+                                <td class="wrap">@commit.MessageSubject</td>
+                                <td class="num mono">@Display.Index(commit.RiskIndex)</td>
+                                <td class="num mono">@Display.Score(commit.RawModelScore)</td>
+                                <td class="num">+@commit.LinesAdded / -@commit.LinesDeleted</td>
+                                <td><a href="repositories/@Map.RepositoryId/commits/@commit.Sha/risk">Risk</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public FileActivityResponse Map { get; set; } = default!;
+
+    private FileActivityItem? Selected { get; set; }
+
+    private void Toggle(FileActivityItem item) =>
+        Selected = Selected?.RelativePath == item.RelativePath ? null : item;
+
+    /// <summary>
+    /// Ekran okuyucu icin tek cumle.
+    ///
+    /// Renk burada hic gecmiyor: sayilar zaten her seyi soyluyor ve rengi kelimeye
+    /// cevirmek ("kirmizi") olculen bir sey degil, bir yorum olurdu.
+    /// </summary>
+    private static string Label(FileActivityItem item) =>
+        $"{item.RelativePath}: ortalama endeks {Display.Index(item.MeanRiskIndex)}, "
+        + $"{item.TouchCount} dokunus, {item.TotalChurn} satir, "
+        + $"en yuksek endeks {Display.Index(item.MaxRiskIndex)}"
+        + (item.StaticFindingCount is int count ? $", {count} statik bulgu" : string.Empty);
+
+    private static string Name(string path) => path.Split('/')[^1];
+
+    /// <summary>
+    /// Klasor yolu; uzunsa bas taraf kisaltiliyor.
+    ///
+    /// Sondaki klasorler korunuyor cunku dosyayi ayirt eden sey o: iki <c>Options.cs</c>
+    /// ancak son bir iki klasorle ayrilabiliyor.
+    /// </summary>
+    private static string Folder(string path)
+    {
+        string[] parts = path.Split('/');
+
+        if (parts.Length <= 1)
+        {
+            return string.Empty;
+        }
+
+        string folder = string.Join('/', parts[..^1]);
+
+        return folder.Length <= 34 ? folder : "..." + folder[^31..];
+    }
+}

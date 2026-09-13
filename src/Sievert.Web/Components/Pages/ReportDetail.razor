@@ -298,11 +298,18 @@ else if (report is ReportResponse ready)
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
 
+    /// <summary>
+    /// Indirme ve manifest adresleri API'nin kokune gore kuruluyor.
+    ///
+    /// Metin birlestirmeyle degil <see cref="Uri"/> ile: taban adres sonunda "/" ile
+    /// bitiyor ve elle birlestirince adres "//api/v1/..." oluyordu. API o adrese 404
+    /// donuyor, yani indirme dugmesi calismiyordu. Gercek tarayicida yakalandi.
+    /// </summary>
     private string Download(ReportResponse ready) =>
-        $"{Options.ApiBaseUrl}/api/v1/reports/{ready.Id}/download";
+        new Uri(Options.ApiBaseUrl, $"api/v1/reports/{ready.Id}/download").ToString();
 
     private string Manifest(ReportResponse ready) =>
-        $"{Options.ApiBaseUrl}/api/v1/reports/{ready.Id}/manifest";
+        new Uri(Options.ApiBaseUrl, $"api/v1/reports/{ready.Id}/manifest").ToString();
 
     private static string Label(string status) => status switch
     {

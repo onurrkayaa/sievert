@@ -196,6 +196,17 @@ public sealed class ReportPageTests : BunitContext
     }
 
     [Fact]
+    public void TheDownloadLinkHasNoDoubleSlash()
+    {
+        // Taban adres "/" ile bitiyor; elle birlestirince adres "//api/v1/..." oluyordu
+        // ve API 404 donuyordu. Gercek tarayicida yakalandi.
+        string markup = RenderDetail(Report(ReportStatus.Ready)).Markup;
+
+        Assert.Contains($"http://127.0.0.1:5000/api/v1/reports/{ReportId}/download", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("5000//api", markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TheDetailPageShowsNoFileSystemPath()
     {
         string markup = RenderDetail(Report(ReportStatus.Ready)).Markup;

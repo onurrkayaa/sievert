@@ -628,6 +628,10 @@ What makes it auditable:
 A partial (cancelled) job can only be reported with an explicit `includePartial=true`,
 and then every section of the PDF says that it covers only the rows that were written.
 
+![Report form](docs/images/asama6/report-form-desktop.png)
+
+![Report detail](docs/images/asama6/report-detail-desktop.png)
+
 An example, produced from the demo data set:
 [`docs/demo/sievert-polly-ornek-rapor.pdf`](docs/demo/sievert-polly-ornek-rapor.pdf)
 (checksum next to it).

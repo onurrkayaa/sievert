@@ -48,3 +48,11 @@ jobs:
       - name: sievert kendi kendini tariyor (tum kurallar)
         continue-on-error: true
         run: dotnet run --project src/Sievert.Cli --no-build -- check . --config .github/sievert-tum-kurallar.json
+
+      # Tek komutluk demo gercekten aciliyor mu: PostgreSQL container'i, migration, demo
+      # verisi, API, panel ve bir PDF raporu. GitHub'in ubuntu kosucusunda Docker var,
+      # o yuzden atlanmiyor; atlansaydi "CI yesil ama demo bozuk" mumkun olurdu.
+      #
+      # Adim CI'i KIRIYOR: demo, bu turun iki teslimatindan biri.
+      - name: tek komutluk demo duman testi
+        run: dotnet run --project tools/Sievert.Demo --no-build -- --smoke-test --no-open

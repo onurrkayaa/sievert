@@ -19,6 +19,13 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4" />
     <PackageVersion Include="Microsoft.ML" Version="5.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <!--
+      QuestPDF: PDF raporu. Cift lisansli; bu proje Community lisansina uc ayri
+      maddeden uygun (bireysel kullanim, ogrenme, OSI onayli acik kaynak). Ayrinti ve
+      kanit: docs/urun/pdf-kutuphanesi-ve-lisans.md. Lisans secimi kodda acik yapiliyor.
+      Font (Lato, OFL) paketin icinde geliyor; repoya font eklenmiyor.
+    -->
+    <PackageVersion Include="QuestPDF" Version="2026.8.0" />
   </ItemGroup>
 
   <ItemGroup Label="Testler">

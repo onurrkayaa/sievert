@@ -188,19 +188,19 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     columns.RelativeColumn();
                 });
 
-                Pair(table, text.CoveredCommits, text.Count(summary.CoveredCommitCount));
-                Pair(table, text.SelectedWindow, text.Count(summary.CommitWindow));
+                Pair(table, text.CoveredCommits, text.Number(summary.CoveredCommitCount));
+                Pair(table, text.SelectedWindow, text.Number(summary.CommitWindow));
                 Pair(table, text.DateRange, summary.FirstCommitUtc is null || summary.LastCommitUtc is null
                     ? "-"
                     : $"{text.Day(summary.FirstCommitUtc.Value)} - {text.Day(summary.LastCommitUtc.Value)}");
                 Pair(table, text.MeanIndex, text.Number(summary.MeanRiskIndex, 1));
                 Pair(table, text.MedianIndex, text.Number(summary.MedianRiskIndex, 1));
                 Pair(table, text.MaximumIndex, text.Number(summary.MaximumRiskIndex, 1));
-                Pair(table, text.DecisionAt05, text.Count(summary.DecisionAt05Count));
+                Pair(table, text.DecisionAt05, text.Number(summary.DecisionAt05Count));
                 Pair(table, text.DecisionAtTrain,
-                    $"{text.Count(summary.DecisionAtTrainCount)} ({text.Number(summary.TrainThreshold, 4)})");
+                    $"{text.Number(summary.DecisionAtTrainCount)} ({text.Number(summary.TrainThreshold, 4)})");
                 Pair(table, text.StaticFindingCount, summary.StaticFindingCount is int count
-                    ? text.Count(count)
+                    ? text.Number(count)
                     : text.NotIncluded);
             });
 
@@ -226,7 +226,7 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     {
                         row.RelativeItem().Text(file.RelativePath).FontSize(8);
                         row.ConstantItem(70).AlignRight().Text(
-                            $"{text.Count(file.TouchCount)} {text.TouchCount.ToLowerInvariant()}").FontSize(8);
+                            $"{text.Number(file.TouchCount)} {text.TouchCount.ToLowerInvariant()}").FontSize(8);
                         row.ConstantItem(60).AlignRight().Text(text.Number(file.MeanRiskIndex, 1)).FontSize(8);
                     });
                 }
@@ -299,7 +299,7 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                 model.Timeline, model.ThresholdIndexAt05, model.ThresholdIndexAtTrain, text));
 
             column.Item().Text(
-                $"{text.Count(model.Timeline.Count)} commit · "
+                $"{text.Number(model.Timeline.Count)} commit · "
                 + $"{text.ThresholdAt05} {text.Number(model.ThresholdIndexAt05, 1)} · "
                 + $"{text.ThresholdAtTrain} {text.Number(model.ThresholdIndexAtTrain, 1)}")
                 .FontSize(8).FontColor(Muted);
@@ -323,7 +323,7 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
 
             column.Item().Text(
                 $"{text.SortedBy}: {model.FileSort} · "
-                + $"{text.Count(model.Files.Count)} / {text.Count(model.FileCountBeforeLimit)} {text.ShownOf}")
+                + $"{text.Number(model.Files.Count)} / {text.Number(model.FileCountBeforeLimit)} {text.ShownOf}")
                 .FontSize(8).FontColor(Muted);
 
             if (model.Files.Count == 0)
@@ -360,12 +360,12 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                 foreach (FileActivityItem file in model.Files)
                 {
                     Cell(table, file.RelativePath, mono: true);
-                    Cell(table, text.Count(file.TouchCount), right: true);
-                    Cell(table, text.Count(file.TotalChurn), right: true);
+                    Cell(table, text.Number(file.TouchCount), right: true);
+                    Cell(table, text.Number(file.TotalChurn), right: true);
                     Cell(table, text.Number(file.MeanRiskIndex, 1), right: true);
                     Cell(table, text.Number(file.MaxRiskIndex, 1), right: true);
                     Cell(table, text.Number(file.LatestRiskIndex, 1), right: true);
-                    Cell(table, file.StaticFindingCount is int count ? text.Count(count) : "-", right: true);
+                    Cell(table, file.StaticFindingCount is int count ? text.Number(count) : "-", right: true);
                 }
             });
 
@@ -432,8 +432,8 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     Cell(table, text.Number(commit.RawModelScore, 4), right: true);
                     Cell(table, commit.DecisionAt05 ? text.Yes : text.No, right: true);
                     Cell(table, commit.DecisionAtTrainThreshold ? text.Yes : text.No, right: true);
-                    Cell(table, text.Count(commit.Churn), right: true);
-                    Cell(table, text.Count(commit.CsFilesChanged), right: true);
+                    Cell(table, text.Number(commit.Churn), right: true);
+                    Cell(table, text.Number(commit.CsFilesChanged), right: true);
                 }
             });
 
@@ -482,9 +482,9 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                 Pair(table, text.SourceHead, model.Static.SourceHeadSha ?? "-");
                 Pair(table, text.TreeState, model.Static.SourceTreeState ?? "-");
                 Pair(table, text.Verified, model.Static.SourceVerified ? text.Yes : text.No);
-                Pair(table, text.Findings, text.Count(model.Static.FindingCount));
-                Pair(table, text.Suppressed, text.Count(model.Static.SuppressedCount));
-                Pair(table, text.Exemptions, text.Count(model.Static.ExemptionCount));
+                Pair(table, text.Findings, text.Number(model.Static.FindingCount));
+                Pair(table, text.Suppressed, text.Number(model.Static.SuppressedCount));
+                Pair(table, text.Exemptions, text.Number(model.Static.ExemptionCount));
             });
 
             if (model.Static.RuleCounts.Count > 0)
@@ -492,11 +492,11 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                 column.Item().Text(text.RuleDistribution).SemiBold().FontSize(9);
 
                 column.Item().Text(string.Join(" · ", model.Static.RuleCounts
-                    .Select(rule => $"{rule.RuleCode} {text.Count(rule.Count)}")))
+                    .Select(rule => $"{rule.RuleCode} {text.Number(rule.Count)}")))
                     .FontSize(8);
 
                 column.Item().Text(string.Join(" · ", model.Static.SeverityCounts
-                    .Select(severity => $"{severity.Severity} {text.Count(severity.Count)}")))
+                    .Select(severity => $"{severity.Severity} {text.Number(severity.Count)}")))
                     .FontSize(8).FontColor(Muted);
             }
 
@@ -527,7 +527,7 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                         Cell(table, finding.RuleCode, mono: true);
                         Cell(table, finding.Severity);
                         Cell(table, finding.RelativePath, mono: true);
-                        Cell(table, text.Count(finding.Line), right: true);
+                        Cell(table, text.Number(finding.Line), right: true);
                         Cell(table, finding.Message);
                     }
                 });

@@ -420,6 +420,7 @@ public static class ReportPerformanceCommand
                 continue;
             }
 
+            // sievert:disable SV004 uc depo icin uc sorgu; olcum hazirligi, sicak yol degil
             Guid? scan = context.AnalysisJobs
                 .AsNoTracking()
                 .Where(job => job.RepositoryId == risk.RepositoryId

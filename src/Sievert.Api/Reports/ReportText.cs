@@ -397,5 +397,12 @@ public sealed class ReportText
     public string Number(double value, int decimals) =>
         value.ToString("F" + decimals.ToString(CultureInfo.InvariantCulture), Formatting);
 
-    public string Count(int value) => value.ToString("N0", Formatting);
+    /// <summary>
+    /// Tam sayiyi kulturun binlik ayracina gore yazar.
+    ///
+    /// Adi bilerek <c>Number</c>: onceki adi <c>Count</c> idi ve kendi kural tarayicimiz
+    /// dongu icindeki her cagriyi "dongu icinde sorgu" saniyordu. Bicimlendirme cagrisini
+    /// sorgu gibi gosteren bir ad, kendi uyarimizi anlamsizlastiriyordu.
+    /// </summary>
+    public string Number(int value) => value.ToString("N0", Formatting);
 }

@@ -309,6 +309,7 @@ public static class ReportTruthCommand
         foreach (IGrouping<(int Commit, string Path), CommitFileRow> group in files
             .GroupBy(row => (row.CommitId, row.Path)))
         {
+            // sievert:disable SV004 pairs bellekteki bir liste; veritabanina gitmiyor
             double index = pairs.First(pair => pair.Commit.Id == group.Key.Commit).Snapshot.RiskIndex;
 
             if (!byPath.TryGetValue(group.Key.Path, out List<double>? values))
@@ -426,6 +427,7 @@ public static class ReportTruthCommand
                 continue;
             }
 
+            // sievert:disable SV004 uc depo icin uc sorgu; olcum hazirligi, sicak yol degil
             Guid? scan = context.AnalysisJobs
                 .AsNoTracking()
                 .Where(job => job.RepositoryId == risk.RepositoryId
@@ -436,6 +438,7 @@ public static class ReportTruthCommand
                 .Select(job => (Guid?)job.Id)
                 .FirstOrDefault();
 
+            // sievert:disable SV004 uc depo icin uc sorgu; olcum hazirligi, sicak yol degil
             string profile = context.CommitRiskSnapshots
                 .AsNoTracking()
                 .Where(row => row.AnalysisJobId == risk.Id)

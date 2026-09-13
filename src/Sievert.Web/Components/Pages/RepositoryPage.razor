@@ -380,8 +380,10 @@ else if (detail is not null)
         // etkilesimli asamada calisiyor; on-islemede cekmek bosa istek olurdu.
         if (RendererInfo.IsInteractive)
         {
+            // Durum suzgeci YOK: iptal edilmis ama satir yazmis bir is de secilebilmeli.
+            // Varsayilan yine tamamlanmis is; kismi olan yalnizca acikca seciliyor.
             riskJobs = (await Api.AnalysesAsync(
-                RepositoryId, 1, 50, "succeeded", "risk-score-all", closing.Token)).Value;
+                RepositoryId, 1, 50, null, "risk-score-all", closing.Token)).Value;
 
             scanJobs = (await Api.AnalysesAsync(
                 RepositoryId, 1, 50, "succeeded", "static-scan", closing.Token)).Value;

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 using DotNet.Testcontainers.Builders;
@@ -345,6 +346,14 @@ public static class DemoOrchestrator
         }
     }
 
+    /// <summary>
+    /// Kapatma isaretini bekler.
+    ///
+    /// Yalniz Ctrl+C degil: <c>SIGTERM</c> ve <c>SIGQUIT</c> de yakalaniyor. Sebep somut -
+    /// arac cogu zaman <c>dotnet run</c> altinda kosuyor ve disaridan gonderilen bir
+    /// sonlandirma once o sarmalayiciya gidiyor; yalniz Ctrl+C dinlenseydi container
+    /// ortada kalirdi. Ilk denemede tam bu oldu.
+    /// </summary>
     private static async Task WaitForInterruptAsync(CancellationToken cancellation)
     {
         TaskCompletionSource interrupted = new();
@@ -356,6 +365,28 @@ public static class DemoOrchestrator
         };
 
         Console.CancelKeyPress += handler;
+
+        // Isaret yakalanip iptal ediliyor: surec hemen olmesin, temizlik kosabilsin.
+        using PosixSignalRegistration term = PosixSignalRegistration.Create(
+            PosixSignal.SIGTERM, signal =>
+            {
+                signal.Cancel = true;
+                interrupted.TrySetResult();
+            });
+
+        using PosixSignalRegistration quit = PosixSignalRegistration.Create(
+            PosixSignal.SIGQUIT, signal =>
+            {
+                signal.Cancel = true;
+                interrupted.TrySetResult();
+            });
+
+        using PosixSignalRegistration interrupt = PosixSignalRegistration.Create(
+            PosixSignal.SIGINT, signal =>
+            {
+                signal.Cancel = true;
+                interrupted.TrySetResult();
+            });
 
         try
         {

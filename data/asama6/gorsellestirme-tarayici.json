@@ -1,0 +1,77 @@
+{
+  "aciklama": "Asama 6 Adim 5: gercek tarayicida olculen sayilar. Playwright ile kosuldu, sayilar tarayicinin Performance API'sinden okundu. Kosullar docs/olcumler/asama6-gorsellestirme.md bolum 1'de.",
+  "kod": "d397b38",
+  "tarih": "2026-09-13",
+  "sayfa": "sharex-full, tamamlanmis risk isi 01a099a8-a6fe-7b75-9a6b-bf22761fb277",
+  "olculenler": {
+    "fcp": "first-contentful-paint, navigationStart'a gore ms",
+    "hazir": "harita icin .map-grid, zaman cizelgesi icin svg.chart belgeye girdigi an, ms",
+    "htmlKb": "navigation entry transferSize",
+    "varlikKb": "resource entry transferSize toplami (HTML haric)"
+  },
+  "soguk": {
+    "aciklama": "Her kosu yeni tarayici baglami; onbellek bos.",
+    "harita": {
+      "fcp": [128, 120, 108, 120, 124],
+      "hazir": [172.6, 184.8, 178.9, 158.7, 163.2],
+      "htmlKb": 42.7,
+      "varlikKb": 54.2,
+      "agdanGelenVarlik": 7,
+      "onbellektenGelenVarlik": 1
+    },
+    "zaman": {
+      "fcp": [112, 116, 120, 112, 128],
+      "hazir": [127.9, 126.3, 129.7, 121.8, 144.6],
+      "htmlKb": 42.7,
+      "varlikKb": 54.2,
+      "agdanGelenVarlik": 7,
+      "onbellektenGelenVarlik": 1
+    }
+  },
+  "isinmis": {
+    "aciklama": "Tek baglam; ayni sayfa art arda aciliyor, varliklar onbellekten geliyor.",
+    "harita": {
+      "fcp": [72, 76, 60, 60, 76],
+      "hazir": [109.0, 113.2, 93.7, 94.9, 108.1],
+      "htmlKb": 42.7,
+      "varlikKb": 0.9,
+      "agdanGelenVarlik": 2,
+      "onbellektenGelenVarlik": 5
+    },
+    "zaman": {
+      "fcp": [76, 64, 64, 64, 72],
+      "hazir": [93.5, 86.8, 72.2, 72.8, 72.4],
+      "htmlKb": 42.7,
+      "varlikKb": 0.9,
+      "agdanGelenVarlik": 2,
+      "onbellektenGelenVarlik": 5
+    }
+  },
+  "apiIstekSayisi": {
+    "aciklama": "Panelin API'ye attigi istekler, panelin kendi gunlugundeki 'Start processing HTTP request' satirlarindan sayildi. Eski surum aea7a59 (Adim 4 sonu) Release yayimi, yeni surum bu turun yayimi; ikisi de ayni API'ye bagli.",
+    "genelBakis": { "eski": 14, "yeni": 8 },
+    "depoGenel": { "eski": 8, "yeni": 7 },
+    "harita": { "eski": null, "yeni": 8 },
+    "zaman": { "eski": null, "yeni": 8 }
+  },
+  "kaliciDurum": {
+    "aciklama": "Sayfa HTML'indeki Blazor-Server-Component-State isaretinin uzunlugu. Devre acilirken bu metin istemciden sunucuya gidiyor; sinir 32 KB.",
+    "birim": "base64 karakter",
+    "depoGenel": 19036,
+    "harita": 19036,
+    "zaman": 19036
+  },
+  "gorunumler": [
+    { "sayfa": "harita", "genislik": 1440, "sayfaTasmasi": 0, "konsolHatasi": 0, "basarisizIstek": 0 },
+    { "sayfa": "harita", "genislik": 1024, "sayfaTasmasi": 0, "konsolHatasi": 0, "basarisizIstek": 0 },
+    { "sayfa": "harita", "genislik": 390, "sayfaTasmasi": 0, "konsolHatasi": 0, "basarisizIstek": 0 },
+    { "sayfa": "zaman", "genislik": 1440, "sayfaTasmasi": 0, "kutuIcerik": 1123, "kutuGenislik": 1123, "konsolHatasi": 0, "basarisizIstek": 0 },
+    { "sayfa": "zaman", "genislik": 1024, "sayfaTasmasi": 0, "kutuIcerik": 707, "kutuGenislik": 707, "konsolHatasi": 0, "basarisizIstek": 0 },
+    { "sayfa": "zaman", "genislik": 390, "sayfaTasmasi": 0, "kutuIcerik": 656, "kutuGenislik": 341, "konsolHatasi": 0, "basarisizIstek": 0 }
+  ],
+  "sorguDegisimi": {
+    "aciklama": "Harita sayfasinda pencere degistirilip ayni sorguya geri donuldu; her sorgu icin panel gunlugunde ayri bir file-activity istegi sayildi.",
+    "adimlar": ["ilk yukleme", "pencere 1000", "geri (ilk sorgu)"],
+    "fileActivityIstegi": 3
+  }
+}

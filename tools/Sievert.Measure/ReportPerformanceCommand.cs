@@ -21,6 +21,16 @@ public static class ReportPerformanceCommand
 {
     private const string ApiUrl = "http://127.0.0.1:5192";
 
+    /// <summary>
+    /// Bu kosuya ozel damga.
+    ///
+    /// Tekrar anahtarlari buna baglaniyor: sabit bir anahtar, ikinci kosuda onceki
+    /// kosunun raporunu geri getiriyordu ve dosyasi silinmis oldugu icin olcum
+    /// patliyordu.
+    /// </summary>
+    private static readonly string Stamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss",
+        System.Globalization.CultureInfo.InvariantCulture);
+
     // sievert:disable SV006 komut satirindan tek sefer kosuyor; iptali Ctrl+C yapiyor
     public static async Task<int> RunAsync(SievertContext context, string[] args)
     {
@@ -114,7 +124,7 @@ public static class ReportPerformanceCommand
             }),
         };
 
-        request.Headers.TryAddWithoutValidation("Idempotency-Key", $"olcum-{target.Id}-{run}");
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", $"olcum-{Stamp}-{target.Id}-{run}");
 
         using HttpResponseMessage accepted = await client.SendAsync(request);
 
@@ -190,14 +200,14 @@ public static class ReportPerformanceCommand
         };
 
         (HttpStatusCode firstStatus, Guid firstId, double firstMs) = await PostAsync(
-            client, target, body, "olcum-idempotent");
+            client, target, body, $"olcum-{Stamp}-idempotent");
 
         await WaitForReadyAsync(client, firstId);
 
         byte[] first = await client.GetByteArrayAsync($"/api/v1/reports/{firstId}/download");
 
         (HttpStatusCode secondStatus, Guid secondId, double secondMs) = await PostAsync(
-            client, target, body, "olcum-idempotent");
+            client, target, body, $"olcum-{Stamp}-idempotent");
 
         byte[] second = await client.GetByteArrayAsync($"/api/v1/reports/{secondId}/download");
 
@@ -224,7 +234,7 @@ public static class ReportPerformanceCommand
             client,
             target,
             new { riskAnalysisJobId = target.RiskJobId, culture = "tr-TR" },
-            "olcum-bozulma");
+            $"olcum-{Stamp}-bozulma");
 
         await WaitForReadyAsync(client, reportId);
 
@@ -270,7 +280,7 @@ public static class ReportPerformanceCommand
             client,
             target,
             new { riskAnalysisJobId = target.RiskJobId, culture = "en-US" },
-            "olcum-iptal");
+            $"olcum-{Stamp}-iptal");
 
         JsonElement report = JsonDocument
             .Parse(await client.GetStringAsync($"/api/v1/reports/{reportId}")).RootElement;

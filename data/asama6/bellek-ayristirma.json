@@ -1,0 +1,401 @@
+{
+  "kod": "1600424",
+  "uretildi": "2026-09-13T06:58:50.799671+00:00",
+  "kosullar": {
+    "derleme": "Debug",
+    "esZamanlilik": 1,
+    "ornekAraligiMs": 50,
+    "saglikAraligiMs": 500,
+    "not": "Her kosu taze bir API sureci. Toplama zorlanmadi, GC ayari degistirilmedi."
+  },
+  "modelYuklemesi": [
+    {
+      "Repository": "polly-full",
+      "ColdWorkingSetBytes": 174276608,
+      "WarmWorkingSetBytes": 191086592,
+      "ColdManagedHeapBytes": 14677720,
+      "WarmManagedHeapBytes": 24320800,
+      "DurationMs": 159.8
+    },
+    {
+      "Repository": "jellyfin-full",
+      "ColdWorkingSetBytes": 174309376,
+      "WarmWorkingSetBytes": 191234048,
+      "ColdManagedHeapBytes": 14670600,
+      "WarmManagedHeapBytes": 24301520,
+      "DurationMs": 167.4
+    },
+    {
+      "Repository": "sharex-full",
+      "ColdWorkingSetBytes": 174227456,
+      "WarmWorkingSetBytes": 191037440,
+      "ColdManagedHeapBytes": 14674112,
+      "WarmManagedHeapBytes": 24319280,
+      "DurationMs": 148.9
+    }
+  ],
+  "kosular": [
+    {
+      "Repository": "polly-full",
+      "Kind": "static-scan",
+      "Status": "succeeded",
+      "ProcessedItems": 797,
+      "ResultCount": 203,
+      "DurationMs": 2607.2,
+      "FirstSampleBytes": 688128,
+      "BaselineBytes": 172900352,
+      "DatabaseReadyBytes": 174342144,
+      "PeakSampledBytes": 302022656,
+      "TerminalBytes": 294092800,
+      "FiveSecondsLaterBytes": 267075584,
+      "TerminalManagedHeapBytes": 130429968,
+      "FiveSecondsLaterManagedHeapBytes": 130659216,
+      "Gen0Collections": 1,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "MaxChangeTrackerEntries": 203,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": []
+    },
+    {
+      "Repository": "jellyfin-full",
+      "Kind": "static-scan",
+      "Status": "succeeded",
+      "ProcessedItems": 2184,
+      "ResultCount": 687,
+      "DurationMs": 6153.2,
+      "FirstSampleBytes": 704512,
+      "BaselineBytes": 168476672,
+      "DatabaseReadyBytes": 174342144,
+      "PeakSampledBytes": 480886784,
+      "TerminalBytes": 472563712,
+      "FiveSecondsLaterBytes": 480886784,
+      "TerminalManagedHeapBytes": 349357784,
+      "FiveSecondsLaterManagedHeapBytes": 349579832,
+      "Gen0Collections": 2,
+      "Gen1Collections": 1,
+      "Gen2Collections": 1,
+      "MaxChangeTrackerEntries": 500,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": [
+        {
+          "Items": 1000,
+          "WorkingSetBytes": 387203072,
+          "ManagedHeapBytes": 265398544
+        },
+        {
+          "Items": 2000,
+          "WorkingSetBytes": 451461120,
+          "ManagedHeapBytes": 329270056
+        }
+      ]
+    },
+    {
+      "Repository": "sharex-full",
+      "Kind": "static-scan",
+      "Status": "succeeded",
+      "ProcessedItems": 1138,
+      "ResultCount": 248,
+      "DurationMs": 3162.7,
+      "FirstSampleBytes": 688128,
+      "BaselineBytes": 173326336,
+      "DatabaseReadyBytes": 174194688,
+      "PeakSampledBytes": 378814464,
+      "TerminalBytes": 375865344,
+      "FiveSecondsLaterBytes": 304513024,
+      "TerminalManagedHeapBytes": 221045872,
+      "FiveSecondsLaterManagedHeapBytes": 221276144,
+      "Gen0Collections": 1,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "MaxChangeTrackerEntries": 248,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": [
+        {
+          "Items": 1000,
+          "WorkingSetBytes": 371130368,
+          "ManagedHeapBytes": 216086080
+        }
+      ]
+    },
+    {
+      "Repository": "polly-full",
+      "Kind": "risk-score-all",
+      "Status": "succeeded",
+      "ProcessedItems": 2759,
+      "ResultCount": 2759,
+      "DurationMs": 1492,
+      "FirstSampleBytes": 671744,
+      "BaselineBytes": 168247296,
+      "DatabaseReadyBytes": 174178304,
+      "PeakSampledBytes": 429408256,
+      "TerminalBytes": 423215104,
+      "FiveSecondsLaterBytes": 429670400,
+      "TerminalManagedHeapBytes": 243858968,
+      "FiveSecondsLaterManagedHeapBytes": 244096440,
+      "Gen0Collections": 1,
+      "Gen1Collections": 0,
+      "Gen2Collections": 0,
+      "MaxChangeTrackerEntries": 250,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": [
+        {
+          "Items": 1000,
+          "WorkingSetBytes": 252346368,
+          "ManagedHeapBytes": 78630952
+        },
+        {
+          "Items": 2000,
+          "WorkingSetBytes": 322289664,
+          "ManagedHeapBytes": 134186448
+        }
+      ]
+    },
+    {
+      "Repository": "jellyfin-full",
+      "Kind": "risk-score-all",
+      "Status": "succeeded",
+      "ProcessedItems": 22917,
+      "ResultCount": 22917,
+      "DurationMs": 10393.6,
+      "FirstSampleBytes": 720896,
+      "BaselineBytes": 168509440,
+      "DatabaseReadyBytes": 174358528,
+      "PeakSampledBytes": 509722624,
+      "TerminalBytes": 316833792,
+      "FiveSecondsLaterBytes": 317308928,
+      "TerminalManagedHeapBytes": 55363544,
+      "FiveSecondsLaterManagedHeapBytes": 55593776,
+      "Gen0Collections": 21,
+      "Gen1Collections": 11,
+      "Gen2Collections": 4,
+      "MaxChangeTrackerEntries": 250,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": [
+        {
+          "Items": 1000,
+          "WorkingSetBytes": 252477440,
+          "ManagedHeapBytes": 78603064
+        },
+        {
+          "Items": 2000,
+          "WorkingSetBytes": 330203136,
+          "ManagedHeapBytes": 141377560
+        },
+        {
+          "Items": 3000,
+          "WorkingSetBytes": 426688512,
+          "ManagedHeapBytes": 245477056
+        },
+        {
+          "Items": 4000,
+          "WorkingSetBytes": 506724352,
+          "ManagedHeapBytes": 77568336
+        },
+        {
+          "Items": 5000,
+          "WorkingSetBytes": 505921536,
+          "ManagedHeapBytes": 70298976
+        },
+        {
+          "Items": 6000,
+          "WorkingSetBytes": 472858624,
+          "ManagedHeapBytes": 246888136
+        },
+        {
+          "Items": 7000,
+          "WorkingSetBytes": 459866112,
+          "ManagedHeapBytes": 307311888
+        },
+        {
+          "Items": 8000,
+          "WorkingSetBytes": 473137152,
+          "ManagedHeapBytes": 161090320
+        },
+        {
+          "Items": 9000,
+          "WorkingSetBytes": 478134272,
+          "ManagedHeapBytes": 240356144
+        },
+        {
+          "Items": 10000,
+          "WorkingSetBytes": 484753408,
+          "ManagedHeapBytes": 140538368
+        },
+        {
+          "Items": 11000,
+          "WorkingSetBytes": 484868096,
+          "ManagedHeapBytes": 157747392
+        },
+        {
+          "Items": 12000,
+          "WorkingSetBytes": 484868096,
+          "ManagedHeapBytes": 157747392
+        },
+        {
+          "Items": 13000,
+          "WorkingSetBytes": 482361344,
+          "ManagedHeapBytes": 133802328
+        },
+        {
+          "Items": 14000,
+          "WorkingSetBytes": 485048320,
+          "ManagedHeapBytes": 115138392
+        },
+        {
+          "Items": 15000,
+          "WorkingSetBytes": 485048320,
+          "ManagedHeapBytes": 115138392
+        },
+        {
+          "Items": 16000,
+          "WorkingSetBytes": 487424000,
+          "ManagedHeapBytes": 89852240
+        },
+        {
+          "Items": 17000,
+          "WorkingSetBytes": 483573760,
+          "ManagedHeapBytes": 53647352
+        },
+        {
+          "Items": 18000,
+          "WorkingSetBytes": 483573760,
+          "ManagedHeapBytes": 53647352
+        },
+        {
+          "Items": 19000,
+          "WorkingSetBytes": 439336960,
+          "ManagedHeapBytes": 129302232
+        },
+        {
+          "Items": 20000,
+          "WorkingSetBytes": 362528768,
+          "ManagedHeapBytes": 126836072
+        },
+        {
+          "Items": 21000,
+          "WorkingSetBytes": 333037568,
+          "ManagedHeapBytes": 119462936
+        },
+        {
+          "Items": 22000,
+          "WorkingSetBytes": 333037568,
+          "ManagedHeapBytes": 119462936
+        }
+      ]
+    },
+    {
+      "Repository": "sharex-full",
+      "Kind": "risk-score-all",
+      "Status": "succeeded",
+      "ProcessedItems": 8490,
+      "ResultCount": 8490,
+      "DurationMs": 4736.1,
+      "FirstSampleBytes": 655360,
+      "BaselineBytes": 168181760,
+      "DatabaseReadyBytes": 174096384,
+      "PeakSampledBytes": 528973824,
+      "TerminalBytes": 522567680,
+      "FiveSecondsLaterBytes": 528990208,
+      "TerminalManagedHeapBytes": 183363104,
+      "FiveSecondsLaterManagedHeapBytes": 183593304,
+      "Gen0Collections": 4,
+      "Gen1Collections": 2,
+      "Gen2Collections": 1,
+      "MaxChangeTrackerEntries": 250,
+      "MaxChangeTrackerEntriesAfterClear": 0,
+      "Trend": [
+        {
+          "Items": 1000,
+          "WorkingSetBytes": 252510208,
+          "ManagedHeapBytes": 78586256
+        },
+        {
+          "Items": 2000,
+          "WorkingSetBytes": 328761344,
+          "ManagedHeapBytes": 141067712
+        },
+        {
+          "Items": 3000,
+          "WorkingSetBytes": 420282368,
+          "ManagedHeapBytes": 239724328
+        },
+        {
+          "Items": 4000,
+          "WorkingSetBytes": 508231680,
+          "ManagedHeapBytes": 77787672
+        },
+        {
+          "Items": 5000,
+          "WorkingSetBytes": 507346944,
+          "ManagedHeapBytes": 63866088
+        },
+        {
+          "Items": 6000,
+          "WorkingSetBytes": 508788736,
+          "ManagedHeapBytes": 162521880
+        },
+        {
+          "Items": 7000,
+          "WorkingSetBytes": 512147456,
+          "ManagedHeapBytes": 246110336
+        },
+        {
+          "Items": 8000,
+          "WorkingSetBytes": 514457600,
+          "ManagedHeapBytes": 316998120
+        }
+      ]
+    }
+  ],
+  "esZamanlilik": {
+    "bir": {
+      "WorkerConcurrency": 1,
+      "WallClockMs": 5940.5,
+      "Jobs": [
+        {
+          "RepositoryId": 2,
+          "Status": "succeeded",
+          "ResultCount": 2759,
+          "DurationMs": 1501.2,
+          "ErrorCode": null
+        },
+        {
+          "RepositoryId": 3,
+          "Status": "succeeded",
+          "ResultCount": 8490,
+          "DurationMs": 4268.6,
+          "ErrorCode": null
+        }
+      ],
+      "BaselineBytes": 174391296,
+      "PeakSampledBytes": 550240256,
+      "TerminalBytes": 546832384,
+      "PeakDatabaseConnections": 5
+    },
+    "iki": {
+      "WorkerConcurrency": 2,
+      "WallClockMs": 4688.8,
+      "Jobs": [
+        {
+          "RepositoryId": 2,
+          "Status": "succeeded",
+          "ResultCount": 2759,
+          "DurationMs": 1466.9,
+          "ErrorCode": null
+        },
+        {
+          "RepositoryId": 3,
+          "Status": "succeeded",
+          "ResultCount": 8490,
+          "DurationMs": 4521.9,
+          "ErrorCode": null
+        }
+      ],
+      "BaselineBytes": 174473216,
+      "PeakSampledBytes": 550305792,
+      "TerminalBytes": 549027840,
+      "PeakDatabaseConnections": 6
+    }
+  }
+}

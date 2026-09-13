@@ -1,3 +1,4 @@
+using Sievert.Contracts;
 using Sievert.Data;
 
 namespace Sievert.Api.Endpoints;

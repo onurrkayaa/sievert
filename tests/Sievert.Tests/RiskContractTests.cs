@@ -1,5 +1,6 @@
 using Sievert.Api;
 using Sievert.Api.Endpoints;
+using Sievert.Contracts;
 
 namespace Sievert.Tests;
 

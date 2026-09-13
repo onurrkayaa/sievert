@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Sievert.Api;
+namespace Sievert.Contracts;
 
 /// <summary>Is baslatma istegi. Dosya sistemi yolu ALMIYOR; yol depo kaydindan geliyor.</summary>
 /// <param name="Kind"><c>static-scan</c> ya da <c>risk-score-all</c>.</param>

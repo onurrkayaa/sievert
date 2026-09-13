@@ -1,4 +1,4 @@
-namespace Sievert.Api;
+namespace Sievert.Contracts;
 
 /// <summary>
 /// Risk cevabindaki uyari kodlari ve karsilik gelen aciklamalar.

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <!--
+    Bu projenin hicbir paket referansi yok ve olmayacak.
+
+    Sebep: API ile panel arasindaki sozlesme burada duruyor ve iki taraf da bunu
+    okuyor. Buraya ASP.NET, EF Core ya da ML.NET girerse panel dolayli olarak
+    veritabanina ve modele baglanir; o zaman "panel API'den okuyor, kendi hesabini
+    yapmiyor" cumlesi derleyici tarafindan degil, yalnizca iyi niyetle korunur.
+
+    Veritabani varliklari, DbContext, model nesneleri ve dosya yollari buraya
+    KONMAZ.
+  -->
+
+</Project>

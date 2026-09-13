@@ -3,6 +3,7 @@ using System.Text.Json;
 using Sievert.Analysis;
 using Sievert.Api;
 using Sievert.Api.Analysis;
+using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Data.Entities;
 using Sievert.Mining;

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Sievert.Api.Analysis;
 
+using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Data.Entities;
 using Sievert.Modeling;

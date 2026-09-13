@@ -3,6 +3,7 @@
     <Project Path="src/Sievert.Analysis/Sievert.Analysis.csproj" />
     <Project Path="src/Sievert.Api/Sievert.Api.csproj" />
     <Project Path="src/Sievert.Cli/Sievert.Cli.csproj" />
+    <Project Path="src/Sievert.Contracts/Sievert.Contracts.csproj" />
     <Project Path="src/Sievert.Core/Sievert.Core.csproj" />
     <Project Path="src/Sievert.Data/Sievert.Data.csproj" />
     <Project Path="src/Sievert.Mining/Sievert.Mining.csproj" />

@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sievert.Analysis\Sievert.Analysis.csproj" />
+    <ProjectReference Include="..\Sievert.Contracts\Sievert.Contracts.csproj" />
     <ProjectReference Include="..\Sievert.Data\Sievert.Data.csproj" />
     <ProjectReference Include="..\Sievert.Mining\Sievert.Mining.csproj" />
     <ProjectReference Include="..\Sievert.Modeling\Sievert.Modeling.csproj" />

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 
+using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Data.Entities;
 

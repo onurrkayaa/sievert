@@ -1,4 +1,4 @@
-namespace Sievert.Api;
+namespace Sievert.Contracts;
 
 /// <summary>
 /// Makine tarafindan okunabilir hata kodlari. Cevaptaki serbest metin degisebilir,

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Sievert.Api;
 using Sievert.Api.Analysis;
 using Sievert.Api.Endpoints;
+using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Modeling;
 

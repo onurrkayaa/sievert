@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
 using Sievert.Analysis;
+using Sievert.Contracts;
 using Sievert.Core.Rules;
 using Sievert.Data;
 using Sievert.Data.Entities;

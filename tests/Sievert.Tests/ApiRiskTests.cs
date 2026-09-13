@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
+using Sievert.Contracts;
 using Sievert.Data;
 
 namespace Sievert.Tests;

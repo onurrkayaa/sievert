@@ -2,6 +2,7 @@ using System.Text.Json;
 
 using Microsoft.EntityFrameworkCore;
 
+using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Data.Entities;
 using Sievert.Modeling;

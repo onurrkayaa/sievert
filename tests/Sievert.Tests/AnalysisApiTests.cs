@@ -4,6 +4,7 @@ using System.Text.Json;
 
 using Sievert.Analysis;
 using Sievert.Api;
+using Sievert.Contracts;
 using Sievert.Core.Rules;
 using Sievert.Data;
 using Sievert.Data.Entities;

@@ -15,7 +15,6 @@ public sealed class AnalysisJobTransitionTests
 
         data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Running);
         data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Canceled);
-        data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Failed);
         data.Add(AnalysisJobStatus.Running, AnalysisJobStatus.Succeeded);
         data.Add(AnalysisJobStatus.Running, AnalysisJobStatus.Failed);
         data.Add(AnalysisJobStatus.Running, AnalysisJobStatus.Canceled);
@@ -43,6 +42,11 @@ public sealed class AnalysisJobTransitionTests
 
         // Kuyruktan dogrudan basariya gidilemez: once running olmali.
         data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Succeeded);
+
+        // Kuyruktaki is basarisiz da yapilamaz. Adim 3'te bu gecis listedeydi ama hicbir
+        // yerden cagrilmiyordu; cagiran yeri olmayan bir izin, hic denenmemis bir isi
+        // denenmis gostermenin acik kapisi.
+        data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Failed);
         data.Add(AnalysisJobStatus.Queued, AnalysisJobStatus.Queued);
         data.Add(AnalysisJobStatus.Running, AnalysisJobStatus.Queued);
         data.Add(AnalysisJobStatus.Running, AnalysisJobStatus.Running);

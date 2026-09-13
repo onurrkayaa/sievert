@@ -3,6 +3,13 @@ namespace Sievert.Api;
 /// <summary>
 /// Makine tarafindan okunabilir hata kodlari. Cevaptaki serbest metin degisebilir,
 /// bu kodlar degismez; istemci koda gore dallanir.
+///
+/// Burada duran her kod bir <c>ProblemDetails</c> cevabinda cikabiliyor. Adim 3'te
+/// <c>REMOTE_ACCESS_NOT_ALLOWED</c> da bu listedeydi ama o bir HTTP cevabi degil:
+/// acilista, ilk istek gelmeden once verilen bir ret. Hicbir zaman
+/// <c>ProblemDetails</c> olarak donemeyecek bir kodu hata katalogunda tutmak, istemciye
+/// olmayan bir cevabi bekletmek olurdu; kod <see cref="RemoteAccessGuard"/> tarafina
+/// tasindi.
 /// </summary>
 public static class ApiError
 {
@@ -80,9 +87,6 @@ public static class ApiError
 
     /// <summary>Yazilan satir sayisi beklenenle ayni degil; is basarili sayilmiyor.</summary>
     public const string ResultCountMismatch = "RESULT_COUNT_MISMATCH";
-
-    /// <summary>Kimlik dogrulama olmadan loopback disinda dinleme istegi.</summary>
-    public const string RemoteAccessNotAllowed = "REMOTE_ACCESS_NOT_ALLOWED";
 
     // Kaynak durumu (Asama 6 Adim 3b).
 

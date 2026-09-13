@@ -251,6 +251,51 @@ public sealed class AnalysisJobStoreTests(PostgresFixture postgres)
         Assert.Equal(AnalysisJobStatus.Queued, (await store.FindAsync(id))!.Status);
     }
 
+    /// <summary>
+    /// Kuyruktaki bir is basarisiz YAPILAMAZ. Hic denenmemis bir isi basarisiz yazmak,
+    /// denenmis gibi gostermek olurdu; altyapida bir sorun varsa is kuyrukta kaliyor ve
+    /// bir sonraki kurtarma onu geri aliyor.
+    /// </summary>
+    [DockerFact]
+    public async Task AQueuedJobCannotBeFailedByTheStore()
+    {
+        (AnalysisJobStore store, int repository, string _) = Open();
+
+        Guid id = (await store.CreateAsync(repository, AnalysisJobKind.StaticScan, null, Now)).Job!.Id;
+
+        Assert.False(AnalysisJobTransitions.IsAllowed(AnalysisJobStatus.Queued, AnalysisJobStatus.Failed));
+        Assert.False(await store.CompleteAsync(id, AnalysisJobStatus.Failed, 0, 0, "X", "y", Now));
+
+        AnalysisJobRow job = (await store.FindAsync(id))!;
+
+        Assert.Equal(AnalysisJobStatus.Queued, job.Status);
+        Assert.Null(job.ErrorCode);
+        Assert.NotNull(job.ActiveDeduplicationKey);
+    }
+
+    /// <summary>
+    /// Kurtarma kuyruktaki isi yalniz yeniden kuyruga aliyor; durumunu degistirmiyor.
+    /// Kuyrukta bekleyen bir isin surec kapandi diye basarisiz olmasi icin bir sebep yok.
+    /// </summary>
+    [DockerFact]
+    public async Task RecoveryLeavesAQueuedJobQueued()
+    {
+        (AnalysisJobStore store, int repository, string _) = Open();
+
+        Guid id = (await store.CreateAsync(repository, AnalysisJobKind.StaticScan, null, Now)).Job!.Id;
+
+        RecoveryReport report = await store.RecoverAsync(Now.AddHours(1));
+
+        Assert.Equal([id], report.Requeued);
+        Assert.Equal(0, report.ChangedRows);
+
+        AnalysisJobRow job = (await store.FindAsync(id))!;
+
+        Assert.Equal(AnalysisJobStatus.Queued, job.Status);
+        Assert.Null(job.ErrorCode);
+        Assert.Null(job.CompletedAtUtc);
+    }
+
     [DockerFact]
     public async Task CancellingAQueuedJobIsImmediateAndStopsItFromStarting()
     {

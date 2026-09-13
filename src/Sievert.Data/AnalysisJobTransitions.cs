@@ -12,16 +12,20 @@ public static class AnalysisJobTransitions
     /// <summary>
     /// Gecerli gecisler.
     ///
-    /// <c>queued -> failed</c> listede var ama normal yol degil: worker her zaman once
-    /// <c>running</c> yapiyor. Bu gecis yalnizca acik bir servis karari icin duruyor -
-    /// ornegin yeniden baslatma sirasinda kuyruktaki bir isin hic calistirilamayacagi
-    /// anlasilirsa.
+    /// <c>queued -> failed</c> Adim 3'te listede duruyordu ama hicbir yerden
+    /// cagrilmiyordu. Cagiran yeri olmayan bir gecisi acik tutmak, ileride birinin onu
+    /// "demek ki serbest" diye kullanmasina davetiye: kuyruktaki bir isi basarisiz
+    /// yapmak, hic denenmemis bir isi denenmis gostermek olurdu. Kuyruga yazarken ya da
+    /// altyapida hata olursa is veritabaninda <c>queued</c> kaliyor ve bir sonraki
+    /// kurtarma onu yeniden aliyor.
+    ///
+    /// Kurtarmanin <c>running -> failed</c> gecisi bu listede: o gercekten baslamis bir
+    /// isin basarisiz bitmesi.
     /// </summary>
     private static readonly (AnalysisJobStatus From, AnalysisJobStatus To)[] Valid =
     [
         (AnalysisJobStatus.Queued, AnalysisJobStatus.Running),
         (AnalysisJobStatus.Queued, AnalysisJobStatus.Canceled),
-        (AnalysisJobStatus.Queued, AnalysisJobStatus.Failed),
         (AnalysisJobStatus.Running, AnalysisJobStatus.Succeeded),
         (AnalysisJobStatus.Running, AnalysisJobStatus.Failed),
         (AnalysisJobStatus.Running, AnalysisJobStatus.Canceled),

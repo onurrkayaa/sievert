@@ -14,6 +14,14 @@ public static class RemoteAccessGuard
 {
     public const string EnvironmentVariable = "SIEVERT_ALLOW_REMOTE";
 
+    /// <summary>
+    /// Acilis tanilama kodu. <see cref="ApiError"/> icinde DEGIL: orada duran kodlar
+    /// <c>ProblemDetails</c> cevaplarinin kodlari ve bu kod hicbir istegin cevabinda
+    /// cikmiyor - reddedilen sey istek degil, surecin kendisi. Kod yine de adlandirilmis
+    /// duruyor ki acilis hatasi belgede ve testte tek bir adla anilabilsin.
+    /// </summary>
+    public const string DiagnosticCode = "REMOTE_ACCESS_NOT_ALLOWED";
+
     public const string RemoteWarning =
         "API loopback disinda dinliyor. Bu turda kimlik dogrulama yok, yani adrese "
         + "erisebilen herkes butun uclari kullanabilir. Deneysel ve guvensizdir.";

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 
 using Sievert.Analysis;
+using Sievert.Api;
 using Sievert.Core.Rules;
 using Sievert.Data;
 using Sievert.Data.Entities;
@@ -521,6 +522,28 @@ public sealed class AnalysisApiTests(PostgresFixture postgres)
         Assert.Equal(0, analysis.GetProperty("runningJobs").GetInt32());
         Assert.Equal(0, analysis.GetProperty("queuedJobs").GetInt32());
         Assert.NotEqual(JsonValueKind.Undefined, analysis.GetProperty("lastRecovery").ValueKind);
+    }
+
+    /// <summary>
+    /// Acilis tanilama kodu hata katalogunda degil, o yuzden OpenAPI'de de olmamali.
+    /// Bir istek karsiliginda hicbir zaman donmeyen bir kodu sozlesmeye koymak, istemciye
+    /// olmayan bir cevabi bekletmek olurdu.
+    /// </summary>
+    [DockerFact]
+    public async Task TheStartupOnlyRemoteCodeIsNotInTheContract()
+    {
+        (SievertApiFactory factory, int _, int _, string _) = Setup(localPath: null);
+        using SievertApiFactory owner = factory;
+        using HttpClient client = factory.CreateClient();
+
+        string document = await client.GetStringAsync("/openapi/v1.json");
+
+        Assert.DoesNotContain(RemoteAccessGuard.DiagnosticCode, document, StringComparison.Ordinal);
+
+        // Yeni kaynak kodlari ise gercekten donebiliyor; katalogda duruyorlar.
+        Assert.Equal("REPOSITORY_WORKTREE_DIRTY", ApiError.RepositoryWorktreeDirty);
+        Assert.Equal("REPOSITORY_CHANGED_DURING_ANALYSIS", ApiError.RepositoryChangedDuringAnalysis);
+        Assert.Equal("REPOSITORY_HEAD_UNAVAILABLE", ApiError.RepositoryHeadUnavailable);
     }
 
     private static string Key(Finding finding) =>

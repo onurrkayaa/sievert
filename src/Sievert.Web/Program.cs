@@ -45,6 +45,9 @@ builder.Services.AddHttpClient<SievertApiClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 
+// On-islemede cekilen veriyi etkilesimli asamaya tasiyan sarmalayici.
+builder.Services.AddScoped<IPageState, PersistentPageState>();
+
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 WebApplication app = builder.Build();

@@ -1,6 +1,7 @@
 @page "/analyses/{JobId:guid}"
 @implements IAsyncDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 
 <PageTitle>Analiz isi - Sievert</PageTitle>
 
@@ -158,22 +159,41 @@ else if (job is not null)
     private bool cancelling;
     private DateTimeOffset? lastUpdate;
     private Task? polling;
+    private IDisposable? persisting;
 
     protected override async Task OnParametersSetAsync()
     {
         await ReloadAsync();
 
-        // Yalniz aktif isler icin donguyu baslatiyoruz. Terminal duruma gecmis bir isi
-        // sormaya devam etmek, degismeyecek bir seyi saniyede bir sormak olurdu.
-        if (polling is null && job is not null && !JobPolling.IsTerminal(job.Status))
+        // Dongu yalniz ETKILESIMLI olusturmada basliyor. On-isleme sirasinda baslatmak,
+        // birazdan atilacak bir olusturma icin sunucuda saniyede bir istek atan bir dongu
+        // acmak olurdu.
+        //
+        // Ikinci sart: terminal duruma gecmis bir isi sormaya devam etmek, degismeyecek
+        // bir seyi saniyede bir sormak olur.
+        if (polling is null
+            && RendererInfo.IsInteractive
+            && job is not null
+            && !JobPolling.IsTerminal(job.Status))
         {
             polling = PollAsync();
         }
     }
 
+    /// <summary>
+    /// Ilk okuma.
+    ///
+    /// Yalnizca **ilk** anlik goruntu on-islemeden tasiniyor; dongunun kendi okumalari
+    /// tasinmiyor. Tasisaydi, devre baglandiginda ekranda saniyeler once alinmis bir
+    /// ilerleme durur ve dongu onun uzerine yazana kadar yanlis bir sayi gorunurdu.
+    /// </summary>
     private async Task ReloadAsync()
     {
-        ApiResult<AnalysisJobResponse> result = await Api.AnalysisAsync(JobId, closing.Token);
+        string key = PageStateKey.For("analysis", ("job", JobId));
+
+        ApiResult<AnalysisJobResponse> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.AnalysisAsync(JobId, closing.Token));
 
         if (result.IsSuccess)
         {
@@ -185,6 +205,9 @@ else if (job is not null)
         {
             failure = result;
         }
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => job);
     }
 
     /// <summary>
@@ -286,6 +309,8 @@ else if (job is not null)
 
     public async ValueTask DisposeAsync()
     {
+        persisting?.Dispose();
+
         await closing.CancelAsync();
 
         if (polling is not null)

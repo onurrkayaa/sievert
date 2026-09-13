@@ -1,6 +1,7 @@
 @page "/system"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 @inject WebOptions Options
 
 <PageTitle>Sistem Durumu - Sievert</PageTitle>
@@ -153,6 +154,7 @@ else if (health is not null)
 @code {
     private readonly CancellationTokenSource closing = new();
 
+    private IDisposable? persisting;
     private bool loading = true;
     private IProblemView? failure;
     private HealthResponse? health;
@@ -165,7 +167,9 @@ else if (health is not null)
         failure = null;
         StateHasChanged();
 
-        ApiResult<HealthResponse> result = await Api.HealthAsync(closing.Token);
+        ApiResult<HealthResponse> result = await State.TakeOrFetchAsync(
+            PageStateKey.For("system"),
+            () => Api.HealthAsync(closing.Token));
 
         if (result.IsSuccess)
         {
@@ -177,10 +181,14 @@ else if (health is not null)
         }
 
         loading = false;
+
+        persisting?.Dispose();
+        persisting = State.Persist(PageStateKey.For("system"), () => health);
     }
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

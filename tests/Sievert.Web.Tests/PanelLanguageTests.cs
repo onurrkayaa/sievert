@@ -37,6 +37,7 @@ public sealed class PanelLanguageTests : BunitContext
     public PanelLanguageTests()
     {
         Services.AddSingleton(new WebOptions { ApiBaseUrl = new Uri("http://127.0.0.1:5000") });
+        Services.AddSingleton<IPageState>(new FakePageState());
     }
 
     [Fact]

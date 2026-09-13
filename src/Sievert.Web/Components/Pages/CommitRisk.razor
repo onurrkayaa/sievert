@@ -1,6 +1,7 @@
 @page "/repositories/{RepositoryId:int}/commits/{Sha}/risk"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 
 <PageTitle>Commit riski - Sievert</PageTitle>
 
@@ -149,6 +150,7 @@ else if (risk is not null)
     [Parameter]
     public string Sha { get; set; } = string.Empty;
 
+    private IDisposable? persisting;
     private bool loading = true;
     private IProblemView? failure;
     private CommitRiskAssessment? risk;
@@ -163,7 +165,11 @@ else if (risk is not null)
         failure = null;
         StateHasChanged();
 
-        ApiResult<CommitRiskAssessment> result = await Api.RiskAsync(RepositoryId, Sha, closing.Token);
+        string key = PageStateKey.For("commit-risk", ("repo", RepositoryId), ("sha", Sha));
+
+        ApiResult<CommitRiskAssessment> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.RiskAsync(RepositoryId, Sha, closing.Token));
 
         if (result.IsSuccess)
         {
@@ -175,10 +181,14 @@ else if (risk is not null)
         }
 
         loading = false;
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => risk);
     }
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

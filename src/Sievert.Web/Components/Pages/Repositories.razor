@@ -1,6 +1,7 @@
 @page "/repositories"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 @inject NavigationManager Navigation
 
 <PageTitle>Repolar - Sievert</PageTitle>
@@ -75,6 +76,7 @@ else
 @code {
     private readonly CancellationTokenSource closing = new();
 
+    private IDisposable? persisting;
     private bool loading = true;
     private IProblemView? failure;
     private PagedResponse<RepositoryListItem>? page;
@@ -94,10 +96,15 @@ else
         failure = null;
         StateHasChanged();
 
-        ApiResult<PagedResponse<RepositoryListItem>> result = await Api.RepositoriesAsync(
-            Math.Max(1, PageNumber ?? 1),
-            Size(),
-            closing.Token);
+        int number = Math.Max(1, PageNumber ?? 1);
+
+        // Anahtar sayfa numarasini ve boyutunu iceriyor; ikinci sayfa on-islemeden
+        // kalan birinci sayfayi almasin.
+        string key = PageStateKey.For("repositories", ("page", number), ("size", Size()));
+
+        ApiResult<PagedResponse<RepositoryListItem>> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.RepositoriesAsync(number, Size(), closing.Token));
 
         if (result.IsSuccess)
         {
@@ -109,6 +116,9 @@ else
         }
 
         loading = false;
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => page);
     }
 
     /// <summary>API'nin ust siniri 100; adres cubugundan gelen buyuk deger kirpiliyor.</summary>
@@ -121,6 +131,7 @@ else
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

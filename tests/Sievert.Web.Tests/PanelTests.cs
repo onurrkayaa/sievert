@@ -20,9 +20,12 @@ namespace Sievert.Web.Tests;
 /// </summary>
 public sealed class PanelTests : BunitContext
 {
+    private FakePageState PageState { get; } = new();
+
     public PanelTests()
     {
         Services.AddSingleton(new WebOptions { ApiBaseUrl = new Uri("http://127.0.0.1:5000") });
+        Services.AddSingleton<IPageState>(PageState);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 @page "/analyses"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 
 <PageTitle>Analiz Isleri - Sievert</PageTitle>
 
@@ -112,7 +113,9 @@ else
 @code {
     private readonly CancellationTokenSource closing = new();
 
+    private IDisposable? persisting;
     private IProblemView? failure;
+    private PagedResponse<RepositoryListItem>? repositoryPage;
     private List<RepositoryListItem>? repositories;
     private PagedResponse<AnalysisJobResponse>? page;
 
@@ -128,7 +131,9 @@ else
     {
         failure = null;
 
-        ApiResult<PagedResponse<RepositoryListItem>> list = await Api.RepositoriesAsync(1, 100, closing.Token);
+        ApiResult<PagedResponse<RepositoryListItem>> list = await State.TakeOrFetchAsync(
+            PageStateKey.For("analyses", ("part", "repositories")),
+            () => Api.RepositoriesAsync(1, 100, closing.Token));
 
         if (!list.IsSuccess || list.Value is null)
         {
@@ -138,6 +143,7 @@ else
             return;
         }
 
+        repositoryPage = list.Value;
         repositories = [.. list.Value.Items];
 
         if (repositories.Count == 0)
@@ -160,13 +166,25 @@ else
         page = null;
         StateHasChanged();
 
-        ApiResult<PagedResponse<AnalysisJobResponse>> result = await Api.AnalysesAsync(
-            repositoryId,
-            pageNumber,
-            pageSize,
-            string.IsNullOrEmpty(status) ? null : status,
-            string.IsNullOrEmpty(kind) ? null : kind,
-            closing.Token);
+        // Anahtar butun suzgecleri iceriyor; filtre degistiginde on-islemeden kalan
+        // eski liste kullanilmiyor.
+        string key = PageStateKey.For(
+            "analyses",
+            ("repo", repositoryId),
+            ("page", pageNumber),
+            ("size", pageSize),
+            ("status", status),
+            ("kind", kind));
+
+        ApiResult<PagedResponse<AnalysisJobResponse>> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.AnalysesAsync(
+                repositoryId,
+                pageNumber,
+                pageSize,
+                string.IsNullOrEmpty(status) ? null : status,
+                string.IsNullOrEmpty(kind) ? null : kind,
+                closing.Token));
 
         if (result.IsSuccess)
         {
@@ -176,6 +194,11 @@ else
         {
             failure = result;
         }
+
+        persisting?.Dispose();
+        persisting = new Subscriptions(
+            State.Persist(PageStateKey.For("analyses", ("part", "repositories")), () => repositoryPage),
+            State.Persist(key, () => page));
     }
 
     private static string Value(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
@@ -214,6 +237,7 @@ else
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

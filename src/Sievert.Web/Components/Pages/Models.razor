@@ -1,6 +1,7 @@
 @page "/models"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 
 <PageTitle>Modeller - Sievert</PageTitle>
 
@@ -80,10 +81,12 @@ else
 @code {
     private readonly CancellationTokenSource closing = new();
 
+    private IDisposable? persisting;
     private bool loading = true;
     private IProblemView? failure;
     private List<ModelResponse>? models;
     private Dictionary<string, string> statuses = [];
+    private HealthResponse? health;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -93,7 +96,9 @@ else
         failure = null;
         StateHasChanged();
 
-        ApiResult<List<ModelResponse>> result = await Api.ModelsAsync(closing.Token);
+        ApiResult<List<ModelResponse>> result = await State.TakeOrFetchAsync(
+            PageStateKey.For("models"),
+            () => Api.ModelsAsync(closing.Token));
 
         if (!result.IsSuccess)
         {
@@ -106,10 +111,18 @@ else
 
         // Durum saglik ucundan geliyor: bir modelin ozeti tutmuyorsa profil listesinde
         // gorunur ama kullanilamaz ve bunu gizlemek yanlis olurdu.
-        ApiResult<HealthResponse> health = await Api.HealthAsync(closing.Token);
+        ApiResult<HealthResponse> health = await State.TakeOrFetchAsync(
+            PageStateKey.For("models", ("part", "health")),
+            () => Api.HealthAsync(closing.Token));
 
+        this.health = health.Value;
         statuses = health.Value?.Models.ToDictionary(model => model.Code, model => model.Status) ?? [];
         loading = false;
+
+        persisting?.Dispose();
+        persisting = new Subscriptions(
+            State.Persist(PageStateKey.For("models"), () => models),
+            State.Persist(PageStateKey.For("models", ("part", "health")), () => this.health));
     }
 
     private string Status(string code) =>
@@ -129,6 +142,7 @@ else
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

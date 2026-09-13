@@ -1,5 +1,6 @@
 using Bunit;
 
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 
 using Sievert.Contracts;
@@ -15,11 +16,14 @@ namespace Sievert.Web.Tests;
 /// </summary>
 public sealed class JobPageTests : BunitContext
 {
+    private FakePageState PageState { get; } = new();
+
     private static readonly Guid JobId = Guid.Parse("01a09990-0000-7000-8000-000000000001");
 
     public JobPageTests()
     {
         Services.AddSingleton(new WebOptions { ApiBaseUrl = new Uri("http://127.0.0.1:5000") });
+        Services.AddSingleton<IPageState>(PageState);
     }
 
     [Fact]
@@ -29,7 +33,7 @@ public sealed class JobPageTests : BunitContext
             .Returns($"/api/v1/analyses/{JobId}", Samples.Job("succeeded", complete: true))
             .Returns($"/api/v1/analyses/{JobId}/risks", Page(complete: true));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -48,7 +52,7 @@ public sealed class JobPageTests : BunitContext
     {
         StubApi stub = new StubApi().Returns($"/api/v1/analyses/{JobId}", Samples.Job("running"));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -74,7 +78,7 @@ public sealed class JobPageTests : BunitContext
         StubApi stub = new StubApi()
             .Returns($"/api/v1/analyses/{JobId}", Samples.Job("running"));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         Render<AnalysisDetail>(parameters => parameters.Add(component => component.JobId, JobId));
 
@@ -89,7 +93,7 @@ public sealed class JobPageTests : BunitContext
     public async Task ARunningJobOffersCancelAndATerminalOneDoesNot()
     {
         StubApi running = new StubApi().Returns($"/api/v1/analyses/{JobId}", Samples.Job("running"));
-        Services.AddSingleton(running.Client());
+        Interactive(running);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -106,7 +110,7 @@ public sealed class JobPageTests : BunitContext
             .Returns($"/api/v1/analyses/{JobId}", Samples.Job("canceled", resultCount: 2500, errorCode: "ANALYSIS_CANCELED"))
             .Returns($"/api/v1/analyses/{JobId}/risks", Page(complete: false));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -143,7 +147,7 @@ public sealed class JobPageTests : BunitContext
                             "SV001", "warning", "src/Ornek.cs", 12, null, "Bos", "async void", "gerekce", false),
                     ]));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -164,7 +168,7 @@ public sealed class JobPageTests : BunitContext
         StubApi stub = new StubApi()
             .Returns($"/api/v1/analyses/{JobId}", Samples.Job("paused-for-maintenance"));
 
-        Services.AddSingleton(stub.Client());
+        Interactive(stub);
 
         IRenderedComponent<AnalysisDetail> page = Render<AnalysisDetail>(parameters =>
             parameters.Add(component => component.JobId, JobId));
@@ -203,6 +207,18 @@ public sealed class JobPageTests : BunitContext
         Assert.True(JobPolling.IsTerminal("canceled"));
         Assert.False(JobPolling.IsTerminal("running"));
         Assert.False(JobPolling.IsTerminal("queued"));
+    }
+
+    /// <summary>
+    /// Istemciyi kaydeder ve olusturmayi **etkilesimli** yapar.
+    ///
+    /// Servisler tek seferde kaydedilmek zorunda: bUnit ilk servis alindiktan sonra yeni
+    /// kayit kabul etmiyor. O yuzden RendererInfo burada, yapicida degil.
+    /// </summary>
+    private void Interactive(StubApi stub)
+    {
+        Services.AddSingleton(stub.Client());
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
     }
 
     private static AnalysisResultPage<CommitRiskSnapshotResponse> Page(bool complete) => new(

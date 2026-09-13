@@ -1,6 +1,7 @@
 @page "/"
 @implements IDisposable
 @inject SievertApiClient Api
+@inject IPageState State
 
 <PageTitle>Genel Bakis - Sievert</PageTitle>
 
@@ -119,6 +120,8 @@
 @code {
     private readonly CancellationTokenSource closing = new();
 
+    private IDisposable? persisting;
+    private DashboardData? snapshot;
     private bool loading = true;
     private IProblemView? failure;
     private HealthResponse? health;
@@ -130,22 +133,36 @@
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
+    /// <summary>
+    /// Genel bakis birden cok ucu birlestiriyor, o yuzden tek bir anahtar altinda tek bir
+    /// paket olarak saklaniyor. Parcalari ayri ayri saklamak, yarisi on-islemeden yarisi
+    /// yeni istekten gelen karisik bir ekran uretirdi.
+    /// </summary>
     private async Task LoadAsync()
     {
         loading = true;
         failure = null;
         StateHasChanged();
 
+        const string key = "dashboard";
+
+        if (State.TryTake(key, out DashboardData? cached))
+        {
+            Apply(cached);
+            loading = false;
+            Subscribe(key);
+
+            return;
+        }
+
         ApiResult<HealthResponse> healthResult = await Api.HealthAsync(closing.Token);
 
-        if (!healthResult.IsSuccess)
+        if (!healthResult.IsSuccess || healthResult.Value is null)
         {
             (loading, failure) = (false, healthResult);
 
             return;
         }
-
-        health = healthResult.Value;
 
         ApiResult<PagedResponse<RepositoryListItem>> repositories =
             await Api.RepositoriesAsync(1, 100, closing.Token);
@@ -157,12 +174,7 @@
             return;
         }
 
-        repositoryCount = repositories.Value.TotalCount;
-        commitCount = repositories.Value.Items.Sum(item => item.CommitCount);
-        names = repositories.Value.Items.ToDictionary(item => item.Id, item => item.Name);
-
         ApiResult<List<ModelResponse>> models = await Api.ModelsAsync(closing.Token);
-        modelCount = models.Value?.Count ?? 0;
 
         // Son isler her depo icin ayri sorulup birlestiriliyor: API'de "butun depolarin
         // isleri" diye bir uc yok ve panel icin bir uc acmak istemedim.
@@ -179,8 +191,33 @@
             }
         }
 
-        recent = [.. jobs.OrderByDescending(job => job.RequestedAtUtc).Take(8)];
+        Apply(new DashboardData(
+            healthResult.Value,
+            repositories.Value.TotalCount,
+            repositories.Value.Items.Sum(item => item.CommitCount),
+            models.Value?.Count ?? 0,
+            [.. jobs.OrderByDescending(job => job.RequestedAtUtc).Take(8)],
+            repositories.Value.Items.ToDictionary(item => item.Id, item => item.Name)));
+
         loading = false;
+        Subscribe(key);
+    }
+
+    private void Apply(DashboardData data)
+    {
+        snapshot = data;
+        health = data.Health;
+        repositoryCount = data.RepositoryCount;
+        commitCount = data.CommitCount;
+        modelCount = data.ModelCount;
+        recent = [.. data.Recent];
+        names = new Dictionary<int, string>(data.Names);
+    }
+
+    private void Subscribe(string key)
+    {
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => snapshot);
     }
 
     private string Name(int repositoryId) =>
@@ -188,6 +225,7 @@
 
     public void Dispose()
     {
+        persisting?.Dispose();
         closing.Cancel();
         closing.Dispose();
     }

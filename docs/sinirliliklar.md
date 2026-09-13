@@ -187,3 +187,24 @@ Bu turda eklenen sinirliliklar:
 | Tarayicidaki boyama suresi olculmedi | panel sureleri | Olculen sey sunucunun HTML uretme suresi. | Kullanicinin gordugu an, olculen andan sonra; aradaki fark **bilinmiyor**. | `asama6-panel-temel.md` bolum 2 | Tarayici tarafli olcum kurulursa. |
 | Kismi sonuc sayfalarinda siralama sonucun tamamina degil kaydedilene gore | `risk-score-all` sonuc sayfasi | Iptal edilmis bir iste yalniz yazilmis satirlar var; "en yuksek skor" o satirlarin en yuksegi. | Kismi bir listede "en riskli commit" ifadesi yaniltici olabilir; sayfada kismi uyarisi var ama siralama uyarisi yok. | - | Kismi sonuclarda siralama kisitlanabilir. |
 | Statik bulgular tarama boyunca bellekte tutuluyor | `static-scan` | `ScanService` butun bulgulari dondurup sonra yaziyor; CLI ile ayni servis oldugu icin degistirilmedi. | Olculdu: 687 bulguda sorun yok (takipci en fazla 500 kayit). Cok daha buyuk bir depoda ne olacagi **olculmedi**. | `asama6-bellek-ayristirma.md` bolum 4 | Gercek bir sorun olculurse. |
+
+## Asama 6 - Adim 5 (harita ve zaman cizelgesi)
+
+Onceki bolumden iki madde bu turda ele alindi. **Satirlar silinmedi.**
+
+| Onceki madde | Ne yapildi |
+|---|---|
+| Sayfa acilisinda veri iki kez cekiliyor | **Kapandi.** `PersistentComponentState` eklendi; genel bakista API cagrisi 14'ten 8'e dustu. Harita ve zaman cizelgesi ise veriyi yalniz devre acikken cekiyor, yani sayfa basina tek istek (`asama6-gorsellestirme.md` bolum 7). |
+| Kismi sonuc sayfalarinda siralama sonucun tamamina degil kaydedilene gore | **Kapandi.** Iki gorsellestirme ucu de cevapta `rankingScope` donuyor ve kismi bir iste `written-results-only` yaziyor; panelde banner olarak gorunuyor. |
+| Tarayicidaki boyama suresi olculmedi | **Kapandi (gorsellestirme sayfalari icin).** Gercek tarayicida ilk boyama ve grafigin ekrana gelme ani olculdu. Diger sayfalar icin hala olculmedi. |
+
+Bu turda eklenen sinirliliklar:
+
+| Sinirlilik | Etkiledigi kisim | Neden boyle | Olcumu nasil etkiler | Etkiledigi olcum | Ne zaman ele alinacak |
+|---|---|---|---|---|---|
+| Varsayilan siralamada harita tek renk gorunebiliyor | dosya etkinlik haritasi | `mean-risk-desc` ile ilk 100 dosya cok dar bir endeks araligina dusebiliyor; ShareX'te 99.6-99.9 arasi, yani 4 farkli renk. | Gorsel "her sey kirmizi" izlenimi veriyor. Sayfa gosterilen aralik bilgisini yaziyor ama renk olcegi bu durumda az bilgi tasiyor. | `asama6-gorsellestirme.md` | Dosya bazinda goreli bir olcek (ya da olcegin secili araliga gerilmesi) eklenirse. |
+| Grafikler on-islenen HTML'de yok | harita ve zaman cizelgesi | Veri devre mesaj sinirini (32 KB) asmasin diye kalici duruma yazilmiyor; yalniz devre acikken cekiliyor. | Ilk boyama ile grafigin gelmesi arasinda soguk onbellekte 50-60 ms var. JavaScript kapaliysa grafik hic gorunmez. | `asama6-gorsellestirme.md` bolum 5 ve 6 | Sunucu tarafli bir "grafik de on-islensin" yolu bulunursa. |
+| Renk olcegi mutlak, pencereye gore gerilmiyor | dosya etkinlik haritasi | Olcek 0-100 endeks araligina sabit; secilen pencerenin araligina gore yeniden olceklenmiyor. | Dar aralikli pencerelerde renk farki goze gelmiyor (ustteki maddeyle ayni kok). | `asama6-gorsellestirme.md` | Iki olcek (mutlak/gerilmis) arasinda secim eklenirse. |
+| Zaman cizelgesi noktalari commit sirasina gore yerlestiriliyor | zaman cizelgesi | Tarih eksenine gecmek bosluklari dogru gostermek demek; bu turda siralama ekseni secildi ve cevapta `TIMELINE_USES_ORDINAL_AXIS` uyarisi donuyor. | Commit'ler arasindaki zaman farki grafikten okunamaz; iki nokta arasi mesafe hep esit. | - | Tarih ekseni istenirse. |
+| Gorsellestirme olcumu tek istemciyle yapildi | harita ve zaman cizelgesi sureleri | Tek tarayici, tek devre, loopback. | Es zamanli kullanicilarda devre basina bellek ve API kuyrugu **olculmedi**. | `asama6-gorsellestirme.md` bolum 10 | Birden fazla kullanici olunca. |
+| Jellyfin `nokta 50` kosusunda 58.2 ms'lik sicrama | zaman cizelgesi ucu | Bes kosunun birinde ortancanin yedi kati bir sure cikti. | Sebebi **olculmedi**; tek bir kosu oldugu icin ortanca etkilenmedi ama tekrarlanip tekrarlanmayacagi bilinmiyor. | `asama6-gorsellestirme.md` bolum 4 | Tekrarlarsa. |

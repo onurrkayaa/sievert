@@ -1,7 +1,7 @@
 # Asama 6 yol haritasi: API ve panel
 
-**Tarih:** 2026-09-12
-**Durum:** Adim 0, 1, 2, 3 ve 4 yapildi. Geri kalan adimlar **yapilmadi**.
+**Tarih:** 2026-09-13
+**Durum:** Adim 0, 1, 2, 3, 3b, 4 ve 5 yapildi. Geri kalan adimlar **yapilmadi**.
 
 Asama 5 bir model birakti ve o modelin ne olup ne olmadigini olctu. Asama 6 o modeli
 kullanilabilir hale getiriyor. Isin buyuk kismi teknik degil: **modelin ne soyleyip ne
@@ -139,19 +139,43 @@ en yuksek deger commit riski sayfasinin soguk ilk kosusu. Durum sorma dongusu 30
 sonra 0 istek.
 
 **Yapilmayanlar.** Grafik kutuphanesi, isi haritasi, zaman cizelgesi, PDF ve kimlik
-dogrulama yok. Sayfa acilisinda veri iki kez cekiliyor (on-isleme + devre).
+dogrulama yok. Sayfa acilisinda veri iki kez cekiliyor (on-isleme + devre); bu Adim 5'te
+kapatildi.
 
 **Devralinan risk.** Arayuzde yuzde isareti gormek, skoru olasilik sanmaya en kolay yol.
 Risk sozlesmesindeki dil arayuzde de gecerli.
 
-### 5. Isi haritasi ve risk zaman cizelgesi — **yapilmadi**
+### 5. Dosya etkinlik haritasi ve risk zaman cizelgesi — **bu turda yapildi**
 
-**Amac.** Dosya/dizin bazinda yogunluk ve zaman icinde risk egrisi.
+**Amac.** Dosya bazinda yogunluk ve zaman icinde risk egrisi.
 
-**Basari olcutu.** Gorsellestirme, altindaki sayinin ne oldugunu (goreli endeks) gizlemiyor.
+**Uretilen.** Iki yeni uc (`visualizations/file-activity`, `visualizations/risk-timeline`),
+tek merkezi renk/koordinat olcegi, harita ve cizelge bilesenleri, arac cubugu, efsane,
+kismi sonuc banner'i, bagimsiz dogrulama araci (`measure visualization-truth`), ADR 0026.
+Ayrica `PersistentComponentState` eklendi ve Adim 4'ten kalan cift veri cekme kapatildi.
+
+**Basari olcutu.** Gorsellestirme, altindaki sayinin ne oldugunu (goreli endeks)
+gizlemiyor: her hucrede endeksin sayisi yazili, efsanede goreli oldugu yazili, yuzde
+isareti yok.
+
+**Olculen.** `docs/olcumler/asama6-gorsellestirme.md`. Harita ucu isinmis durumda en
+yuksek ortanca 58.3 ms, zaman cizelgesi 100 nokta icin 25.9 ms; komut sayisi pencere ve
+limitten bagimsiz sabit (5 ve 4). Tarayicida soguk onbellekte ilk boyama 120-128 ms,
+grafigin ekrana gelmesi 173-185 ms. Ham tablolardan yeniden hesapla **0 fark** (30 dosya,
+150 nokta).
+
+**Bu turda bulunan kusur.** Kalici durum 32 KB'lik devre mesaj sinirini asiyordu: sayfa
+aciliyor, grafik ciziliyor ama hicbir tiklama calismiyordu ve sunucu gunlugunde hicbir
+sey yoktu. Butce, kirpilmis ozet ve "grafik verisi kalici duruma girmesin" kurali ile
+kapatildi; en buyuk sayfa durumu 19 036 karakter.
+
+**Yapilmayanlar.** Birlesik statik+ML skor yok, kalibrasyon yok, yakinlastirma/tooltip
+yok, dizin bazinda toplama yok.
 
 **Devralinan risk.** Renk olcegi olasilik izlenimi verebilir; efsanede endeksin goreli
-oldugu yazili olmali.
+oldugu yazili. Varsayilan siralamada (`mean-risk-desc`) gosterilen 100 dosya cok dar bir
+endeks araligina dusebiliyor ve harita tek renk gibi gorunuyor; sayfa gosterilen aralik
+bilgisini yaziyor.
 
 ### 6. Rapor/PDF ve demo akisi — **yapilmadi**
 
@@ -174,8 +198,8 @@ kapanis raporu.
 - [x] Adim 3 — arka plan isleri, iptal ve sonuc saklama
 - [x] Adim 3b — panel oncesi sertlestirme (kaynak durumu, bellek, es zamanlilik)
 - [x] Adim 4 — Blazor panel
-- [ ] Adim 5 — isi haritasi ve zaman cizelgesi
+- [x] Adim 5 — dosya etkinlik haritasi ve risk zaman cizelgesi
 - [ ] Adim 6 — rapor ve demo
 - [ ] Adim 7 — kullanilabilirlik ve kapanis
 
-**Asama 6 tamamlanmadi.** Sonraki nokta Adim 5: isi haritasi ve risk zaman cizelgesi.
+**Asama 6 tamamlanmadi.** Sonraki nokta Adim 6: rapor/PDF ve demo akisi.

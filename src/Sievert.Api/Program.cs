@@ -135,6 +135,7 @@ api.MapModels();
 api.MapRepositories();
 api.MapRisk();
 api.MapAnalyses();
+api.MapVisualizations();
 
 app.Run();
 

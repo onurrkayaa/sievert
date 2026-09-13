@@ -1,0 +1,149 @@
+{
+  "kod": "599fdd7",
+  "uretildi": "2026-09-13T07:25:34.730637+00:00",
+  "kosullar": {
+    "derleme": "Release",
+    "istemci": "tek HttpClient, tarayici yok",
+    "onbellek": "her kosu yeni istek; HTTP onbellegi kullanilmiyor",
+    "kosuSayisi": 5,
+    "not": "Blazor on-isleme acik; ilk cevabin govdesi sayfanin icerigi."
+  },
+  "sayfalar": [
+    {
+      "Name": "Genel bakis",
+      "Path": "/",
+      "FirstRunMs": 21.8,
+      "MedianMs": 18.3,
+      "MaxMs": 23.3,
+      "RunsMs": [
+        21.8,
+        23.3,
+        15.1,
+        18.3,
+        14.4
+      ],
+      "ApiRequests": 7,
+      "HtmlBytes": 13021,
+      "SlowestApiMs": 6.3
+    },
+    {
+      "Name": "Repolar",
+      "Path": "/repositories",
+      "FirstRunMs": 9.7,
+      "MedianMs": 3.7,
+      "MaxMs": 9.7,
+      "RunsMs": [
+        9.7,
+        8.6,
+        3.7,
+        3.7,
+        3.7
+      ],
+      "ApiRequests": 2,
+      "HtmlBytes": 9662,
+      "SlowestApiMs": 5.4
+    },
+    {
+      "Name": "Depo ayrintisi",
+      "Path": "/repositories/2",
+      "FirstRunMs": 49,
+      "MedianMs": 16.9,
+      "MaxMs": 49,
+      "RunsMs": [
+        49,
+        17.9,
+        15.5,
+        16.9,
+        16.1
+      ],
+      "ApiRequests": 4,
+      "HtmlBytes": 25964,
+      "SlowestApiMs": 31.5
+    },
+    {
+      "Name": "Analiz isleri",
+      "Path": "/analyses",
+      "FirstRunMs": 15.3,
+      "MedianMs": 10.9,
+      "MaxMs": 15.3,
+      "RunsMs": [
+        15.3,
+        11.2,
+        10.7,
+        10.6,
+        10.9
+      ],
+      "ApiRequests": 3,
+      "HtmlBytes": 20925,
+      "SlowestApiMs": 4.2
+    },
+    {
+      "Name": "Is ayrintisi",
+      "Path": "/analyses/01a099a6-e152-7167-b8b2-34454b255a9c",
+      "FirstRunMs": 30.6,
+      "MedianMs": 6.5,
+      "MaxMs": 30.6,
+      "RunsMs": [
+        30.6,
+        8.5,
+        6.1,
+        6.5,
+        6.1
+      ],
+      "ApiRequests": 3,
+      "HtmlBytes": 28350,
+      "SlowestApiMs": 17.4
+    },
+    {
+      "Name": "Commit riski",
+      "Path": "/repositories/2/commits/2247db2407713fa221d57011814e4be446361b1f/risk",
+      "FirstRunMs": 139,
+      "MedianMs": 6.5,
+      "MaxMs": 139,
+      "RunsMs": [
+        139,
+        8.5,
+        6.5,
+        5.4,
+        4.9
+      ],
+      "ApiRequests": 2,
+      "HtmlBytes": 22511,
+      "SlowestApiMs": 130
+    },
+    {
+      "Name": "Modeller",
+      "Path": "/models",
+      "FirstRunMs": 6.9,
+      "MedianMs": 4.2,
+      "MaxMs": 6.9,
+      "RunsMs": [
+        6.9,
+        4.7,
+        4.2,
+        3.9,
+        4.1
+      ],
+      "ApiRequests": 3,
+      "HtmlBytes": 12776,
+      "SlowestApiMs": 4
+    },
+    {
+      "Name": "Sistem durumu",
+      "Path": "/system",
+      "FirstRunMs": 7.6,
+      "MedianMs": 5.3,
+      "MaxMs": 7.6,
+      "RunsMs": [
+        7.6,
+        5.3,
+        5.8,
+        5,
+        4.7
+      ],
+      "ApiRequests": 2,
+      "HtmlBytes": 10037,
+      "SlowestApiMs": 4.9
+    }
+  ]
+}

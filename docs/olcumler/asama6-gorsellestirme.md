@@ -157,8 +157,8 @@ KB'a dusuyor, ag istegi 7'den 2'ye iniyor. Ilk boyama yaklasik yariya iniyor. **
 hazir olma suresi ise ayni buyuklukte kaliyor** (172 -> 108 ms), cunku o sure
 cogunlukla devrenin acilmasi ve API cagrisi; onbellekle ilgisi yok.
 
-Beklenti 16 gorsel icin **2000 ms** demisti; soguk onbellekte olculen en yuksek deger
-**184.8 ms**.
+Beklenti 17 ilk anlamli boyama icin **1500 ms** demisti; soguk onbellekte olculen en
+yuksek FCP **128 ms**.
 
 ## 7. PersistentComponentState: once ve sonra
 
@@ -227,7 +227,38 @@ Uc genislikte, gercek tarayicida:
 icinde kayiyor; sayfa kaymiyor. Genis ekranlarda grafik kutusuna sigiyor (1123 icerik /
 1123 kutu).
 
-## 9. Olculmeyenler
+## 9. Beklentiler karsisinda
+
+Beklenti dosyasi: `docs/olcumler/asama6-gorsellestirme-beklenti.md`. Bu turda olculen
+beklentiler:
+
+| # | Beklenti | Sonuc |
+|---|---|---|
+| 1 | Ayni sayfa verisi bir kez cekilmeli | tuttu (bolum 7) |
+| 2 | Durum anahtari sorgu parametrelerini icermeli | tuttu (bolum 7) |
+| 3 | Grafik uclari mevcut sayfa acilislarini belirgin yavaslatmamali | tuttu, asagida |
+| 4 | Harita ucu Polly/ShareX 100 ms, Jellyfin 300 ms altinda | tuttu |
+| 5 | Zaman cizelgesi 100 nokta icin 100 ms altinda | tuttu |
+| 16 | Mobil gorunumde grafik kirpilmamali | tuttu (bolum 8) |
+| 17 | Ilk anlamli boyama 1500 ms altinda | tuttu (bolum 6) |
+
+**Beklenti 3.** Depo sayfasinin kendisi (harita/zaman sekmesi acik degilken) ayni
+kosulda olculdu: ilk kosu 78.7 ms, sonraki bes kosunun ortancasi **20.3 ms**, en
+yuksegi 22.2 ms. Adim 4'te ayni sayfanin ortancasi 16.9 ms'ti. Aradaki 3.4 ms'lik fark
+arac cubugunun is listelerinden geliyor olabilir ama bunu ayri olcmedim; soyleyebilecegim
+sey sadece sayfanin belirgin yavaslamadigi.
+
+**Beklenti 4 ayrintisi.** Olculen en yuksek ortancalar: Polly 49.9 ms, ShareX 58.3 ms,
+Jellyfin 31.9 ms. Tek tek kosulardaki en yuksek degerler de sinirin altinda kaldi
+(Polly 66.4 ms, ShareX 61.9 ms, Jellyfin 49.4 ms).
+
+**Beklenti 5 ayrintisi.** 100 nokta icin ortancalar 11.2 / 25.9 / 14.7 ms, en yuksek
+tek kosu 28.7 ms.
+
+Beklenti 6-15 bu dosyada degil; onlar test ve dogrulama ciktilariyla kontrol edildi
+(`data/asama6/gorsellestirme-dogrulama.json` ve Adim 5 testleri).
+
+## 10. Olculmeyenler
 
 - **Cok kullanicili yuk.** Tek istemci, tek devre. Es zamanli kullanicilarda devre basina
   bellek ve API kuyrugu olculmedi.

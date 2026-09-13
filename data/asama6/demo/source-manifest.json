@@ -1,0 +1,22 @@
+{
+  "sourceRepository": "github.com/app-vnext/polly",
+  "sourceSnapshot": "2247db2407713fa221d57011814e4be446361b1f",
+  "selectionRule": "kaynak deponun tarih sirasinda en yeni 200 commit\u0027i; risk dagilimina bakilarak secim yapilmadi",
+  "commitCount": 200,
+  "firstCommitSha": "a75dfc583a3661529de9eada83dff96a548e9fd8",
+  "firstCommitDateUtc": "2026-03-19T16:23:04Z",
+  "lastCommitSha": "2247db2407713fa221d57011814e4be446361b1f",
+  "lastCommitDateUtc": "2026-09-08T20:33:15Z",
+  "commitFileCount": 379,
+  "metricCount": 200,
+  "bugIntroducingCount": 0,
+  "botCommitCount": 172,
+  "riskSnapshotCount": 200,
+  "modelProfile": "polly",
+  "modelChecksum": "0761308193ca",
+  "staticFindingCount": 203,
+  "producedByCommit": "66cb86a",
+  "producedByCommand": "dotnet run --project tools/Sievert.Demo -- export-seed",
+  "seedChecksum": "48783184c9f327a5418e1f3b7e10309915d7f23f7188a73e6530752a7e47891c",
+  "scopeLimit": "Bu alt kume yalniz demo icindir; olcum ve model sonuclari icin kullanilmaz. Tam veri data/asama5 altindaki dondurulmus dosyalarda."
+}

@@ -20,11 +20,16 @@ public sealed class AnalysisJobWorker(
     TimeProvider clock,
     ILogger<AnalysisJobWorker> logger) : BackgroundService
 {
-    /// <summary>Bu surecin kimligi. Hangi surecin isi yarida biraktigi gorulsun diye.</summary>
-    public static readonly string InstanceId =
-        $"{Environment.MachineName}:{Environment.ProcessId}".Length <= 80
-            ? $"{Environment.MachineName}:{Environment.ProcessId}"
-            : Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    /// <summary>
+    /// Bu worker orneginin kimligi. Hangi surecin isi yarida biraktigi gorulsun diye
+    /// yaziliyor.
+    ///
+    /// Ornek basina, surec basina degil: ayni surecte iki worker ornegi olabiliyor
+    /// (testler tam olarak bunu kuruyor) ve o zaman "isi kim aldi" sorusunun cevabi surec
+    /// kimligiyle verilemez. Sutun 80 karakterle sinirli, o yuzden uzun makine adlarinda
+    /// bas taraf kirpiliyor - onemli olan kuyruk kismi.
+    /// </summary>
+    public string InstanceId { get; } = Describe();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -179,6 +184,16 @@ public sealed class AnalysisJobWorker(
             outcome.ResultCount,
             outcome.ErrorCode,
             (clock.GetUtcNow() - started).TotalMilliseconds);
+    }
+
+    private static string Describe()
+    {
+        // Rastgele son ek; Guid.CreateVersion7'nin bas taraflari zaman damgasi oldugu
+        // icin ayni milisaniyede acilan iki ornek ayni oneki paylasirdi.
+        string value = $"{Environment.MachineName}:{Environment.ProcessId}"
+            + $":{Guid.NewGuid().ToString("n")[..8]}";
+
+        return value.Length <= 80 ? value : value[^80..];
     }
 
     private static IAnalysisJobHandler Handler(IServiceScope scope, AnalysisJobKind kind)

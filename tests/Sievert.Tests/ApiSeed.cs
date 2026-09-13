@@ -54,6 +54,69 @@ public static class ApiSeed
         return commit.Sha;
     }
 
+    /// <summary>
+    /// Ayni kaliptan cok sayida commit ve olcu yazar.
+    ///
+    /// Bes commit'lik kume, "isin ortasinda" bir an gerektiren testler icin cok kisa:
+    /// is baslamadan bitiyor. Toplu yaziliyor, tek tek degil; kurulum testin kendisinden
+    /// uzun surmemeli.
+    /// </summary>
+    public static void AddManyCommits(SievertContext database, int repositoryId, int count)
+    {
+        List<CommitRow> commits = [];
+
+        for (int index = 0; index < count; index++)
+        {
+            commits.Add(new CommitRow
+            {
+                RepositoryId = repositoryId,
+                Sha = index.ToString("x8") + new string('b', 32),
+                AuthorName = "Yazar " + index,
+                AuthorEmail = $"yazar{index}@ornek.test",
+                AuthorDateUtc = new DateTimeOffset(2021, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes(index),
+                MessageSubject = "toplu commit " + index,
+                MessageFull = "govde",
+                ParentCount = 1,
+                LinesAdded = 10 + (index % 50),
+                LinesDeleted = 2 + (index % 7),
+                ChangedFiles = 1 + (index % 5),
+                ChangedCSharpFiles = 1 + (index % 4),
+                LabelSource = "szz",
+            });
+        }
+
+        database.Commits.AddRange(commits);
+        database.SaveChanges();
+
+        List<CommitMetricRow> metrics = [];
+
+        foreach (CommitRow commit in commits)
+        {
+            metrics.Add(new CommitMetricRow
+            {
+                CommitId = commit.Id,
+                LinesAdded = commit.LinesAdded,
+                LinesDeleted = commit.LinesDeleted,
+                FilesChanged = commit.ChangedFiles,
+                CsFilesChanged = commit.ChangedCSharpFiles,
+                Entropy = 0.5,
+                DirectoryCount = 1,
+                SubsystemCount = 1,
+                MaxFileAgeDays = 30,
+                MinFileAgeDays = 1,
+                PriorChanges = 4,
+                PriorFixes = 1,
+                DistinctAuthorsOnFiles = 2,
+                AuthorCommitCount = 3,
+                AuthorFileExperience = 3,
+                IsFix = false,
+            });
+        }
+
+        database.CommitMetrics.AddRange(metrics);
+        database.SaveChanges();
+    }
+
     /// <summary>Sha'lar sayilabilir olsun diye sabit bir kaliptan uretiliyor.</summary>
     public static string ShaFor(int index) => index.ToString("x2").PadLeft(2, '0') + new string('a', 38);
 

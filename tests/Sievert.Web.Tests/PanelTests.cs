@@ -45,7 +45,7 @@ public sealed class PanelTests : BunitContext
         IRenderedComponent<CommitRisk> page = RenderRisk(Samples.Risk());
 
         Assert.Contains("Goreli risk endeksi", page.Markup, StringComparison.Ordinal);
-        Assert.Contains("hata olasiligi degildir", page.Markup, StringComparison.Ordinal);
+        Assert.Contains("gercek bir olasilik degildir", page.Markup, StringComparison.Ordinal);
     }
 
     [Fact]

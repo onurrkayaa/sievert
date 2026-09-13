@@ -130,9 +130,6 @@ public static class VisualizationPerformanceCommand
                 $"{WebUrl}/repositories/{primary.Id}?tab=dosyalar&job={primary.JobId}"));
             pages.Add(await MeasurePageAsync(client, web, "Zaman cizelgesi",
                 $"{WebUrl}/repositories/{primary.Id}?tab=zaman&job={primary.JobId}"));
-
-            api.Dispose();
-            web.Dispose();
         }
 
         string json = JsonSerializer.Serialize(

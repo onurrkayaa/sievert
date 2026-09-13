@@ -117,6 +117,139 @@ public static class ApiSeed
         database.SaveChanges();
     }
 
+    /// <summary>
+    /// Gorsellestirme testleri icin kontrollu veri: dosya satirlari ve bitmis bir risk isi.
+    ///
+    /// Anlik goruntuler dogrudan yaziliyor, gercek isleyici kosturulmuyor. Sebep:
+    /// gorsellestirme ucu **anlik goruntuleri okuyor** ve sinanan sey o okuma. Endeksleri
+    /// modele birakmak, testin neyi sinadigini modelin ciktisina baglardi.
+    /// </summary>
+    /// <param name="scores">Commit sirasina gore endeksler (0-100).</param>
+    /// <param name="filesPerCommit">Her commit'in dokundugu yollar.</param>
+    public static Guid AddRiskJobWithFiles(
+        SievertContext database,
+        int repositoryId,
+        IReadOnlyList<double> scores,
+        IReadOnlyList<string[]> filesPerCommit,
+        bool complete = true)
+    {
+        List<CommitRow> commits = [];
+
+        for (int index = 0; index < scores.Count; index++)
+        {
+            commits.Add(new CommitRow
+            {
+                RepositoryId = repositoryId,
+                Sha = (1000 + index).ToString("x8") + new string('d', 32),
+                AuthorName = "Yazar",
+                AuthorEmail = "yazar@ornek.test",
+                AuthorDateUtc = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero).AddHours(index),
+                MessageSubject = "gorsellestirme commit " + index,
+                MessageFull = "govde",
+                ParentCount = 1,
+                LinesAdded = 10 + index,
+                LinesDeleted = index,
+                ChangedFiles = filesPerCommit[index].Length,
+                ChangedCSharpFiles = filesPerCommit[index].Length,
+                IsBugIntroducing = index % 3 == 0,
+                IsBot = index == 1,
+                LabelSource = "szz",
+            });
+        }
+
+        database.Commits.AddRange(commits);
+        database.SaveChanges();
+
+        List<CommitFileRow> files = [];
+        List<CommitMetricRow> metrics = [];
+
+        for (int index = 0; index < commits.Count; index++)
+        {
+            foreach (string path in filesPerCommit[index])
+            {
+                files.Add(new CommitFileRow
+                {
+                    CommitId = commits[index].Id,
+                    Path = path,
+                    LinesAdded = 1 + index,
+                    LinesDeleted = index,
+                    ChangeKind = "modified",
+                    IsCSharp = path.EndsWith(".cs", StringComparison.Ordinal),
+                });
+            }
+
+            metrics.Add(new CommitMetricRow
+            {
+                CommitId = commits[index].Id,
+                LinesAdded = commits[index].LinesAdded,
+                LinesDeleted = commits[index].LinesDeleted,
+                FilesChanged = commits[index].ChangedFiles,
+                CsFilesChanged = commits[index].ChangedCSharpFiles,
+                Entropy = 0.5,
+                DirectoryCount = 1,
+                SubsystemCount = 1,
+                MaxFileAgeDays = 30,
+                MinFileAgeDays = 1,
+                PriorChanges = 4,
+                PriorFixes = 1,
+                DistinctAuthorsOnFiles = 2,
+                AuthorCommitCount = 3,
+                AuthorFileExperience = 3,
+                IsFix = index % 2 == 1,
+            });
+        }
+
+        database.CommitFiles.AddRange(files);
+        database.CommitMetrics.AddRange(metrics);
+        database.SaveChanges();
+
+        AnalysisJobRow job = new()
+        {
+            Id = Guid.CreateVersion7(),
+            RepositoryId = repositoryId,
+            Kind = AnalysisJobKind.RiskScoreAll,
+            Status = complete ? AnalysisJobStatus.Succeeded : AnalysisJobStatus.Canceled,
+            RequestedAtUtc = DateTimeOffset.UtcNow,
+            StartedAtUtc = DateTimeOffset.UtcNow,
+            CompletedAtUtc = DateTimeOffset.UtcNow,
+            CurrentPhase = complete ? "succeeded" : "canceled",
+            ProcessedItems = scores.Count,
+            TotalItems = scores.Count,
+            ResultCount = scores.Count,
+            IsResultComplete = complete,
+            ErrorCode = complete ? null : "ANALYSIS_CANCELED",
+        };
+
+        database.AnalysisJobs.Add(job);
+        database.SaveChanges();
+
+        List<CommitRiskSnapshotRow> snapshots = [];
+
+        for (int index = 0; index < commits.Count; index++)
+        {
+            snapshots.Add(new CommitRiskSnapshotRow
+            {
+                AnalysisJobId = job.Id,
+                CommitId = commits[index].Id,
+                RawModelScore = scores[index] / 100.0,
+                RiskIndex = scores[index],
+                DecisionAt05 = scores[index] >= 50,
+                DecisionAtTrainThreshold = scores[index] >= 24,
+                TrainThreshold = 0.2381,
+                ModelProfile = "polly",
+                ModelChecksum = "0761308193ca",
+                IsCalibrated = false,
+                WarningCodes = "[\"UNCALIBRATED_SCORE\"]",
+                CreatedAtUtc = DateTimeOffset.UtcNow,
+            });
+        }
+
+        database.CommitRiskSnapshots.AddRange(snapshots);
+        database.SaveChanges();
+
+        return job.Id;
+    }
+
     /// <summary>Sha'lar sayilabilir olsun diye sabit bir kaliptan uretiliyor.</summary>
     public static string ShaFor(int index) => index.ToString("x2").PadLeft(2, '0') + new string('a', 38);
 

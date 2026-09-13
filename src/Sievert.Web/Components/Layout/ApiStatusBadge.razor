@@ -1,0 +1,55 @@
+@implements IDisposable
+@inject SievertApiClient Api
+
+@*
+    API su an konusuyor mu.
+
+    Uc durum var ve ucu de farkli: hazir, kismi hazir (API ayakta ama veritabani ya da
+    model hazir degil), erisilemiyor. Ikisini birlestirmek "calisiyor ama hicbir sey
+    gostermiyor" durumunu aciklanamaz hale getirirdi.
+*@
+<div class="card raised" aria-live="polite">
+    <p class="stat-label">API durumu</p>
+    <p class="row" style="margin-top:var(--space-2)">
+        <span class="pill @tone">@label</span>
+    </p>
+    @if (detail is not null)
+    {
+        <p class="stat-note">@detail</p>
+    }
+</div>
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private string label = "Bakiliyor";
+    private string tone = "tone-idle";
+    private string? detail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiResult<HealthResponse> health = await Api.HealthAsync(closing.Token);
+
+        if (!health.IsSuccess || health.Value is null)
+        {
+            (label, tone, detail) = ("Erisilemiyor", "tone-danger", health.Detail);
+
+            return;
+        }
+
+        bool databaseReady = health.Value.Database.Reachable && health.Value.Database.MigrationsApplied;
+        bool modelsReady = health.Value.Models.All(model => model.Status == "Ready");
+
+        (label, tone, detail) = databaseReady && modelsReady
+            ? ("Hazir", "tone-done", null)
+            : ("Kismi hazir", "tone-warning", databaseReady
+                ? "Bir model profili kullanilamiyor."
+                : "Veritabani hazir degil.");
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

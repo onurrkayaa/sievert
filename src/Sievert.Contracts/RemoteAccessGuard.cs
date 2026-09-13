@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Sievert.Api;
+namespace Sievert.Contracts;
 
 /// <summary>
 /// API'nin hangi adreslerde dinleyebilecegine karar verir.
@@ -9,6 +9,10 @@ namespace Sievert.Api;
 /// arayuzlerinde dinlemesi, veritabanindaki commit verisini ve model ciktilarini aga
 /// acmak demek. O yuzden varsayilan loopback; disari acmak acik bir ayar istiyor ve o
 /// ayar verildiginde de gunluge bir uyari yaziliyor.
+///
+/// Sozlesme projesinde duruyor cunku ayni kurali **iki** surec uyguluyor: API ve panel.
+/// Ikisine ayri birer kopya yazmak, guvenlikle ilgili bir kontrolun iki yerde farkli
+/// davranmasinin en kisa yolu olurdu.
 /// </summary>
 public static class RemoteAccessGuard
 {
@@ -23,7 +27,7 @@ public static class RemoteAccessGuard
     public const string DiagnosticCode = "REMOTE_ACCESS_NOT_ALLOWED";
 
     public const string RemoteWarning =
-        "API loopback disinda dinliyor. Bu turda kimlik dogrulama yok, yani adrese "
+        "Servis loopback disinda dinliyor. Bu turda kimlik dogrulama yok, yani adrese "
         + "erisebilen herkes butun uclari kullanabilir. Deneysel ve guvensizdir.";
 
     /// <summary>
@@ -32,7 +36,8 @@ public static class RemoteAccessGuard
     /// </summary>
     /// <param name="urls">Noktali virgulle ayrilmis dinleme adresleri; bos ise varsayilan.</param>
     /// <param name="allowRemote">Ortam degiskeninin degeri.</param>
-    public static string? Check(string? urls, string? allowRemote)
+    /// <param name="host">Hangi surec reddediyor; mesajin basinda geciyor.</param>
+    public static string? Check(string? urls, string? allowRemote, string host = "API")
     {
         if (string.IsNullOrWhiteSpace(urls))
         {
@@ -49,7 +54,7 @@ public static class RemoteAccessGuard
             return null;
         }
 
-        return $"API yalnizca loopback adreslerinde dinleyebilir. Loopback olmayan adres(ler): "
+        return $"{host} yalnizca loopback adreslerinde dinleyebilir. Loopback olmayan adres(ler): "
             + $"{string.Join(", ", remote)}. {RemoteWarning} Yine de acmak istiyorsan "
             + $"{EnvironmentVariable}=true ver.";
     }

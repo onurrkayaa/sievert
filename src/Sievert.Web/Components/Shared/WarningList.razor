@@ -1,0 +1,21 @@
+@*
+    Model uyarilari.
+
+    Zorunlu uyarilar her degerlendirmede doner ve burada gizlenmiyor, katlanmiyor,
+    kucultulmuyor. Sebep risk sozlesmesinde: skorun ne olmadigi, skorun kendisi kadar
+    gorunur olmali.
+*@
+<div class="stack-tight">
+    @foreach (string warning in Codes)
+    {
+        <div class="notice warning">
+            <h3><code>@warning</code></h3>
+            <p>@Display.Warning(warning)</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Codes { get; set; } = [];
+}

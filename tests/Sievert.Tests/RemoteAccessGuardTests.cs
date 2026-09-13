@@ -1,4 +1,4 @@
-using Sievert.Api;
+using Sievert.Contracts;
 
 namespace Sievert.Tests;
 

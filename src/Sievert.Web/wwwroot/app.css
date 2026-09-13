@@ -1,0 +1,509 @@
+/*
+  Sievert paneli.
+
+  Renkler ve olculer tek yerde: asagidaki degiskenler. Bir rengi bir bilesenin icinde
+  yazmak, uc ay sonra "hangi gri dogru gri" sorusunu cevapsiz birakiyor.
+
+  Iki kural bu dosyanin her yerinde gecerli:
+  - Renk tek basina bilgi tasimiyor. Her durumun yaninda metin var.
+  - Yatay tasma yok. Genis tablolar sayfayi degil, kendi kutularini kaydiriyor.
+
+  Harici font ya da CDN yok; sistem yazi tipi kullaniliyor. Internet olmadan da acilmali.
+*/
+
+:root {
+    /* Rontgen filmine benzesin diye koyu lacivert; tam siyah degil, kontrast cok sert olurdu. */
+    --background: #0d1219;
+    --surface: #141c26;
+    --surface-raised: #1b2534;
+    --border: #2a3646;
+    --border-strong: #3b4a5e;
+
+    --text-primary: #e4eaf1;
+    --text-secondary: #9aa9bb;
+    --text-faint: #6d7d90;
+
+    --accent: #45c8dc;
+    --accent-strong: #7fe0ef;
+    --accent-quiet: #17323b;
+
+    --warning: #e8a33d;
+    --warning-quiet: #3a2c14;
+    --danger: #e86a6a;
+    --danger-quiet: #3a1c1c;
+    --success: #59c08a;
+    --success-quiet: #16301f;
+
+    --focus: #7fe0ef;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+
+    --radius: 8px;
+    --radius-small: 5px;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    /* Tiklanabilir her seyin en kucuk yuksekligi. */
+    --target: 44px;
+
+    color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    /* Hicbir sayfa yatay kaymamali; genis icerik kendi kutusunda kayiyor. */
+    overflow-x: hidden;
+}
+
+body {
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+    margin: 0 0 var(--space-3) 0;
+    line-height: 1.25;
+    font-weight: 600;
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.02rem; }
+h4 { font-size: 0.92rem; color: var(--text-secondary); }
+
+p { margin: 0 0 var(--space-3) 0; }
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+code, .mono {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+}
+
+/* ---------------------------------------------------------------- iskelet */
+
+.shell {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: var(--space-5) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.brand-line {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: var(--space-1) 0 0 0;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.nav a {
+    display: flex;
+    align-items: center;
+    min-height: var(--target);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-small);
+    color: var(--text-secondary);
+    border-left: 3px solid transparent;
+}
+
+.nav a:hover {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.nav a.active {
+    background: var(--accent-quiet);
+    color: var(--accent-strong);
+    border-left-color: var(--accent);
+}
+
+.main {
+    min-width: 0;
+    padding: var(--space-5) var(--space-6) var(--space-7) var(--space-6);
+}
+
+.page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+}
+
+.page-head p {
+    color: var(--text-secondary);
+    margin: var(--space-1) 0 0 0;
+    max-width: 70ch;
+}
+
+.foot {
+    margin-top: var(--space-7);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 0.82rem;
+}
+
+/* ---------------------------------------------------------------- kartlar */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    min-width: 0;
+}
+
+.card.raised { background: var(--surface-raised); }
+
+.card h3 { margin-bottom: var(--space-2); }
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.stat-value {
+    font-size: 1.7rem;
+    font-weight: 600;
+    margin: var(--space-1) 0 0 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-note {
+    color: var(--text-faint);
+    font-size: 0.8rem;
+    margin: var(--space-1) 0 0 0;
+}
+
+.stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-tight { display: flex; flex-direction: column; gap: var(--space-2); }
+.row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.row-spread { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: space-between; }
+.section { margin-top: var(--space-6); }
+
+/* ---------------------------------------------------------------- durumlar */
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.tone-idle { color: var(--text-secondary); border-color: var(--border-strong); }
+.tone-active { color: var(--accent-strong); border-color: var(--accent); background: var(--accent-quiet); }
+.tone-done { color: var(--success); border-color: var(--success); background: var(--success-quiet); }
+.tone-warning { color: var(--warning); border-color: var(--warning); background: var(--warning-quiet); }
+.tone-danger { color: var(--danger); border-color: var(--danger); background: var(--danger-quiet); }
+.tone-unknown { color: var(--text-faint); border-style: dashed; }
+
+.notice {
+    border: 1px solid var(--border-strong);
+    border-left-width: 4px;
+    border-radius: var(--radius-small);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+}
+
+.notice h3 { margin-bottom: var(--space-2); font-size: 0.95rem; }
+.notice p:last-child { margin-bottom: 0; }
+.notice.warning { border-left-color: var(--warning); }
+.notice.danger { border-left-color: var(--danger); }
+.notice.info { border-left-color: var(--accent); }
+
+.muted { color: var(--text-secondary); }
+.faint { color: var(--text-faint); }
+
+/* ---------------------------------------------------------------- tablolar */
+
+/*
+  Tablolar mobilde sayfayi degil kendi kutularini kaydiriyor. Yatay kaydirilabildigi
+  gorunsun diye kenarlik var; "burada devami var" bilgisi gorunmuyorsa kimse kaydirmiyor.
+*/
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+th, td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--surface-raised);
+    position: sticky;
+    top: 0;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface-raised); }
+
+td.wrap, th.wrap { white-space: normal; min-width: 220px; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- kontroller */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--target);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-small);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-strong); }
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn.primary {
+    background: var(--accent-quiet);
+    border-color: var(--accent);
+    color: var(--accent-strong);
+}
+
+.btn.quiet { background: transparent; }
+
+select, input[type="text"] {
+    min-height: var(--target);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-small);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+label.field {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ---------------------------------------------------------------- ilerleme */
+
+.progress {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.progress > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
+/* Hareket azaltilmis modda gecis yok. */
+@media (prefers-reduced-motion: no-preference) {
+    .progress > span { transition: width 240ms ease-out; }
+}
+
+/* ---------------------------------------------------------------- katki cubuklari */
+
+/*
+  Grafik kutuphanesi yok. Cubuk yalnizca goze yardim ediyor; sayinin kendisi her satirda
+  yazili, cubuk kaybolsa da bilgi kaybolmuyor.
+*/
+.bars { display: flex; flex-direction: column; gap: var(--space-2); }
+
+.bar-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(60px, 130px) auto;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.bar-track {
+    height: 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+    overflow: hidden;
+}
+
+.bar-track > span { display: block; height: 100%; }
+.bar-up > span { background: var(--warning); }
+.bar-down > span { background: var(--accent); }
+
+.bar-value {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- iskelet yukleme */
+
+.skeleton {
+    background: var(--surface-raised);
+    border-radius: var(--radius-small);
+    height: 14px;
+}
+
+.empty {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: var(--space-6);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+dl.facts {
+    display: grid;
+    grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+}
+
+dl.facts dt { color: var(--text-secondary); font-size: 0.85rem; }
+dl.facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+ul.plain { margin: 0; padding-left: var(--space-4); }
+ul.plain li { margin-bottom: var(--space-1); }
+
+/* ---------------------------------------------------------------- duyarli */
+
+@media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: var(--space-4);
+        gap: var(--space-3);
+    }
+
+    .nav { flex-direction: row; flex-wrap: wrap; }
+    .nav a { min-height: var(--target); padding: 0 var(--space-3); border-left: none; border-bottom: 3px solid transparent; }
+    .nav a.active { border-left: none; border-bottom-color: var(--accent); }
+
+    .main { padding: var(--space-4); }
+}
+
+@media (max-width: 520px) {
+    body { font-size: 14px; }
+
+    .cards { grid-template-columns: minmax(0, 1fr); }
+    .bar-row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+    dl.facts { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+    dl.facts dt { margin-top: var(--space-2); }
+}
+
+/* Blazor'un kendi hata seridi. */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: var(--space-3) var(--space-4);
+    background: var(--danger-quiet);
+    color: var(--text-primary);
+    border-top: 2px solid var(--danger);
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    float: right;
+}

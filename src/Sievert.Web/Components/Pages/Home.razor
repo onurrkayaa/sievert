@@ -1,0 +1,194 @@
+@page "/"
+@implements IDisposable
+@inject SievertApiClient Api
+
+<PageTitle>Genel Bakis - Sievert</PageTitle>
+
+<PageHeader Title="Genel Bakis"
+            Lead="Taranan depolar, egitilmis model profilleri ve arka planda kosan isler." />
+
+@*
+    Bilimsel sinir karti.
+
+    Kapatilabilir bir kutu degil ve olmayacak: bu dort cumle, ekrandaki her sayinin ne
+    olmadigini soyluyor. Kapatilabilir olsaydi kullanici bir kez kapatir ve bir daha
+    gormezdi.
+*@
+<div class="notice info">
+    <h2 style="font-size:1rem">Bu panelin gosterdigi sayilar ne degil</h2>
+    <ul class="plain">
+        <li>Model hedefi <strong>SZZ ile uretilmis</strong> bir etiket; gercek hata kayitlari degil.</li>
+        <li>Ham skor <strong>kalibre edilmedi</strong>; hata olasiligi olarak okunamaz.</li>
+        <li>Statik analiz bulgulari model skoruna <strong>dahil degil</strong>.</li>
+        <li>Insan dogrulamasi 14 ornekle sinirli kaldi; populasyonu temsil etmiyor.</li>
+    </ul>
+</div>
+
+<div class="section">
+    @if (loading)
+    {
+        <Loading Message="Genel bakis yukleniyor..." />
+    }
+    else if (failure is not null)
+    {
+        <ProblemView Result="failure" OnRetry="LoadAsync" />
+    }
+    else
+    {
+        <div class="cards">
+            <div class="card">
+                <p class="stat-label">Depo</p>
+                <p class="stat-value">@Display.Count(repositoryCount)</p>
+                <p class="stat-note">taranmis depo</p>
+            </div>
+            <div class="card">
+                <p class="stat-label">Commit</p>
+                <p class="stat-value">@Display.Count(commitCount)</p>
+                <p class="stat-note">veritabanindaki toplam</p>
+            </div>
+            <div class="card">
+                <p class="stat-label">Calisan is</p>
+                <p class="stat-value">@Display.Count(health?.Analysis.RunningJobs ?? 0)</p>
+                <p class="stat-note">kuyrukta @Display.Count(health?.Analysis.QueuedJobs ?? 0)</p>
+            </div>
+            <div class="card">
+                <p class="stat-label">Model profili</p>
+                <p class="stat-value">@Display.Count(modelCount)</p>
+                <p class="stat-note">hepsi kalibre edilmedi</p>
+            </div>
+            <div class="card">
+                <p class="stat-label">Son biten is</p>
+                <p class="stat-value" style="font-size:1rem">@Display.Moment(health?.Analysis.LastCompletedJobAtUtc)</p>
+                <p class="stat-note">worker es zamanliligi @(health?.Analysis.WorkerConcurrency ?? 0)</p>
+            </div>
+            <div class="card">
+                <p class="stat-label">Sistem</p>
+                <p class="stat-value" style="font-size:1rem">
+                    <span class="pill @(health?.Status == "ok" ? "tone-done" : "tone-warning")">
+                        @(health?.Status == "ok" ? "Hazir" : "Kismi hazir")
+                    </span>
+                </p>
+                <p class="stat-note"><a href="system">Sistem durumu</a></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Son isler</h2>
+
+            @if (recent.Count == 0)
+            {
+                <EmptyState Title="Henuz is yok"
+                            Detail="Bir depo secip statik tarama ya da skorlama baslatabilirsin.">
+                    <p><a href="repositories">Repolara git</a></p>
+                </EmptyState>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Tur</th>
+                                <th scope="col">Depo</th>
+                                <th scope="col">Durum</th>
+                                <th scope="col">Ilerleme</th>
+                                <th scope="col">Istek zamani</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (AnalysisJobResponse job in recent)
+                            {
+                                <tr>
+                                    <td>@Display.Kind(job.Kind)</td>
+                                    <td>@Name(job.RepositoryId)</td>
+                                    <td><span class="pill @Display.StatusTone(job.Status)">@Display.Status(job.Status)</span></td>
+                                    <td class="num">@Display.Count(job.ProcessedItems)@(job.TotalItems is int total ? " / " + Display.Count(total) : string.Empty)</td>
+                                    <td>@Display.Moment(job.RequestedAtUtc)</td>
+                                    <td><a href="analyses/@job.Id">Ayrinti</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private HealthResponse? health;
+    private int repositoryCount;
+    private int commitCount;
+    private int modelCount;
+    private List<AnalysisJobResponse> recent = [];
+    private Dictionary<int, string> names = [];
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<HealthResponse> healthResult = await Api.HealthAsync(closing.Token);
+
+        if (!healthResult.IsSuccess)
+        {
+            (loading, failure) = (false, healthResult);
+
+            return;
+        }
+
+        health = healthResult.Value;
+
+        ApiResult<PagedResponse<RepositoryListItem>> repositories =
+            await Api.RepositoriesAsync(1, 100, closing.Token);
+
+        if (!repositories.IsSuccess || repositories.Value is null)
+        {
+            (loading, failure) = (false, repositories);
+
+            return;
+        }
+
+        repositoryCount = repositories.Value.TotalCount;
+        commitCount = repositories.Value.Items.Sum(item => item.CommitCount);
+        names = repositories.Value.Items.ToDictionary(item => item.Id, item => item.Name);
+
+        ApiResult<List<ModelResponse>> models = await Api.ModelsAsync(closing.Token);
+        modelCount = models.Value?.Count ?? 0;
+
+        // Son isler her depo icin ayri sorulup birlestiriliyor: API'de "butun depolarin
+        // isleri" diye bir uc yok ve panel icin bir uc acmak istemedim.
+        List<AnalysisJobResponse> jobs = [];
+
+        foreach (RepositoryListItem repository in repositories.Value.Items)
+        {
+            ApiResult<PagedResponse<AnalysisJobResponse>> page =
+                await Api.AnalysesAsync(repository.Id, 1, 5, null, null, closing.Token);
+
+            if (page.Value is not null)
+            {
+                jobs.AddRange(page.Value.Items);
+            }
+        }
+
+        recent = [.. jobs.OrderByDescending(job => job.RequestedAtUtc).Take(8)];
+        loading = false;
+    }
+
+    private string Name(int repositoryId) =>
+        names.TryGetValue(repositoryId, out string? name) ? name : "#" + repositoryId;
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

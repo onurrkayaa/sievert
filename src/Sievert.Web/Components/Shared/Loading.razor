@@ -1,0 +1,19 @@
+@*
+    Yukleniyor durumu.
+
+    Bos bir ekran gostermek yerine iskelet cizgiler: kullanici "veri yok" ile "henuz
+    gelmedi" arasindaki farki gorebilmeli. Ekran okuyucu icin de acikca yaziyor.
+*@
+<div class="card" aria-busy="true" aria-live="polite">
+    <p class="muted">@Message</p>
+    <div class="stack-tight" aria-hidden="true">
+        <div class="skeleton" style="width:70%"></div>
+        <div class="skeleton" style="width:52%"></div>
+        <div class="skeleton" style="width:61%"></div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = "Yukleniyor...";
+}

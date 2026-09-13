@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <!--
+    Tek referans sozlesme projesi.
+
+    Sievert.Api'ye referans YOK: panel API'yi HTTP uzerinden kullaniyor, sinif cagirarak
+    degil. Sievert.Data, Sievert.Modeling ve Sievert.Analysis'e de referans yok; panel
+    veritabanina ve modele hic dokunmuyor, gosterdigi her sayiyi API'den okuyor.
+
+    Bu bir uslup tercihi degil: referans olsaydi panelde yanlislikla kendi hesabini yapan
+    bir satir yazmak serbest olurdu ve bunu yalnizca kod incelemesi yakalardi.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Sievert.Contracts\Sievert.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

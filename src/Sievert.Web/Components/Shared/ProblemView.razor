@@ -1,0 +1,39 @@
+@*
+    Hata gosterimi.
+
+    Uc sey gorunuyor: ne oldugu, makine okunabilir kod ve iz kimligi. Yigin izi ve
+    sunucu ayrintisi YOK - onlar zaten API cevabinda da yok, sunucu gunlugunde kaliyor.
+    Iz kimligi gorunuyor cunku destek istenirse aranacak sey o.
+*@
+<div class="notice danger" role="alert">
+    <h3>@(Result.Title ?? "Istek karsilanamadi")</h3>
+    <p>@(Result.Detail ?? "Ayrinti yok.")</p>
+
+    <dl class="facts">
+        @if (Result.ErrorCode is string errorCode)
+        {
+            <dt>Hata kodu</dt>
+            <dd><code>@errorCode</code></dd>
+        }
+        @if (Result.TraceId is string trace)
+        {
+            <dt>Iz kimligi</dt>
+            <dd><code>@trace</code></dd>
+        }
+    </dl>
+
+    @if (OnRetry.HasDelegate)
+    {
+        <p style="margin-top:var(--space-3);margin-bottom:0">
+            <button class="btn" type="button" @onclick="OnRetry">Yeniden dene</button>
+        </p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IProblemView Result { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+}

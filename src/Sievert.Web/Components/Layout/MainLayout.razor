@@ -1,0 +1,43 @@
+@inherits LayoutComponentBase
+
+<div class="shell">
+    <nav class="sidebar" aria-label="Ana gezinme">
+        <div>
+            <p class="brand-name">Sievert</p>
+            <p class="brand-line">C# projeleri icin statik analiz ve tarihsel risk incelemesi</p>
+        </div>
+
+        <div class="nav">
+            <NavLink href="" Match="NavLinkMatch.All">Genel Bakis</NavLink>
+            <NavLink href="repositories">Repolar</NavLink>
+            <NavLink href="analyses">Analiz Isleri</NavLink>
+            <NavLink href="models">Modeller</NavLink>
+            <NavLink href="system">Sistem Durumu</NavLink>
+        </div>
+
+        <ApiStatusBadge />
+    </nav>
+
+    <main class="main">
+        @Body
+
+        <footer class="foot">
+            <p>
+                Deneysel model. Ham skorlar kalibre edilmedi ve hata olasiligi olarak okunamaz.
+                Statik bulgular model skoruna dahil degildir.
+            </p>
+            <p>Panel surumu @Options.Version &middot; API @Options.SafeApiAddress</p>
+        </footer>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Beklenmeyen bir hata olustu.
+    <a href="." class="reload">Yeniden yukle</a>
+    <span class="dismiss">X</span>
+</div>
+
+@code {
+    [Inject]
+    private WebOptions Options { get; set; } = default!;
+}

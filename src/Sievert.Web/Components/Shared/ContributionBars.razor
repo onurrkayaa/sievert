@@ -1,0 +1,96 @@
+@*
+    Oznitelik katkilari.
+
+    Grafik kutuphanesi yok: cubuklar duz CSS. Cubuk yalnizca goze yardim ediyor, her
+    satirda ham deger, donusmus deger, katsayi ve katki sayi olarak yazili. Cubuk
+    kaybolsa da bilgi kaybolmuyor.
+
+    Baslik "neden oldu" demiyor: katki nedensel bir iddia degil, modelde tasinan iliski.
+*@
+<h3>@Title</h3>
+
+@if (Items.Count == 0)
+{
+    <p class="muted">Bu yonde katkisi olan oznitelik yok.</p>
+}
+else
+{
+    <div class="bars">
+        @foreach (FeatureContribution item in Items)
+        {
+            <div class="bar-row">
+                <div>
+                    <div>@item.FeatureName</div>
+                    <div class="faint" style="font-size:0.8rem">@item.Explanation</div>
+                </div>
+
+                <div class="bar-track @(Up ? "bar-up" : "bar-down")" aria-hidden="true">
+                    <span style="width:@(Width(item))%"></span>
+                </div>
+
+                <div class="bar-value">@Signed(item.Contribution)</div>
+            </div>
+        }
+    </div>
+
+    <div class="table-wrap" style="margin-top:var(--space-3)">
+        <table>
+            <caption class="faint" style="text-align:left;padding:var(--space-2) var(--space-3)">
+                Katki = katsayi x donusmus deger. Nedensellik anlatmiyor.
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Oznitelik</th>
+                    <th scope="col" class="num">Ham deger</th>
+                    <th scope="col" class="num">Donusmus</th>
+                    <th scope="col" class="num">Katsayi</th>
+                    <th scope="col" class="num">Katki</th>
+                    <th scope="col">Egitim araligi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (FeatureContribution item in Items)
+                {
+                    <tr>
+                        <td>@item.FeatureName</td>
+                        <td class="num">@item.RawValue.ToString("G6", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num">@item.TransformedValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num">@item.Coefficient.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)</td>
+                        <td class="num">@Signed(item.Contribution)</td>
+                        <td>
+                            @if (item.OutsideTrainRange)
+                            {
+                                <span class="pill tone-warning">Disinda (@item.OutsideDirection)</span>
+                            }
+                            else
+                            {
+                                <span class="muted">Icinde</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<FeatureContribution> Items { get; set; } = [];
+
+    /// <summary>Yukari tasiyanlar mi; yalniz cubugun rengini belirliyor.</summary>
+    [Parameter]
+    public bool Up { get; set; }
+
+    private double Largest => Items.Count == 0 ? 1 : Items.Max(item => Math.Abs(item.Contribution));
+
+    private double Width(FeatureContribution item) =>
+        Math.Round(Math.Abs(item.Contribution) / Math.Max(1e-9, Largest) * 100, 1);
+
+    private static string Signed(double value) =>
+        (value >= 0 ? "+" : "-")
+        + Math.Abs(value).ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+}

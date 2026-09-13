@@ -1,0 +1,19 @@
+<div class="empty">
+    <p><strong>@Title</strong></p>
+    @if (!string.IsNullOrWhiteSpace(Detail))
+    {
+        <p>@Detail</p>
+    }
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Detail { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

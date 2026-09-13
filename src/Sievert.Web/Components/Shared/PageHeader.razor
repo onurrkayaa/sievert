@@ -1,0 +1,28 @@
+@*
+    Sayfa basligi. Her sayfada tek bir h1 var ve baslik sirasi h1 -> h2 -> h3 diye
+    ilerliyor; ekran okuyucu icin sayfanin iskeleti bu.
+*@
+<div class="page-head">
+    <div>
+        <h1>@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Lead))
+        {
+            <p>@Lead</p>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="row">@Actions</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Lead { get; set; }
+
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

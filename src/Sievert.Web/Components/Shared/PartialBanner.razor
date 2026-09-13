@@ -1,0 +1,22 @@
+@*
+    Kismi sonuc uyarisi.
+
+    Basarisiz ya da iptal edilmis bir isin satirlari duruyor ama tam sonuc degil. Bu
+    kutu tam sonucla ayni renk ve baslikta OLMAMALI; yoksa kullanici eksik bir listeyi
+    tam liste sanir.
+*@
+@if (Partial)
+{
+    <div class="notice warning" role="status">
+        <h3>Bu sonuc tamamlanmamistir</h3>
+        <p>@(Warning ?? "Is basariyla bitmedi; asagidaki satirlar eksik olabilir.")</p>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Partial { get; set; }
+
+    [Parameter]
+    public string? Warning { get; set; }
+}

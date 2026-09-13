@@ -346,13 +346,16 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     columns.ConstantColumn(42);
                 });
 
-                HeaderCell(table, text.Path);
-                HeaderCell(table, text.TouchCount, right: true);
-                HeaderCell(table, text.Churn, right: true);
-                HeaderCell(table, text.Mean, right: true);
-                HeaderCell(table, text.Maximum, right: true);
-                HeaderCell(table, text.Latest, right: true);
-                HeaderCell(table, text.Findings, right: true);
+                table.Header(header =>
+                {
+                    HeaderCell(header, text.Path);
+                    HeaderCell(header, text.TouchCount, right: true);
+                    HeaderCell(header, text.Churn, right: true);
+                    HeaderCell(header, text.Mean, right: true);
+                    HeaderCell(header, text.Maximum, right: true);
+                    HeaderCell(header, text.Latest, right: true);
+                    HeaderCell(header, text.Findings, right: true);
+                });
 
                 foreach (FileActivityItem file in model.Files)
                 {
@@ -407,15 +410,18 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     columns.ConstantColumn(34);
                 });
 
-                HeaderCell(table, text.ShortSha);
-                HeaderCell(table, text.Date);
-                HeaderCell(table, text.Subject);
-                HeaderCell(table, text.Index, right: true);
-                HeaderCell(table, text.RawScore, right: true);
-                HeaderCell(table, text.Decision05, right: true);
-                HeaderCell(table, text.DecisionTrain, right: true);
-                HeaderCell(table, text.Churn, right: true);
-                HeaderCell(table, text.CsFiles, right: true);
+                table.Header(header =>
+                {
+                    HeaderCell(header, text.ShortSha);
+                    HeaderCell(header, text.Date);
+                    HeaderCell(header, text.Subject);
+                    HeaderCell(header, text.Index, right: true);
+                    HeaderCell(header, text.RawScore, right: true);
+                    HeaderCell(header, text.Decision05, right: true);
+                    HeaderCell(header, text.DecisionTrain, right: true);
+                    HeaderCell(header, text.Churn, right: true);
+                    HeaderCell(header, text.CsFiles, right: true);
+                });
 
                 foreach (ReportCommitRow commit in model.TopCommits)
                 {
@@ -507,11 +513,14 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                         columns.RelativeColumn(4);
                     });
 
-                    HeaderCell(table, text.Rule);
-                    HeaderCell(table, text.Severity);
-                    HeaderCell(table, text.Path);
-                    HeaderCell(table, text.Line, right: true);
-                    HeaderCell(table, text.Message);
+                    table.Header(header =>
+                    {
+                        HeaderCell(header, text.Rule);
+                        HeaderCell(header, text.Severity);
+                        HeaderCell(header, text.Path);
+                        HeaderCell(header, text.Line, right: true);
+                        HeaderCell(header, text.Message);
+                    });
 
                     foreach (StaticFindingResponse finding in model.Static.Findings)
                     {
@@ -598,10 +607,13 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
                     columns.ConstantColumn(46);
                 });
 
-                HeaderCell(table, text.Feature);
-                HeaderCell(table, text.Value, right: true);
-                HeaderCell(table, text.Coefficient, right: true);
-                HeaderCell(table, text.Contribution, right: true);
+                table.Header(header =>
+                {
+                    HeaderCell(header, text.Feature);
+                    HeaderCell(header, text.Value, right: true);
+                    HeaderCell(header, text.Coefficient, right: true);
+                    HeaderCell(header, text.Contribution, right: true);
+                });
 
                 foreach (ReportContribution contribution in contributions)
                 {
@@ -680,16 +692,26 @@ public sealed class ReportDocument(ReportModel model, ReportText text) : IDocume
         }
     }
 
-    private static void HeaderCell(TableDescriptor table, string title, bool right = false)
+    /// <summary>
+    /// Tablo basligi. <c>table.Header</c> kullaniliyor cunku tablo sayfa asinca baslik
+    /// **her sayfada** tekrar etmeli; ilk surumde etmiyordu ve ikinci sayfadaki satirlar
+    /// hangi sutunun ne oldugu belli olmadan duruyordu.
+    /// </summary>
+    private static void HeaderCell(TableCellDescriptor header, string title, bool right = false)
     {
-        IContainer cell = table.Cell().BorderBottom(1).BorderColor(Ink).PaddingVertical(2).PaddingRight(3);
+        IContainer cell = header.Cell().BorderBottom(1).BorderColor(Ink).PaddingVertical(2).PaddingRight(3);
 
         (right ? cell.AlignRight() : cell).Text(title).FontSize(8).SemiBold();
     }
 
+    /// <summary>
+    /// Icerik hucresi. <c>ShowEntire</c> ile bir satirin icerigi sayfa sonunda ikiye
+    /// bolunmuyor: uzun bir dosya yolu ilk surumde sayfa sinirinda ortasindan kesilmisti.
+    /// </summary>
     private static void Cell(TableDescriptor table, string value, bool right = false, bool mono = false)
     {
-        IContainer cell = table.Cell().BorderBottom(1).BorderColor(Rule).PaddingVertical(2).PaddingRight(3);
+        IContainer cell = table.Cell().ShowEntire()
+            .BorderBottom(1).BorderColor(Rule).PaddingVertical(2).PaddingRight(3);
 
         TextSpanDescriptor span = (right ? cell.AlignRight() : cell).Text(value).FontSize(8);
 

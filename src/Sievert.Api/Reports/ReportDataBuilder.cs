@@ -131,8 +131,29 @@ public sealed class ReportDataBuilder(
         commit.CsFilesChanged,
         Codes(commit.WarningCodes));
 
-    private static IReadOnlyList<string> Codes(string raw) =>
-        raw.Length == 0 ? [] : [.. raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+    /// <summary>
+    /// Uyari kodlari veritabaninda JSON dizi metni olarak duruyor.
+    ///
+    /// Ilk surumde virgulle ayrilmis metin sanilmisti ve raporda kodlar tirnak ve
+    /// koseli parantezle birlikte basildi. Gorsel kontrolde yakalandi; zaman cizelgesi
+    /// ayni isi zaten dogru yapiyordu.
+    /// </summary>
+    private static IReadOnlyList<string> Codes(string raw)
+    {
+        if (raw.Length == 0)
+        {
+            return [];
+        }
+
+        try
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<List<string>>(raw) ?? [];
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return [];
+        }
+    }
 
     private static ReportSummary Summarise(
         ReportPlan plan,

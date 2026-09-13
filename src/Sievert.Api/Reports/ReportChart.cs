@@ -118,9 +118,12 @@ public static class ReportChart
         svg.Append(CultureInfo.InvariantCulture,
             $"<line x1=\"{N(PlotLeft)}\" y1=\"{N(y)}\" x2=\"{N(PlotRight)}\" y2=\"{N(y)}\" stroke=\"{colour}\" stroke-width=\"1.2\" stroke-dasharray=\"6 4\" />");
 
+        // Etiketteki sayi **belgenin kulturuyle** yaziliyor: ayni sayfada bir yerde
+        // "93,3" digerinde "93.3" gormek gorsel kontrolde yakalanan bir tutarsizlikti.
+        // Koordinatlar degismez kulturde kaliyor; oradaki virgul SVG'yi bozar.
         svg.Append(CultureInfo.InvariantCulture,
             $"<text x=\"{N(PlotRight - 4)}\" y=\"{N(y - 6)}\" text-anchor=\"end\" font-family=\"Lato, sans-serif\" font-size=\"13\" fill=\"{colour}\">"
-            + $"{Escape(caption)} {N(Math.Round(index, 1))}</text>");
+            + $"{Escape(caption)} {Escape(text.Number(index, 1))}</text>");
     }
 
     private static void Label(

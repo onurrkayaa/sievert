@@ -29,7 +29,11 @@ public sealed class ReportGenerateHandler(
 
     public async Task<JobOutcome> RunAsync(AnalysisJobRun run, CancellationToken cancellation)
     {
+        // AsTracking acikca: API baglaminin varsayilani NoTracking (salt-okunur uclar
+        // icin dogru), ama bu kayit guncellenecek. Varsayilana guvenmek, kaydin sessizce
+        // hic guncellenmemesi demekti - tam olarak bu yasandi.
         ReportArtifactRow? artifact = await context.ReportArtifacts
+            .AsTracking()
             .FirstOrDefaultAsync(row => row.AnalysisJobId == run.JobId, cancellation);
 
         if (artifact is null)

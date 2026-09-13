@@ -313,7 +313,10 @@ public static class ReportEndpoints
 
         SievertContext database = Database.Open(context);
 
+        // AsTracking: bu akista kayit guncellenebiliyor (dogrulama basarisizsa
+        // corrupted, basariliysa VerifiedAtUtc). Baglamin varsayilani NoTracking.
         ReportArtifactRow? artifact = await database.ReportArtifacts
+            .AsTracking()
             .FirstOrDefaultAsync(row => row.Id == reportId, cancellation);
 
         if (artifact is null)

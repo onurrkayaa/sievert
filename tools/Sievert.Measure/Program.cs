@@ -297,6 +297,19 @@ if (args[0] == "visualization-truth")
     return await VisualizationTruthCommand.RunAsync(context, args);
 }
 
+// Asama 6 Adim 6: PDF raporunun bagimsiz dogrulanmasi.
+// args: report-truth <repo-koku> <commit> <cikti.json>
+if (args[0] == "report-truth")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure report-truth <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await ReportTruthCommand.RunAsync(context, args);
+}
+
 // Asama 6 Adim 5: gorsellestirme uclarinin sureleri.
 // args: visualization-performance <repo-koku> <commit> <cikti.json>
 if (args[0] == "visualization-performance")

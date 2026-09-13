@@ -1,0 +1,183 @@
+{
+  "kod": "a6c2f08",
+  "uretildi": "2026-09-13T18:37:29.75981+00:00",
+  "kosullar": {
+    "derleme": "Release yayim ciktisi",
+    "not": "Sure, POST istegi ile artefaktin hazir olmasi arasi. Saglik ve risk ucu sureleri rapor uretilirken olculdu."
+  },
+  "raporlar": [
+    {
+      "Repository": "jellyfin-full",
+      "Run": 1,
+      "AcceptedMs": 206.5,
+      "TotalMs": 721.8,
+      "DownloadMs": 11,
+      "PageCount": 9,
+      "ByteLength": 168195,
+      "DatabaseCommands": 435,
+      "HealthMedianMs": 2.9,
+      "HealthMaxMs": 18,
+      "CommitsMedianMs": 4.8,
+      "SamplesDuringGeneration": 45
+    },
+    {
+      "Repository": "jellyfin-full",
+      "Run": 2,
+      "AcceptedMs": 5.5,
+      "TotalMs": 87.3,
+      "DownloadMs": 6.7,
+      "PageCount": 9,
+      "ByteLength": 168187,
+      "DatabaseCommands": 111,
+      "HealthMedianMs": 3,
+      "HealthMaxMs": 3.9,
+      "CommitsMedianMs": 4.9,
+      "SamplesDuringGeneration": 9
+    },
+    {
+      "Repository": "jellyfin-full",
+      "Run": 3,
+      "AcceptedMs": 10.3,
+      "TotalMs": 103.8,
+      "DownloadMs": 6.5,
+      "PageCount": 9,
+      "ByteLength": 168182,
+      "DatabaseCommands": 111,
+      "HealthMedianMs": 3.3,
+      "HealthMaxMs": 8,
+      "CommitsMedianMs": 4.9,
+      "SamplesDuringGeneration": 9
+    },
+    {
+      "Repository": "polly-full",
+      "Run": 1,
+      "AcceptedMs": 9.3,
+      "TotalMs": 119,
+      "DownloadMs": 6.3,
+      "PageCount": 8,
+      "ByteLength": 158652,
+      "DatabaseCommands": 147,
+      "HealthMedianMs": 2.9,
+      "HealthMaxMs": 8.2,
+      "CommitsMedianMs": 3.6,
+      "SamplesDuringGeneration": 13
+    },
+    {
+      "Repository": "polly-full",
+      "Run": 2,
+      "AcceptedMs": 8.9,
+      "TotalMs": 104.9,
+      "DownloadMs": 4.7,
+      "PageCount": 8,
+      "ByteLength": 158650,
+      "DatabaseCommands": 129,
+      "HealthMedianMs": 3.3,
+      "HealthMaxMs": 4.9,
+      "CommitsMedianMs": 3.8,
+      "SamplesDuringGeneration": 11
+    },
+    {
+      "Repository": "polly-full",
+      "Run": 3,
+      "AcceptedMs": 7.9,
+      "TotalMs": 103.7,
+      "DownloadMs": 5.2,
+      "PageCount": 8,
+      "ByteLength": 158643,
+      "DatabaseCommands": 129,
+      "HealthMedianMs": 3.4,
+      "HealthMaxMs": 5.5,
+      "CommitsMedianMs": 4,
+      "SamplesDuringGeneration": 11
+    },
+    {
+      "Repository": "polly-full",
+      "Run": 4,
+      "AcceptedMs": 9.6,
+      "TotalMs": 107.2,
+      "DownloadMs": 4.7,
+      "PageCount": 8,
+      "ByteLength": 158640,
+      "DatabaseCommands": 138,
+      "HealthMedianMs": 3,
+      "HealthMaxMs": 4.5,
+      "CommitsMedianMs": 3.9,
+      "SamplesDuringGeneration": 12
+    },
+    {
+      "Repository": "polly-full",
+      "Run": 5,
+      "AcceptedMs": 8.8,
+      "TotalMs": 115,
+      "DownloadMs": 5,
+      "PageCount": 8,
+      "ByteLength": 158643,
+      "DatabaseCommands": 138,
+      "HealthMedianMs": 3,
+      "HealthMaxMs": 4.2,
+      "CommitsMedianMs": 3.9,
+      "SamplesDuringGeneration": 12
+    },
+    {
+      "Repository": "sharex-full",
+      "Run": 1,
+      "AcceptedMs": 9.4,
+      "TotalMs": 95.9,
+      "DownloadMs": 4.6,
+      "PageCount": 9,
+      "ByteLength": 163071,
+      "DatabaseCommands": 129,
+      "HealthMedianMs": 2.8,
+      "HealthMaxMs": 4.5,
+      "CommitsMedianMs": 3.7,
+      "SamplesDuringGeneration": 11
+    },
+    {
+      "Repository": "sharex-full",
+      "Run": 2,
+      "AcceptedMs": 6.8,
+      "TotalMs": 86.9,
+      "DownloadMs": 2.8,
+      "PageCount": 9,
+      "ByteLength": 163071,
+      "DatabaseCommands": 129,
+      "HealthMedianMs": 2.5,
+      "HealthMaxMs": 3.5,
+      "CommitsMedianMs": 3.5,
+      "SamplesDuringGeneration": 11
+    },
+    {
+      "Repository": "sharex-full",
+      "Run": 3,
+      "AcceptedMs": 4.4,
+      "TotalMs": 78.9,
+      "DownloadMs": 4.2,
+      "PageCount": 9,
+      "ByteLength": 163073,
+      "DatabaseCommands": 129,
+      "HealthMedianMs": 2.6,
+      "HealthMaxMs": 3.1,
+      "CommitsMedianMs": 3.4,
+      "SamplesDuringGeneration": 11
+    }
+  ],
+  "idempotent": {
+    "ilkDurum": 202,
+    "ikinciDurum": 200,
+    "ayniRapor": true,
+    "ayniBaytlar": true,
+    "ilkSureMs": 8.1,
+    "ikinciSureMs": 4.8
+  },
+  "bozulma": {
+    "indirmeDurumu": 500,
+    "hataKodu": "REPORT_ARTIFACT_CORRUPTED",
+    "kayitDurumu": "corrupted"
+  },
+  "iptal": {
+    "iptalIstegi": 202,
+    "isDurumu": "canceled",
+    "raporDurumu": "failed",
+    "terminalSureMs": 128.7
+  }
+}

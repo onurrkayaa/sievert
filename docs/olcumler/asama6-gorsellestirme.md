@@ -199,13 +199,16 @@ Devre acilirken sayfadaki kalici durum metni istemciden sunucuya gidiyor ve Blaz
 Server'in varsayilan mesaj siniri **32 KB**. Bu tur ilk denemede bu sinir asilmisti:
 sayfa aciliyordu ama devre sessizce kapaniyordu ve **hicbir tiklama calismiyordu**.
 
-Simdiki degerler, sayfa HTML'inden okundu:
+Kusuru ararken olculen degerler (duzeltmeden once, ayni sayfalar) ve simdiki degerler:
 
-| Sayfa | Kalici durum | Sinira oran |
-|---|---|---|
-| Depo genel | 19 036 karakter | %58 |
-| Dosya haritasi | 19 036 karakter | %58 |
-| Zaman cizelgesi | 19 036 karakter | %58 |
+| Sayfa | Duzeltmeden once | Simdi | Sinira oran |
+|---|---|---|---|
+| Depo genel | 73 KB | 19 036 karakter (18.6 KB) | %58 |
+| Dosya haritasi | 142 KB | 19 036 karakter (18.6 KB) | %58 |
+| Zaman cizelgesi | 186 KB | 19 036 karakter (18.6 KB) | %58 |
+
+Onceki sutun kusur arastirmasi sirasinda tarayicidan okundu; simdiki sutun sayfa
+HTML'inden.
 
 Uc sayfada da ayni: gorsellestirme verisi zaten kalici duruma yazilmiyor, yazilan sey
 depo ozeti ve is listesi.

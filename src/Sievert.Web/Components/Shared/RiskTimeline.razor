@@ -58,6 +58,21 @@ else
 
             @AxisTitle()
 
+            @*
+                Yatay eksen: baslangic, orta ve bitis tarihi. Her commit'e etiket koymak
+                yuz noktada okunmaz olurdu; uc isaret araligi anlatmaya yetiyor ve tam
+                tarih her noktanin kendi etiketinde zaten var.
+            *@
+            @foreach ((double x, string label, string anchor) in HorizontalMarks())
+            {
+                <line x1="@VisualizationScale.Number(x)"
+                      x2="@VisualizationScale.Number(x)"
+                      y1="@VisualizationScale.Number(VisualizationScale.PlotTop)"
+                      y2="@VisualizationScale.Number(VisualizationScale.PlotBottom)"
+                      class="chart-grid" />
+                @Caption(x, VisualizationScale.PlotBottom + 22, anchor, label)
+            }
+
             @* Referans cizgileri. Ayni degere dusuyorlarsa tek cizgi ve birlesik etiket. *@
             @if (Coincide)
             {
@@ -287,6 +302,46 @@ else
     private string Y(RiskTimelinePoint point) => VisualizationScale.Number(VisualizationScale.Y(point.RiskIndex));
 
     private string Path() => string.Join(' ', Timeline.Points.Select(point => $"{X(point)},{Y(point)}"));
+
+    /// <summary>
+    /// Yatay eksen isaretleri: ilk, orta ve son nokta.
+    ///
+    /// Konumlar noktalarin kendi konumundan aliniyor, tarihten yeniden hesaplanmiyor;
+    /// boylece isaret her zaman gercek bir commit'in ustunde duruyor ve zaman araligi
+    /// sifir oldugunda da dogru yerde kaliyor.
+    /// </summary>
+    private IEnumerable<(double X, string Label, string Anchor)> HorizontalMarks()
+    {
+        if (Timeline.Points.Count == 0)
+        {
+            yield break;
+        }
+
+        int[] indexes = Timeline.Points.Count < 3
+            ? [0]
+            : [0, Timeline.Points.Count / 2, Timeline.Points.Count - 1];
+
+        int[] distinct = [.. indexes.Distinct()];
+
+        for (int order = 0; order < distinct.Length; order++)
+        {
+            RiskTimelinePoint point = Timeline.Points[distinct[order]];
+
+            // Uc ve orta isaretlerin hizalamasi farkli: ortalanmis bir ilk ya da son
+            // etiket cizim alaninin disina tasip kirpiliyor. Gorsel kontrolde son etiket
+            // "2026-09-" diye yarim gorundu.
+            string anchor = order == 0 && distinct.Length > 1
+                ? "start"
+                : order == distinct.Length - 1 && distinct.Length > 1
+                    ? "end"
+                    : "middle";
+
+            yield return (
+                double.Parse(X(point), System.Globalization.CultureInfo.InvariantCulture),
+                Display.Day(point.AuthorDateUtc),
+                anchor);
+        }
+    }
 
     private void Select(RiskTimelinePoint point) => Chosen = point;
 

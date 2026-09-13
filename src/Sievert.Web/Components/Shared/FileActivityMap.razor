@@ -22,9 +22,14 @@
     @Display.Count(Map.ConsideredCommitCount) commit incelendi &middot;
     @Display.Count(Map.FileCountBeforeLimit) dosya bulundu &middot;
     @Display.Count(Map.ReturnedFileCount) dosya gosteriliyor
-    @if (Map.SourceHeadSha is null)
+    @*
+        Kaynak surum yalniz varsa yaziliyor. Risk skorlamasi calisma agacini hic
+        okumuyor, yani bu alan o is turunde her zaman bos; "kaynak yok" yazmak
+        eksik bir sey varmis izlenimi verirdi.
+    *@
+    @if (Map.SourceHeadSha is string head)
     {
-        <text>&middot; kaynak surum kaydi yok</text>
+        <text>&middot; kaynak @head[..12]</text>
     }
 </p>
 

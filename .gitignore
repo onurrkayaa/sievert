@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 # Yerel calisma notlari, repoya girmiyor
 test-sonuclari/
 .playwright-mcp/
+
+# Calisma zamani ciktilari (rapor PDF dosyalari); repoya girmiyor
+data/runtime/

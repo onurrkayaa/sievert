@@ -20,6 +20,12 @@ public sealed class ApiOptions
     /// <summary>RiskIndex icin egitim skor referansi.</summary>
     public string ScoreReferencePath { get; set; } = Path.Combine("data", "asama6", "model-score-reference.json");
 
+    /// <summary>
+    /// Uretilen rapor dosyalarinin klasoru. Repo icine commit edilmiyor; calisma
+    /// zamani ciktisi ve <c>.gitignore</c> icinde.
+    /// </summary>
+    public string ReportDirectory { get; set; } = Path.Combine("data", "runtime", "reports");
+
     /// <summary>Sayfalama varsayilani ve ust siniri.</summary>
     public int DefaultPageSize { get; set; } = 25;
 
@@ -53,6 +59,7 @@ public sealed class ApiOptions
             ModelDirectory = Absolute(root, ModelDirectory),
             ModelResultsPath = Absolute(root, ModelResultsPath),
             ScoreReferencePath = Absolute(root, ScoreReferencePath),
+            ReportDirectory = Absolute(root, ReportDirectory),
             DefaultPageSize = DefaultPageSize,
             MaximumPageSize = MaximumPageSize,
         };

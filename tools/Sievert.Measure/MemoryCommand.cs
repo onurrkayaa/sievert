@@ -45,6 +45,13 @@ public static class MemoryCommand
                 .ToList()
         ];
 
+        List<ModelLoadResult> loads = [];
+
+        foreach (Target target in targets)
+        {
+            loads.Add(await MeasureModelLoadAsync(repositoryRoot, context, target));
+        }
+
         List<RunResult> runs = [];
 
         foreach (string kind in (string[])["static-scan", "risk-score-all"])
@@ -61,7 +68,7 @@ public static class MemoryCommand
         ConcurrencyResult one = await MeasureConcurrencyAsync(repositoryRoot, context, pair, 1);
         ConcurrencyResult two = await MeasureConcurrencyAsync(repositoryRoot, context, pair, 2);
 
-        string json = Render(codeCommit, runs, one, two);
+        string json = Render(codeCommit, loads, runs, one, two);
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
         File.WriteAllText(outputPath, json, new UTF8Encoding(false));
 
@@ -73,6 +80,59 @@ public static class MemoryCommand
 
     private static HttpClient Client() =>
         new() { BaseAddress = new Uri(BaseUrl), Timeout = TimeSpan.FromMinutes(30) };
+
+    /// <summary>
+    /// Model yuklemesinin tek basina maliyeti.
+    ///
+    /// Ayri bir surec, ayri bir olcum: is kosarken faz gecisi milisaniyeler suruyor ve
+    /// saglik ornekleri arasina sigmiyor. Burada yapilan tek sey bir tek commit'i
+    /// skorlamak, yani modeli diskten okutmak.
+    /// </summary>
+    private static async Task<ModelLoadResult> MeasureModelLoadAsync(
+        string repositoryRoot,
+        SievertContext context,
+        Target target)
+    {
+        string? sha = await context.Commits
+            .AsNoTracking()
+            .Where(commit => commit.RepositoryId == target.Id)
+            .OrderBy(commit => commit.Id)
+            .Select(commit => commit.Sha)
+            .FirstOrDefaultAsync();
+
+        if (sha is null)
+        {
+            return new ModelLoadResult(target.Name, 0, 0, 0, 0, 0);
+        }
+
+        using ApiProcess api = ApiProcess.Start(repositoryRoot, logQueries: false);
+        using HttpClient client = Client();
+
+        await api.WaitUntilHealthyAsync(client);
+
+        Health cold = await ReadHealthAsync(client);
+
+        Stopwatch clock = Stopwatch.StartNew();
+        using HttpResponseMessage response = await client.GetAsync(
+            $"/api/v1/repositories/{target.Id}/commits/{sha}/risk");
+        clock.Stop();
+
+        Health warm = await ReadHealthAsync(client);
+
+        Console.WriteLine(
+            $"== model yuklemesi: {target.Name} == {Mb(warm.WorkingSetBytes - cold.WorkingSetBytes)} MB, "
+            + $"{clock.ElapsedMilliseconds} ms, {(int)response.StatusCode}");
+
+        api.Stop();
+
+        return new ModelLoadResult(
+            target.Name,
+            cold.WorkingSetBytes,
+            warm.WorkingSetBytes,
+            cold.ManagedHeapBytes,
+            warm.ManagedHeapBytes,
+            Math.Round(clock.Elapsed.TotalMilliseconds, 1));
+    }
 
     /// <summary>
     /// Tek bir is, taze bir surecte. Model onbellegi soguk: surec yeni acildi ve is
@@ -141,16 +201,13 @@ public static class MemoryCommand
         int resultCount = job.GetProperty("resultCount").GetInt32();
         int processed = job.GetProperty("processedItems").GetInt32();
 
-        int? tracked = job.TryGetProperty("resultSummary", out JsonElement summary)
-            && summary.ValueKind == JsonValueKind.Object
-            && summary.TryGetProperty("maxChangeTrackerEntries", out JsonElement entries)
-                ? entries.GetInt32()
+        JsonElement? summary = job.TryGetProperty("resultSummary", out JsonElement raw)
+            && raw.ValueKind == JsonValueKind.Object
+                ? raw
                 : null;
 
-        // Model yuklemesi skorlama dongusunun hemen oncesinde oluyor; ilk "scoring"
-        // ornegi modelin yuklendigi andan sonraki ilk olcum.
-        Tick? beforeModel = ticks.FirstOrDefault(tick => tick.Phase is "queued" or "starting" or "counting-commits");
-        Tick? afterModel = ticks.FirstOrDefault(tick => tick.Phase == "scoring");
+        int? tracked = Number(summary, "maxChangeTrackerEntries");
+        int? trackedAfterClear = Number(summary, "maxChangeTrackerEntriesAfterClear");
 
         List<RssSample> samples = [.. api.Samples];
         long baseline = samples.Where(sample => sample.ElapsedMs <= readyAt).Select(sample => sample.WorkingSetBytes)
@@ -175,8 +232,6 @@ public static class MemoryCommand
             samples.FirstOrDefault()?.WorkingSetBytes ?? 0,
             baseline,
             ready.WorkingSetBytes,
-            beforeModel?.WorkingSetBytes,
-            afterModel?.WorkingSetBytes,
             peak,
             terminalRss,
             after.WorkingSetBytes,
@@ -186,8 +241,14 @@ public static class MemoryCommand
             terminal.Gen1 - ready.Gen1,
             terminal.Gen2 - ready.Gen2,
             tracked,
+            trackedAfterClear,
             Trend(ticks));
     }
+
+    private static int? Number(JsonElement? summary, string field) =>
+        summary is JsonElement value && value.TryGetProperty(field, out JsonElement found)
+            ? found.GetInt32()
+            : null;
 
     /// <summary>Her bin ogede o ana kadar goruleni degil, o andaki calisma kumesini yazar.</summary>
     private static List<TrendPoint> Trend(IReadOnlyList<Tick> ticks)
@@ -374,6 +435,7 @@ public static class MemoryCommand
 
     private static string Render(
         string codeCommit,
+        IReadOnlyList<ModelLoadResult> loads,
         IReadOnlyList<RunResult> runs,
         ConcurrencyResult one,
         ConcurrencyResult two) =>
@@ -390,6 +452,7 @@ public static class MemoryCommand
                     saglikAraligiMs = HealthIntervalMs,
                     not = "Her kosu taze bir API sureci. Toplama zorlanmadi, GC ayari degistirilmedi.",
                 },
+                modelYuklemesi = loads,
                 kosular = runs,
                 esZamanlilik = new { bir = one, iki = two },
             },
@@ -415,6 +478,14 @@ public static class MemoryCommand
         int Gen1,
         int Gen2);
 
+    private sealed record ModelLoadResult(
+        string Repository,
+        long ColdWorkingSetBytes,
+        long WarmWorkingSetBytes,
+        long ColdManagedHeapBytes,
+        long WarmManagedHeapBytes,
+        double DurationMs);
+
     private sealed record TrendPoint(int Items, long WorkingSetBytes, long ManagedHeapBytes);
 
     private sealed record JobTiming(int RepositoryId, string Status, int ResultCount, double DurationMs, string? ErrorCode);
@@ -429,8 +500,6 @@ public static class MemoryCommand
         long FirstSampleBytes,
         long BaselineBytes,
         long DatabaseReadyBytes,
-        long? BeforeModelLoadBytes,
-        long? AfterModelLoadBytes,
         long PeakSampledBytes,
         long TerminalBytes,
         long FiveSecondsLaterBytes,
@@ -440,6 +509,7 @@ public static class MemoryCommand
         int Gen1Collections,
         int Gen2Collections,
         int? MaxChangeTrackerEntries,
+        int? MaxChangeTrackerEntriesAfterClear,
         IReadOnlyList<TrendPoint> Trend);
 
     private sealed record ConcurrencyResult(

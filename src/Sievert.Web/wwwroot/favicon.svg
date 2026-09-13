@@ -1,0 +1,10 @@
+<!--
+  Sekmedeki simge. Yerel bir SVG; disaridan indirilen bir ikon paketi yok.
+  Sievert bir radyasyon doz birimi, o yuzden bir doz olcer kadrani: halka ve merkez nokta.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7" fill="#0d1219"/>
+  <circle cx="16" cy="16" r="9" fill="none" stroke="#45c8dc" stroke-width="2"/>
+  <circle cx="16" cy="16" r="3" fill="#45c8dc"/>
+  <path d="M16 7 L16 3" stroke="#45c8dc" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,185 @@
+@page "/repositories/{RepositoryId:int}/commits/{Sha}/risk"
+@implements IDisposable
+@inject SievertApiClient Api
+
+<PageTitle>Commit riski - Sievert</PageTitle>
+
+@if (loading)
+{
+    <Loading Message="Degerlendirme yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (risk is not null)
+{
+    <PageHeader Title="@("Commit " + Short)" Lead="@risk.RepositoryIdentity">
+        <Actions>
+            <a class="btn quiet" href="repositories/@RepositoryId">Depoya git</a>
+        </Actions>
+    </PageHeader>
+
+    <div class="card">
+        <dl class="facts">
+            <dt>Commit</dt>
+            <dd class="mono">@risk.CommitSha</dd>
+            <dt>Model profili</dt>
+            <dd>
+                @risk.ModelProfile
+                <span class="pill tone-warning">kalibre edilmedi</span>
+            </dd>
+            <dt>Model ozeti</dt>
+            <dd class="mono">@risk.ModelChecksum</dd>
+            <dt>Model kodu commit'i</dt>
+            <dd class="mono">@risk.ModelCodeCommit</dd>
+            <dt>Hedef tanimi</dt>
+            <dd>@risk.TargetDefinition</dd>
+            <dt>Kayitli SZZ etiketi</dt>
+            <dd>
+                @(risk.Audit.StoredSzzLabel ? "Hata getiren olarak isaretli" : "Isaretsiz")
+                <span class="faint">(kaynak: @(risk.Audit.LabelSourceType ?? "yok"))</span>
+            </dd>
+            <dt>Statik analiz</dt>
+            <dd>
+                <span class="pill tone-unknown">@risk.StaticAnalysis.Status</span>
+                <span class="faint">model skoruna dahil degil</span>
+            </dd>
+        </dl>
+    </div>
+
+    @*
+        Dort sayi, dort ayri kart.
+
+        Tek bir "risk yuzdesi" uretmiyoruz. Ham skor kalibre edilmedi, goreli endeks bir
+        siralama, iki karar ise iki ayri esige gore. Bunlari tek bir sayiya indirmek
+        olculmemis bir birlesimi uretmek olurdu.
+    *@
+    <div class="cards section">
+        <div class="card">
+            <p class="stat-label">Ham model skoru</p>
+            <p class="stat-value mono">@Display.Score(risk.RawModelScore)</p>
+            <p class="stat-note">0-1 araliginda, yuzde degil, kalibre edilmedi</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Goreli risk endeksi</p>
+            <p class="stat-value mono">@Display.Index(risk.RiskIndex)</p>
+            <p class="stat-note" title="@risk.RiskIndexBasis">
+                Secilen model profilinin egitim dagilimindaki goreli yuzdelik; hata olasiligi degildir.
+            </p>
+        </div>
+        <div class="card">
+            <p class="stat-label">0,5 esigine gore karar</p>
+            <p class="stat-value" style="font-size:1.15rem">@Display.Decision(risk.DecisionAt05)</p>
+            <p class="stat-note">modelin kendi ciktisini oldugu gibi kullanan karar</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Egitim esigine gore karar</p>
+            <p class="stat-value" style="font-size:1.15rem">@Display.Decision(risk.DecisionAtTrainThreshold)</p>
+            <p class="stat-note">esik @Display.Score(risk.TrainThreshold)</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Uyarilar</h2>
+        <WarningList Codes="risk.Warnings" />
+    </div>
+
+    <div class="section">
+        <h2>Oznitelik katkilari</h2>
+        <p class="muted">
+            Katki, modelin o oznitelige verdigi agirlik ile donusmus degerin carpimi.
+            <strong>Nedensel bir iddia degil:</strong> "model skoru bu kadar tasidi" demek,
+            "bu hataya yol acti" demek degil.
+        </p>
+
+        <div class="stack">
+            <ContributionBars Title="Skoru yukari tasiyanlar" Items="risk.PositiveContributions" Up="true" />
+            <ContributionBars Title="Skoru asagi tasiyanlar" Items="risk.NegativeContributions" Up="false" />
+        </div>
+    </div>
+
+    <div class="section">
+        <details>
+            <summary style="cursor:pointer;min-height:var(--target);display:flex;align-items:center">
+                Butun oznitelik degerleri (@risk.FeatureValues.Count)
+            </summary>
+
+            <div class="table-wrap" style="margin-top:var(--space-3)">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Oznitelik</th>
+                            <th scope="col" class="num">Ham deger</th>
+                            <th scope="col" class="num">Donusmus deger</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (FeatureValue value in risk.FeatureValues)
+                        {
+                            <tr>
+                                <td>@value.FeatureName</td>
+                                <td class="num mono">@value.RawValue.ToString("G6", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                <td class="num mono">@value.TransformedValue.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </div>
+
+    <div class="section">
+        <h2>Sinirliliklar</h2>
+        <ul class="plain muted">
+            @foreach (string limitation in risk.Limitations)
+            {
+                <li>@limitation</li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    [Parameter]
+    public int RepositoryId { get; set; }
+
+    [Parameter]
+    public string Sha { get; set; } = string.Empty;
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private CommitRiskAssessment? risk;
+
+    private string Short => Sha.Length >= 12 ? Sha[..12] : Sha;
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<CommitRiskAssessment> result = await Api.RiskAsync(RepositoryId, Sha, closing.Token);
+
+        if (result.IsSuccess)
+        {
+            risk = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        loading = false;
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

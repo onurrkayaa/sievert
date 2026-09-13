@@ -19,10 +19,15 @@ public interface IProblemView
     string? TraceId { get; }
 }
 
-/// <summary>Sonuc tasimayan bir hata; is baslatma ve iptal cevaplarinda kullaniliyor.</summary>
-public sealed record ProblemView(string? Title, string? Detail, string? ErrorCode, string? TraceId) : IProblemView
+/// <summary>
+/// Sonuc tasimayan bir hata; is baslatma ve iptal cevaplarinda kullaniliyor.
+///
+/// Adi <c>ProblemView</c> DEGIL: o ad hata kutusu bileseninin adi ve ikisi ayni ad
+/// alaninda gorununce Razor hangisini kastettigimizi bilemiyor.
+/// </summary>
+public sealed record ProblemSummary(string? Title, string? Detail, string? ErrorCode, string? TraceId) : IProblemView
 {
-    public static ProblemView From(ProblemResponse problem) =>
+    public static ProblemSummary From(ProblemResponse problem) =>
         new(problem.Title ?? "Istek karsilanamadi", problem.Detail, problem.ErrorCode, problem.TraceId);
 }
 

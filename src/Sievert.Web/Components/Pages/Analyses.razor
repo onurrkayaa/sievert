@@ -1,0 +1,220 @@
+@page "/analyses"
+@implements IDisposable
+@inject SievertApiClient Api
+
+<PageTitle>Analiz Isleri - Sievert</PageTitle>
+
+<PageHeader Title="Analiz Isleri"
+            Lead="Arka planda kosan statik tarama ve skorlama isleri." />
+
+@if (repositories is null)
+{
+    <Loading Message="Depolar yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else
+{
+    <div class="row" style="margin-bottom:var(--space-4)">
+        <label class="field">
+            Depo
+            <select value="@repositoryId" @onchange="ChangeRepositoryAsync">
+                @foreach (RepositoryListItem item in repositories)
+                {
+                    <option value="@item.Id" selected="@(item.Id == repositoryId)">@item.Name</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            Durum
+            <select value="@status" @onchange="@(args => ApplyAsync(() => status = Value(args)))">
+                <option value="">Hepsi</option>
+                <option value="queued">Kuyrukta</option>
+                <option value="running">Calisiyor</option>
+                <option value="succeeded">Tamamlandi</option>
+                <option value="failed">Basarisiz</option>
+                <option value="canceled">Iptal edildi</option>
+            </select>
+        </label>
+
+        <label class="field">
+            Tur
+            <select value="@kind" @onchange="@(args => ApplyAsync(() => kind = Value(args)))">
+                <option value="">Hepsi</option>
+                <option value="static-scan">Statik tarama</option>
+                <option value="risk-score-all">Tum commit'leri skorla</option>
+            </select>
+        </label>
+    </div>
+
+    @if (page is null)
+    {
+        <Loading Message="Isler yukleniyor..." />
+    }
+    else if (page.TotalCount == 0)
+    {
+        <EmptyState Title="Bu suzgeclerle is yok"
+                    Detail="Bir depo sayfasindan yeni bir is baslatabilirsin." />
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Tur</th>
+                        <th scope="col">Durum</th>
+                        <th scope="col">Asama</th>
+                        <th scope="col" class="num">Ilerleme</th>
+                        <th scope="col" class="num">Sonuc</th>
+                        <th scope="col">Istek</th>
+                        <th scope="col">Bitis</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (AnalysisJobResponse job in page.Items)
+                    {
+                        <tr>
+                            <td>@Display.Kind(job.Kind)</td>
+                            <td><span class="pill @Display.StatusTone(job.Status)">@Display.Status(job.Status)</span></td>
+                            <td class="muted">@job.CurrentPhase</td>
+                            <td class="num">
+                                @Display.Count(job.ProcessedItems)@(job.TotalItems is int total ? " / " + Display.Count(total) : string.Empty)
+                            </td>
+                            <td class="num">
+                                @Display.Count(job.ResultCount)
+                                @if (!job.IsResultComplete && job.ResultCount > 0)
+                                {
+                                    <span class="pill tone-warning">kismi</span>
+                                }
+                            </td>
+                            <td>@Display.Moment(job.RequestedAtUtc)</td>
+                            <td>@Display.Moment(job.CompletedAtUtc)</td>
+                            <td><a href="analyses/@job.Id">Ayrinti</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pager Page="page.Page"
+               PageSize="page.PageSize"
+               TotalCount="page.TotalCount"
+               PageChanged="ChangePageAsync"
+               PageSizeChanged="ChangeSizeAsync" />
+    }
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private IProblemView? failure;
+    private List<RepositoryListItem>? repositories;
+    private PagedResponse<AnalysisJobResponse>? page;
+
+    private int repositoryId;
+    private string status = string.Empty;
+    private string kind = string.Empty;
+    private int pageNumber = 1;
+    private int pageSize = 25;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        failure = null;
+
+        ApiResult<PagedResponse<RepositoryListItem>> list = await Api.RepositoriesAsync(1, 100, closing.Token);
+
+        if (!list.IsSuccess || list.Value is null)
+        {
+            failure = list;
+            repositories = [];
+
+            return;
+        }
+
+        repositories = [.. list.Value.Items];
+
+        if (repositories.Count == 0)
+        {
+            page = new PagedResponse<AnalysisJobResponse>(1, pageSize, 0, []);
+
+            return;
+        }
+
+        if (repositoryId == 0)
+        {
+            repositoryId = repositories[0].Id;
+        }
+
+        await LoadJobsAsync();
+    }
+
+    private async Task LoadJobsAsync()
+    {
+        page = null;
+        StateHasChanged();
+
+        ApiResult<PagedResponse<AnalysisJobResponse>> result = await Api.AnalysesAsync(
+            repositoryId,
+            pageNumber,
+            pageSize,
+            string.IsNullOrEmpty(status) ? null : status,
+            string.IsNullOrEmpty(kind) ? null : kind,
+            closing.Token);
+
+        if (result.IsSuccess)
+        {
+            page = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+    }
+
+    private static string Value(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+
+    private Task ApplyAsync(Action change)
+    {
+        change();
+        pageNumber = 1;
+
+        return LoadJobsAsync();
+    }
+
+    private Task ChangeRepositoryAsync(ChangeEventArgs args) =>
+        ApplyAsync(() =>
+        {
+            if (int.TryParse(args.Value?.ToString(), out int value))
+            {
+                repositoryId = value;
+            }
+        });
+
+    private Task ChangePageAsync(int value)
+    {
+        pageNumber = value;
+
+        return LoadJobsAsync();
+    }
+
+    private Task ChangeSizeAsync(int value)
+    {
+        pageSize = value;
+        pageNumber = 1;
+
+        return LoadJobsAsync();
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

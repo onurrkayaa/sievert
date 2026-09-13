@@ -1,0 +1,179 @@
+@implements IDisposable
+@inject SievertApiClient Api
+
+@*
+    Skorlama sonucu.
+
+    Ham skor dort ondalikli ve yuzde isareti YOK; goreli endeks 0-100 ama "yuzdelik sira"
+    diye yaziyor. Ikisi ayri sutunda duruyor, tek bir "risk" sutununda birlestirilmiyor.
+*@
+<h2>Commit skorlari</h2>
+
+<div class="notice info">
+    <p>
+        <strong>Ham model skoru kalibre edilmedi.</strong>
+        Goreli endeks, secilen model profilinin egitim dagilimindaki yuzdelik sirasidir;
+        hata olasiligi degildir.
+    </p>
+</div>
+
+@if (!Ready)
+{
+    <EmptyState Title="Skorlama suruyor" Detail="Is bitince satirlar burada gorunecek." />
+}
+else if (page is null && failure is null)
+{
+    <Loading Message="Skorlar yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (page is not null)
+{
+    <PartialBanner Partial="page.Partial" Warning="@(page.PartialWarning)" />
+
+    <div class="row" style="margin:var(--space-3) 0">
+        <label class="field">
+            Sira
+            <select value="@order" @onchange="@(args => ApplyAsync(() => order = args.Value?.ToString() ?? "highest"))">
+                <option value="highest" selected="@(order == "highest")">En yuksek skor once</option>
+                <option value="newest" selected="@(order == "newest")">En yeni once</option>
+                <option value="oldest" selected="@(order == "oldest")">En eski once</option>
+            </select>
+        </label>
+    </div>
+
+    @if (page.TotalCount == 0)
+    {
+        <EmptyState Title="Bu iste kaydedilmis skor yok" />
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Commit</th>
+                        <th scope="col">Tarih</th>
+                        <th scope="col" class="wrap">Mesaj</th>
+                        <th scope="col" class="num">Ham model skoru</th>
+                        <th scope="col" class="num">Goreli endeks</th>
+                        <th scope="col">0,5 karari</th>
+                        <th scope="col">Egitim esigi karari</th>
+                        <th scope="col">Profil</th>
+                        <th scope="col" class="num">Uyari</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CommitRiskSnapshotResponse row in page.Items)
+                    {
+                        <tr>
+                            <td><code>@row.ShortSha</code></td>
+                            <td>@Display.Day(row.AuthorDateUtc)</td>
+                            <td class="wrap">@row.MessageSubject</td>
+                            <td class="num mono">@Display.Score(row.RawModelScore)</td>
+                            <td class="num mono">@Display.Index(row.RiskIndex)</td>
+                            <td>@Display.Decision(row.DecisionAt05)</td>
+                            <td>@Display.Decision(row.DecisionAtTrainThreshold)</td>
+                            <td>
+                                @row.ModelProfile
+                                @if (!row.IsCalibrated)
+                                {
+                                    <span class="pill tone-warning">kalibre edilmedi</span>
+                                }
+                            </td>
+                            <td class="num">@row.WarningCodes.Count</td>
+                            <td><a href="repositories/@RepositoryId/commits/@row.Sha/risk">Ayrinti</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pager Page="page.Page"
+               PageSize="page.PageSize"
+               TotalCount="page.TotalCount"
+               PageChanged="ChangePageAsync"
+               PageSizeChanged="ChangeSizeAsync" />
+    }
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    [Parameter, EditorRequired]
+    public Guid JobId { get; set; }
+
+    [Parameter, EditorRequired]
+    public int RepositoryId { get; set; }
+
+    [Parameter, EditorRequired]
+    public bool Ready { get; set; }
+
+    private AnalysisResultPage<CommitRiskSnapshotResponse>? page;
+    private IProblemView? failure;
+    private string order = "highest";
+    private int pageNumber = 1;
+    private int pageSize = 25;
+    private bool loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Ready && !loaded)
+        {
+            loaded = true;
+
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        page = null;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<AnalysisResultPage<CommitRiskSnapshotResponse>> result =
+            await Api.RisksAsync(JobId, pageNumber, pageSize, order, closing.Token);
+
+        if (result.IsSuccess)
+        {
+            page = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+    }
+
+    private Task ApplyAsync(Action change)
+    {
+        change();
+        pageNumber = 1;
+
+        return LoadAsync();
+    }
+
+    private Task ChangePageAsync(int value)
+    {
+        pageNumber = value;
+
+        return LoadAsync();
+    }
+
+    private Task ChangeSizeAsync(int value)
+    {
+        pageSize = value;
+        pageNumber = 1;
+
+        return LoadAsync();
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

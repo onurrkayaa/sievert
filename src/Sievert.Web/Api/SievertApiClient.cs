@@ -44,10 +44,23 @@ public sealed class SievertApiClient(HttpClient http, ILogger<SievertApiClient> 
         int repositoryId,
         int page,
         int pageSize,
-        CancellationToken cancellation) =>
-        GetAsync<PagedResponse<CommitListItem>>(
-            $"/api/v1/repositories/{repositoryId}/commits?page={page}&pageSize={Clamp(pageSize)}",
-            cancellation);
+        string order,
+        bool? isFix,
+        bool? isBugIntroducing,
+        bool? isBot,
+        CancellationToken cancellation)
+    {
+        string query = $"/api/v1/repositories/{repositoryId}/commits?page={page}&pageSize={Clamp(pageSize)}"
+            + $"&order={Uri.EscapeDataString(order)}";
+
+        query += Flag("isFix", isFix) + Flag("isBugIntroducing", isBugIntroducing) + Flag("isBot", isBot);
+
+        return GetAsync<PagedResponse<CommitListItem>>(query, cancellation);
+    }
+
+    /// <summary>Verilmeyen bir suzgec sorguya hic yazilmiyor; "hepsi" ile "false" ayni sey degil.</summary>
+    private static string Flag(string name, bool? value) =>
+        value is bool set ? $"&{name}={(set ? "true" : "false")}" : string.Empty;
 
     public Task<ApiResult<CommitRiskAssessment>> RiskAsync(
         int repositoryId,

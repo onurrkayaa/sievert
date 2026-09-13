@@ -1,5 +1,6 @@
 @implements IDisposable
 @inject SievertApiClient Api
+@inject NavigationManager Navigation
 
 @*
     API su an konusuyor mu.
@@ -28,6 +29,16 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Her gezinmede yeniden soruluyor. Tek sefer sorsaydik API bir sure sonra geri
+        // geldiginde rozet hala "Erisilemiyor" der ve kullanici duzelen bir seyi bozuk
+        // sanardi.
+        Navigation.LocationChanged += OnLocationChanged;
+
+        await CheckAsync();
+    }
+
+    private async Task CheckAsync()
+    {
         ApiResult<HealthResponse> health = await Api.HealthAsync(closing.Token);
 
         if (!health.IsSuccess || health.Value is null)
@@ -38,17 +49,51 @@
         }
 
         bool databaseReady = health.Value.Database.Reachable && health.Value.Database.MigrationsApplied;
-        bool modelsReady = health.Value.Models.All(model => model.Status == "Ready");
 
-        (label, tone, detail) = databaseReady && modelsReady
+        // NotLoaded bir sorun DEGIL: model tembel yukleniyor ve ilk skorlamaya kadar
+        // diskten okunmuyor. Sorun olan iki durum var - ozet tutmuyor ya da yuklenemedi.
+        bool modelsUsable = health.Value.Models.All(model => model.Status is "Ready" or "NotLoaded");
+
+        (label, tone, detail) = databaseReady && modelsUsable
             ? ("Hazir", "tone-done", null)
             : ("Kismi hazir", "tone-warning", databaseReady
                 ? "Bir model profili kullanilamiyor."
                 : "Veritabani hazir degil.");
     }
 
+    /// <summary>
+    /// Gezinme olayi senkron; kontrol ise bir HTTP cagrisi.
+    ///
+    /// <c>async void</c> YAZMIYORUZ: oradan cikan bir istisna yakalanamaz ve sureci
+    /// dusurur. Gorev acikca baslatiliyor ve icinde yakalaniyor.
+    /// </summary>
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _ = RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        if (closing.IsCancellationRequested)
+        {
+            return;
+        }
+
+        try
+        {
+            await CheckAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (OperationCanceledException)
+        {
+            // Bilesen birakildi; sorun degil.
+        }
+        catch (ObjectDisposedException)
+        {
+            // Devre kapandi.
+        }
+    }
+
     public void Dispose()
     {
+        Navigation.LocationChanged -= OnLocationChanged;
         closing.Cancel();
         closing.Dispose();
     }

@@ -25,7 +25,7 @@ else
                 </div>
 
                 <div class="bar-track @(Up ? "bar-up" : "bar-down")" aria-hidden="true">
-                    <span style="width:@(Width(item))%"></span>
+                    <span style="width:@Width(item)"></span>
                 </div>
 
                 <div class="bar-value">@Signed(item.Contribution)</div>
@@ -87,8 +87,17 @@ else
 
     private double Largest => Items.Count == 0 ? 1 : Items.Max(item => Math.Abs(item.Contribution));
 
-    private double Width(FeatureContribution item) =>
-        Math.Round(Math.Abs(item.Contribution) / Math.Max(1e-9, Largest) * 100, 1);
+    /// <summary>
+    /// Cubugun genisligi, CSS'e hazir metin olarak.
+    ///
+    /// Bicimlendirme **degismez kultur** ile: sunucunun kulturu virgullu ondalik
+    /// kullaniyorsa "width:67,8%" cikiyor, tarayici bunu gecersiz sayiyor ve cubugun
+    /// tamami doluyor. Gorsel kontrolde tam olarak bu cikti; 0,43 ile 0,02 katkinin
+    /// cubuklari ayni uzunluktaydi.
+    /// </summary>
+    private string Width(FeatureContribution item) =>
+        Math.Round(Math.Abs(item.Contribution) / Math.Max(1e-9, Largest) * 100, 1)
+            .ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + "%";
 
     private static string Signed(double value) =>
         (value >= 0 ? "+" : "-")

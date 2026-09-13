@@ -1,0 +1,305 @@
+@page "/analyses/{JobId:guid}"
+@implements IAsyncDisposable
+@inject SievertApiClient Api
+
+<PageTitle>Analiz isi - Sievert</PageTitle>
+
+@if (job is null && failure is null)
+{
+    <Loading Message="Is yukleniyor..." />
+}
+else if (failure is not null && job is null)
+{
+    <ProblemView Result="failure" OnRetry="ReloadAsync" />
+}
+else if (job is not null)
+{
+    <PageHeader Title="@Display.Kind(job.Kind)" Lead="@($"Depo #{job.RepositoryId}")">
+        <Actions>
+            @if (!JobPolling.IsTerminal(job.Status))
+            {
+                <button class="btn" type="button" disabled="@cancelling" @onclick="CancelAsync">
+                    @(cancelling ? "Iptal isteniyor..." : "Isi iptal et")
+                </button>
+            }
+            <a class="btn quiet" href="repositories/@job.RepositoryId">Depoya git</a>
+        </Actions>
+    </PageHeader>
+
+    @if (cancelNote is not null)
+    {
+        <div class="notice info" role="status"><p>@cancelNote</p></div>
+    }
+
+    @if (cancelProblem is not null)
+    {
+        <ProblemView Result="cancelProblem" />
+    }
+
+    <div class="cards">
+        <div class="card">
+            <p class="stat-label">Durum</p>
+            <p class="stat-value" style="font-size:1.2rem">
+                <span class="pill @Display.StatusTone(job.Status)">@Display.Status(job.Status)</span>
+            </p>
+            <p class="stat-note">asama: @job.CurrentPhase</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Islenen</p>
+            <p class="stat-value">@Display.Count(job.ProcessedItems)</p>
+            <p class="stat-note">@(job.TotalItems is int total ? "toplam " + Display.Count(total) : "toplam henuz bilinmiyor")</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Sonuc satiri</p>
+            <p class="stat-value">@Display.Count(job.ResultCount)</p>
+            <p class="stat-note">@(job.IsResultComplete ? "tam sonuc" : "tam degil")</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Sure</p>
+            <p class="stat-value" style="font-size:1.2rem">@Display.Duration(job.StartedAtUtc, job.CompletedAtUtc)</p>
+            <p class="stat-note">istek @Display.Moment(job.RequestedAtUtc)</p>
+        </div>
+    </div>
+
+    @if (job.ProgressPercent is double percent)
+    {
+        <div class="section">
+            <div class="progress" role="progressbar"
+                 aria-valuenow="@((int)percent)" aria-valuemin="0" aria-valuemax="100"
+                 aria-label="Is ilerlemesi">
+                <span style="width:@(percent.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))%"></span>
+            </div>
+            <p class="stat-note">%@Display.Index(percent) &middot; son guncelleme @Display.Moment(lastUpdate)</p>
+        </div>
+    }
+    else
+    {
+        <p class="stat-note">Son guncelleme @Display.Moment(lastUpdate)</p>
+    }
+
+    @if (job.ErrorCode is string errorCode)
+    {
+        <div class="section notice danger" role="alert">
+            <h2 style="font-size:1rem">Is basariyla bitmedi</h2>
+            <dl class="facts">
+                <dt>Hata kodu</dt>
+                <dd><code>@errorCode</code></dd>
+                @if (job.ErrorMessage is string message)
+                {
+                    <dt>Aciklama</dt>
+                    <dd>@message</dd>
+                }
+            </dl>
+        </div>
+    }
+
+    @if (job.Kind == "static-scan")
+    {
+        <div class="section">
+            <h2>Taranan kaynak</h2>
+            <div class="card">
+                <dl class="facts">
+                    <dt>HEAD commit</dt>
+                    <dd>@(job.SourceHeadShortSha is string sha ? sha : "Kaydedilmedi")</dd>
+                    <dt>Calisma agaci</dt>
+                    <dd>
+                        <span class="pill @(job.SourceTreeState == "clean" ? "tone-done" : "tone-warning")">
+                            @Display.TreeState(job.SourceTreeState)
+                        </span>
+                    </dd>
+                    <dt>Bitiste yeniden okundu</dt>
+                    <dd>@(job.SourceVerified ? "Evet" : "Hayir")</dd>
+                    <dt>Tarama sirasinda degisti</dt>
+                    <dd>@(job.SourceCommitChangedDuringAnalysis ? "Evet" : "Hayir")</dd>
+                </dl>
+            </div>
+        </div>
+    }
+
+    @if (job.ResultSummary is System.Text.Json.JsonElement summary
+        && summary.ValueKind == System.Text.Json.JsonValueKind.Object)
+    {
+        <div class="section">
+            <h2>Is ozeti</h2>
+            <div class="card">
+                <dl class="facts">
+                    @foreach (System.Text.Json.JsonProperty field in summary.EnumerateObject())
+                    {
+                        <dt>@field.Name</dt>
+                        <dd class="mono">@field.Value.ToString()</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    }
+
+    <div class="section">
+        @if (job.Kind == "static-scan")
+        {
+            <FindingsPanel JobId="job.Id" Ready="JobPolling.IsTerminal(job.Status)" Status="job.Status" />
+        }
+        else
+        {
+            <RiskResultsPanel JobId="job.Id" RepositoryId="job.RepositoryId" Ready="JobPolling.IsTerminal(job.Status)" />
+        }
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    [Parameter]
+    public Guid JobId { get; set; }
+
+    private AnalysisJobResponse? job;
+    private IProblemView? failure;
+    private IProblemView? cancelProblem;
+    private string? cancelNote;
+    private bool cancelling;
+    private DateTimeOffset? lastUpdate;
+    private Task? polling;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ReloadAsync();
+
+        // Yalniz aktif isler icin donguyu baslatiyoruz. Terminal duruma gecmis bir isi
+        // sormaya devam etmek, degismeyecek bir seyi saniyede bir sormak olurdu.
+        if (polling is null && job is not null && !JobPolling.IsTerminal(job.Status))
+        {
+            polling = PollAsync();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        ApiResult<AnalysisJobResponse> result = await Api.AnalysisAsync(JobId, closing.Token);
+
+        if (result.IsSuccess)
+        {
+            job = result.Value;
+            failure = null;
+            lastUpdate = DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            failure = result;
+        }
+    }
+
+    /// <summary>
+    /// Durum dongusu.
+    ///
+    /// Tek bir dongu ve her turda tek bir istek: bir sonraki istek oncekinin cevabi
+    /// gelmeden baslamiyor. Zamanlayici kullansaydim yavas bir cevap ustune ikinci bir
+    /// istek binerdi.
+    ///
+    /// Dongu su uc durumda duruyor: is terminal duruma gecti, bilesen birakildi ya da
+    /// kullanici sayfadan ayrildi. Ucu de ayni jetondan geciyor.
+    /// </summary>
+    private async Task PollAsync()
+    {
+        int failures = 0;
+
+        while (!closing.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(JobPolling.Wait(failures), closing.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (closing.IsCancellationRequested)
+            {
+                return;
+            }
+
+            ApiResult<AnalysisJobResponse> result = await Api.AnalysisAsync(JobId, closing.Token);
+
+            if (result.IsSuccess && result.Value is not null)
+            {
+                job = result.Value;
+                failure = null;
+                failures = 0;
+                lastUpdate = DateTimeOffset.UtcNow;
+            }
+            else
+            {
+                // Hata halinde sonsuz hizli tekrar yok; bekleme merdivenine giriyoruz.
+                failures++;
+                failure = result;
+            }
+
+            await InvokeAsync(StateHasChanged);
+
+            if (job is not null && JobPolling.IsTerminal(job.Status))
+            {
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Iptal.
+    ///
+    /// Dugme istek boyunca kapali; cift tiklama ikinci bir istek gondermiyor. Cevap
+    /// <c>200</c> ise durum kesin, <c>202</c> ise is bir sonraki obek sinirinda duracak
+    /// ve bunu kullaniciya soyluyoruz - "iptal edildi" demek yanlis olurdu.
+    /// </summary>
+    private async Task CancelAsync()
+    {
+        cancelling = true;
+        cancelProblem = null;
+        cancelNote = null;
+        StateHasChanged();
+
+        JobCancel result = await Api.CancelAsync(JobId, closing.Token);
+
+        cancelling = false;
+
+        if (result.Problem is not null)
+        {
+            cancelProblem = ProblemSummary.From(result.Problem);
+
+            return;
+        }
+
+        if (result.Job is not null)
+        {
+            job = result.Job;
+            lastUpdate = DateTimeOffset.UtcNow;
+        }
+
+        // Uc ayri sonuc, uc ayri cumle. Bitmis bir is icin "iptal edildi" demek yanlis
+        // olurdu: istek geldiginde is coktan bitmisti ve hicbir sey degismedi.
+        cancelNote = job switch
+        {
+            { Status: "succeeded" or "failed" } => "Is iptal istegi gelmeden bitmisti; durumu degismedi.",
+            { Status: "canceled" } => "Is iptal edildi. Kaydedilen satirlar kismi.",
+            _ when result.Immediate => "Iptal islendi; isin durumu su an kesin.",
+            _ => "Iptal istegi kaydedildi. Is bir sonraki obek sinirinda duracak.",
+        };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await closing.CancelAsync();
+
+        if (polling is not null)
+        {
+            try
+            {
+                await polling;
+            }
+            catch (OperationCanceledException)
+            {
+                // Kapanirken iptal bekleniyor.
+            }
+        }
+
+        closing.Dispose();
+    }
+}

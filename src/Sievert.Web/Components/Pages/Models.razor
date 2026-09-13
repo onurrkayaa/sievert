@@ -1,0 +1,135 @@
+@page "/models"
+@implements IDisposable
+@inject SievertApiClient Api
+
+<PageTitle>Modeller - Sievert</PageTitle>
+
+<PageHeader Title="Model profilleri"
+            Lead="Asama 5'te egitilmis uc ayni-repo modeli. Hicbiri kalibre edilmedi." />
+
+<div class="notice warning">
+    <h2 style="font-size:1rem">Kalibrasyon</h2>
+    <p>
+        Platt ve isotonic kalibrasyon denemeleri yapildi ama <strong>uretim icin bir
+        kalibrator secilmedi</strong> (ADR 0019, ADR 0022). Skorlar bu yuzden olasilik
+        olarak sunulmuyor ve her profilde <code>isCalibrated</code> alani <code>false</code>.
+    </p>
+</div>
+
+@if (loading)
+{
+    <Loading Message="Profiller yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (models is null || models.Count == 0)
+{
+    <EmptyState Title="Model profili yok" Detail="API hicbir profil yukleyemedi." />
+}
+else
+{
+    <div class="stack section">
+        @foreach (ModelResponse model in models)
+        {
+            <div class="card">
+                <div class="row-spread">
+                    <h2 style="margin:0">@model.DisplayName</h2>
+                    <span class="pill @(Usable(model.Code) ? "tone-done" : "tone-danger")">@Label(model.Code)</span>
+                </div>
+
+                <p class="muted" style="margin-top:var(--space-2)">
+                    Bu profil yalniz eslesen egitim reposu icin otomatik secilir.
+                    Disaridan baska bir profil zorlanamaz.
+                </p>
+
+                <dl class="facts">
+                    <dt>Kod</dt>
+                    <dd><code>@model.Code</code></dd>
+                    <dt>Depo kimligi</dt>
+                    <dd class="mono">@model.RepositoryIdentity</dd>
+                    <dt>Egitici</dt>
+                    <dd>@model.Trainer (@model.MlPackage)</dd>
+                    <dt>Oznitelik sayisi</dt>
+                    <dd>@model.FeatureCount (sema @model.FeatureSchemaVersion)</dd>
+                    <dt>Egitim esigi</dt>
+                    <dd class="mono">@Display.Score(model.TrainThreshold)</dd>
+                    <dt>Kalibre edildi mi</dt>
+                    <dd>
+                        <span class="pill tone-warning">Hayir</span>
+                    </dd>
+                    <dt>Model kodu commit'i</dt>
+                    <dd class="mono">@model.ModelCodeCommit</dd>
+                    <dt>Dosya ozeti</dt>
+                    <dd class="mono">@model.ModelChecksum</dd>
+                </dl>
+
+                <h3 style="margin-top:var(--space-4)">Sinirliliklar</h3>
+                <ul class="plain muted">
+                    @foreach (string limitation in model.Limitations)
+                    {
+                        <li>@limitation</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private List<ModelResponse>? models;
+    private Dictionary<string, string> statuses = [];
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<List<ModelResponse>> result = await Api.ModelsAsync(closing.Token);
+
+        if (!result.IsSuccess)
+        {
+            (loading, failure) = (false, result);
+
+            return;
+        }
+
+        models = result.Value;
+
+        // Durum saglik ucundan geliyor: bir modelin ozeti tutmuyorsa profil listesinde
+        // gorunur ama kullanilamaz ve bunu gizlemek yanlis olurdu.
+        ApiResult<HealthResponse> health = await Api.HealthAsync(closing.Token);
+
+        statuses = health.Value?.Models.ToDictionary(model => model.Code, model => model.Status) ?? [];
+        loading = false;
+    }
+
+    private string Status(string code) =>
+        statuses.TryGetValue(code, out string? status) ? status : "Bilinmiyor";
+
+    /// <summary>Model kullanilabilir mi. Tembel yukleme yuzunden "NotLoaded" normal bir durum.</summary>
+    private bool Usable(string code) => Status(code) is "Ready" or "NotLoaded";
+
+    private string Label(string code) => Status(code) switch
+    {
+        "Ready" => "Yuklu",
+        "NotLoaded" => "Hazir, henuz yuklenmedi",
+        "ChecksumMismatch" => "Ozet tutmuyor, kullanilmiyor",
+        "Failed" => "Yuklenemedi",
+        _ => "Bilinmiyor",
+    };
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

@@ -1,0 +1,187 @@
+@page "/system"
+@implements IDisposable
+@inject SievertApiClient Api
+@inject WebOptions Options
+
+<PageTitle>Sistem Durumu - Sievert</PageTitle>
+
+<PageHeader Title="Sistem Durumu" Lead="API, veritabani, kuyruk ve worker." />
+
+@*
+    Kimlik dogrulama uyarisi.
+
+    Bu turda kimlik dogrulama yok. API loopback'te dinliyorsa erisim yereldir ve bu
+    kabul edilebilir; disari acilmissa adrese erisen herkes butun uclari kullanabilir ve
+    bunu ekranda soylemek gerekiyor.
+*@
+@if (Options.RemoteWarning is string warning)
+{
+    <div class="notice danger" role="alert">
+        <h2 style="font-size:1rem">Uzak erisim acik ve kimlik dogrulama yok</h2>
+        <p>@warning</p>
+    </div>
+}
+else
+{
+    <div class="notice info">
+        <p>API yerel adreste dinliyor (@Options.SafeApiAddress). Bu turda kimlik dogrulama yok,
+        o yuzden servis disari acilmamali.</p>
+    </div>
+}
+
+@if (loading)
+{
+    <Loading Message="Durum okunuyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (health is not null)
+{
+    <div class="cards section">
+        <div class="card">
+            <p class="stat-label">API</p>
+            <p class="stat-value" style="font-size:1.1rem">
+                <span class="pill @(health.Status == "ok" ? "tone-done" : "tone-warning")">
+                    @(health.Status == "ok" ? "Hazir" : "Kismi hazir")
+                </span>
+            </p>
+            <p class="stat-note">surum @health.Version</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Veritabani</p>
+            <p class="stat-value" style="font-size:1.1rem">
+                <span class="pill @(health.Database.Reachable ? "tone-done" : "tone-danger")">
+                    @(health.Database.Reachable ? "Baglanti var" : "Baglanti yok")
+                </span>
+            </p>
+            <p class="stat-note">@(health.Database.Detail ?? "sorun bildirilmedi")</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Gecisler</p>
+            <p class="stat-value" style="font-size:1.1rem">
+                <span class="pill @(health.Database.MigrationsApplied ? "tone-done" : "tone-warning")">
+                    @(health.Database.MigrationsApplied ? "Uygulandi" : "Eksik var")
+                </span>
+            </p>
+            <p class="stat-note">sema surumu</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Model kayit defteri</p>
+            @* Tembel yukleme: "NotLoaded" kullanilamaz demek degil, henuz diske gidilmedi demek. *@
+            <p class="stat-value">@health.Models.Count(model => model.Status is "Ready" or "NotLoaded") / @health.Models.Count</p>
+            <p class="stat-note">kullanilabilir profil &middot; metadata @health.ModelMetadataVersion</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Kuyruk ve worker</h2>
+        <div class="card">
+            <dl class="facts">
+                <dt>Kuyruk kapasitesi</dt>
+                <dd>@Display.Count(health.Analysis.QueueCapacity)</dd>
+                <dt>Kuyrukta bekleyen (kanal)</dt>
+                <dd>@Display.Count(health.Analysis.QueuedInChannel)</dd>
+                <dt>Worker es zamanliligi</dt>
+                <dd>@Display.Count(health.Analysis.WorkerConcurrency)</dd>
+                <dt>Kuyruktaki is</dt>
+                <dd>@Display.Count(health.Analysis.QueuedJobs)</dd>
+                <dt>Calisan is</dt>
+                <dd>@Display.Count(health.Analysis.RunningJobs)</dd>
+                <dt>Son biten is</dt>
+                <dd>@Display.Moment(health.Analysis.LastCompletedJobAtUtc)</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Son kurtarma</h2>
+        <div class="card">
+            @if (health.Analysis.LastRecovery is RecoveryHealth recovery)
+            {
+                <dl class="facts">
+                    <dt>Zaman</dt>
+                    <dd>@Display.Moment(recovery.At)</dd>
+                    <dt>Yeniden kuyruga alinan</dt>
+                    <dd>@Display.Count(recovery.Requeued)</dd>
+                    <dt>Yarida kalmis sayilan</dt>
+                    <dd>@Display.Count(recovery.Interrupted)</dd>
+                    <dt>Baslamadan iptal edilen</dt>
+                    <dd>@Display.Count(recovery.CanceledBeforeStart)</dd>
+                </dl>
+            }
+            else
+            {
+                <p class="muted">Bu surecte kurtarma calismadi ya da veritabani hazir degildi.</p>
+            }
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>API sureci</h2>
+        <div class="card">
+            <dl class="facts">
+                <dt>Calisma kumesi</dt>
+                <dd>@Display.Megabytes(health.Process.WorkingSetBytes)</dd>
+                <dt>Yonetilen yigin</dt>
+                <dd>@Display.Megabytes(health.Process.ManagedHeapBytes)</dd>
+                <dt>Toplama (nesil 0 / 1 / 2)</dt>
+                <dd>@health.Process.Gen0Collections / @health.Process.Gen1Collections / @health.Process.Gen2Collections</dd>
+                <dt>Ayakta kalma suresi</dt>
+                <dd>@Display.Seconds(health.Process.UptimeSeconds)</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Panel</h2>
+        <div class="card">
+            <dl class="facts">
+                <dt>Surum</dt>
+                <dd>@Options.Version</dd>
+                <dt>API adresi</dt>
+                @* Yalniz sema, host ve port. Kullanici adi, parola ve yol gosterilmiyor. *@
+                <dd class="mono">@Options.SafeApiAddress</dd>
+                <dt>Kimlik dogrulama</dt>
+                <dd>Yok (bu turda tasarlanmadi)</dd>
+            </dl>
+        </div>
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private HealthResponse? health;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<HealthResponse> result = await Api.HealthAsync(closing.Token);
+
+        if (result.IsSuccess)
+        {
+            health = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        loading = false;
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

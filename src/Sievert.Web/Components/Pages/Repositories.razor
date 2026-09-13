@@ -1,0 +1,127 @@
+@page "/repositories"
+@implements IDisposable
+@inject SievertApiClient Api
+@inject NavigationManager Navigation
+
+<PageTitle>Repolar - Sievert</PageTitle>
+
+<PageHeader Title="Repolar"
+            Lead="Veritabaninda taranmis depolar. Yerel klasor yolu panelde gosterilmiyor." />
+
+@if (loading)
+{
+    <Loading Message="Depolar yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (page is null || page.TotalCount == 0)
+{
+    <EmptyState Title="Henuz taranmis depo yok"
+                Detail="Once CLI ile bir depo taranip veritabanina yazilmali." />
+}
+else
+{
+    <div class="table-wrap">
+        <table>
+            <caption class="faint" style="text-align:left;padding:var(--space-2) var(--space-3)">
+                Taranmis depolar
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Ad</th>
+                    <th scope="col" class="wrap">Kimlik</th>
+                    <th scope="col" class="num">Commit</th>
+                    <th scope="col">Tarih araligi</th>
+                    <th scope="col">Model profili</th>
+                    <th scope="col">Son tarama</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (RepositoryListItem item in page.Items)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td class="wrap"><code>@item.RepositoryIdentity</code></td>
+                        <td class="num">@Display.Count(item.CommitCount)</td>
+                        <td>@Display.Day(item.FirstCommitDate) - @Display.Day(item.LastCommitDate)</td>
+                        <td>
+                            @if (item.ModelProfileAvailable)
+                            {
+                                <span class="pill tone-done">Var</span>
+                            }
+                            else
+                            {
+                                <span class="pill tone-warning">Yok</span>
+                            }
+                        </td>
+                        <td>@Display.Day(item.ScanDate)</td>
+                        <td><a href="repositories/@item.Id">Ayrinti</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <Pager Page="page.Page"
+           PageSize="page.PageSize"
+           TotalCount="page.TotalCount"
+           PageChanged="GoToPageAsync"
+           PageSizeChanged="ChangeSizeAsync" />
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private PagedResponse<RepositoryListItem>? page;
+
+    /// <summary>Sayfa durumu adres cubugunda; baglanti paylasilabilir ve geri tusu calisir.</summary>
+    [SupplyParameterFromQuery(Name = "page")]
+    private int? PageNumber { get; set; }
+
+    [SupplyParameterFromQuery(Name = "pageSize")]
+    private int? PageSize { get; set; }
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<PagedResponse<RepositoryListItem>> result = await Api.RepositoriesAsync(
+            Math.Max(1, PageNumber ?? 1),
+            Size(),
+            closing.Token);
+
+        if (result.IsSuccess)
+        {
+            page = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        loading = false;
+    }
+
+    /// <summary>API'nin ust siniri 100; adres cubugundan gelen buyuk deger kirpiliyor.</summary>
+    private int Size() =>
+        Pager.Sizes.Contains(PageSize ?? 25) ? PageSize ?? 25 : 25;
+
+    private void GoToPageAsync(int value) => Navigation.NavigateTo($"repositories?page={value}&pageSize={Size()}");
+
+    private void ChangeSizeAsync(int value) => Navigation.NavigateTo($"repositories?page=1&pageSize={value}");
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

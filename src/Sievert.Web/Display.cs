@@ -112,6 +112,10 @@ public static class Display
             : $"{(milliseconds / 1000).ToString("F1", CultureInfo.InvariantCulture)} sn";
     }
 
+    /// <summary>Saniye, tek ondalikli. Kultura bagli ondalik ayraci sayfada karisiklik yaratiyordu.</summary>
+    public static string Seconds(double value) =>
+        value.ToString("F1", CultureInfo.InvariantCulture) + " sn";
+
     public static string Megabytes(long bytes) =>
         (bytes / 1024.0 / 1024.0).ToString("F1", CultureInfo.InvariantCulture) + " MB";
 

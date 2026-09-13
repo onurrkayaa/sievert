@@ -132,13 +132,45 @@ public static class RepositoryEndpoints
                 return Problems.NotFound(context, $"{id} numarali depo yok.", ApiError.RepositoryNotFound);
             }
 
+            IQueryable<CommitRow> filtered = database.Commits.Where(row => row.RepositoryId == id);
+
+            // Uc suzgec. Panelin commit listesi bunlari kullaniyor; sayfa basina 25 satiri
+            // istemcide suzmek, "hic hata getiren commit yok" gibi yanlis bir izlenim
+            // verirdi - sayfada yok demek kumede yok demek degil.
+            if (!Filter.TryRead(context, "isFix", out bool? isFix, out string? invalid)
+                || !Filter.TryRead(context, "isBugIntroducing", out bool? isBugIntroducing, out invalid)
+                || !Filter.TryRead(context, "isBot", out bool? isBot, out invalid))
+            {
+                return Problems.BadRequest(context, invalid!, ApiError.InvalidPagination);
+            }
+
+            if (isFix is bool fix)
+            {
+                filtered = filtered.Where(row =>
+                    database.CommitMetrics.Any(metric => metric.CommitId == row.Id && metric.IsFix) == fix);
+            }
+
+            if (isBugIntroducing is bool bugIntroducing)
+            {
+                filtered = filtered.Where(row => row.IsBugIntroducing == bugIntroducing);
+            }
+
+            if (isBot is bool bot)
+            {
+                filtered = filtered.Where(row => row.IsBot == bot);
+            }
+
             // Siralama CommitOrdering kuraliyla ayni: tarih artan, esitlikte madencilik
-            // sirasi (Id) artan. Burada en yeni once istendigi icin ikisi de tersine
+            // sirasi (Id) artan. Varsayilan en yeni once, o yuzden ikisi de tersine
             // ceviriliyor; kural ayni kural.
-            IQueryable<CommitRow> query = database.Commits
-                .Where(row => row.RepositoryId == id)
-                .OrderByDescending(row => row.AuthorDateUtc)
-                .ThenByDescending(row => row.Id);
+            bool oldest = string.Equals(
+                context.Request.Query["order"].FirstOrDefault(),
+                "oldest",
+                StringComparison.OrdinalIgnoreCase);
+
+            IQueryable<CommitRow> query = oldest
+                ? filtered.OrderBy(row => row.AuthorDateUtc).ThenBy(row => row.Id)
+                : filtered.OrderByDescending(row => row.AuthorDateUtc).ThenByDescending(row => row.Id);
 
             int total = await query.CountAsync(cancellation);
 
@@ -162,7 +194,7 @@ public static class RepositoryEndpoints
             return Results.Ok(new PagedResponse<CommitListItem>(paging.Page, paging.PageSize, total, items));
         })
         .WithName("RepositoryCommits")
-        .WithSummary("Bir deponun commit'leri, en yeniden eskiye")
+        .WithSummary("Bir deponun commit'leri; isFix, isBugIntroducing ve isBot ile suzulebilir")
         .Produces<PagedResponse<CommitListItem>>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)

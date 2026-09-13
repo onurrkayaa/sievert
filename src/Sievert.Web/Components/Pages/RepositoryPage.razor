@@ -1,0 +1,376 @@
+@page "/repositories/{RepositoryId:int}"
+@implements IDisposable
+@inject SievertApiClient Api
+@inject NavigationManager Navigation
+
+<PageTitle>@(detail?.Repository.Name ?? "Depo") - Sievert</PageTitle>
+
+@if (loading)
+{
+    <Loading Message="Depo yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (detail is not null)
+{
+    <PageHeader Title="@detail.Repository.Name" Lead="@detail.Repository.RepositoryIdentity">
+        <Actions>
+            <button class="btn primary"
+                    type="button"
+                    disabled="@(busy is not null || !CanScan)"
+                    @onclick="@(() => StartAsync("static-scan"))">
+                @(busy == "static-scan" ? "Baslatiliyor..." : "Statik tarama baslat")
+            </button>
+
+            <button class="btn primary"
+                    type="button"
+                    disabled="@(busy is not null || detail.ModelProfile is null)"
+                    @onclick="@(() => StartAsync("risk-score-all"))">
+                @(busy == "risk-score-all" ? "Baslatiliyor..." : "Tum commit'leri skorla")
+            </button>
+        </Actions>
+    </PageHeader>
+
+    @if (startProblem is not null)
+    {
+        <ProblemView Result="startProblem" />
+    }
+
+    @if (conflictUrl is not null)
+    {
+        <div class="notice warning" role="status">
+            <h3>Bu depo icin zaten calisan bir is var</h3>
+            <p>Yeni bir is acilmadi. <a href="@PanelLink(conflictUrl)">Duran ise git</a></p>
+        </div>
+    }
+
+    <div class="cards">
+        <div class="card">
+            <p class="stat-label">Commit</p>
+            <p class="stat-value">@Display.Count(detail.CommitCount)</p>
+            <p class="stat-note">olcusu hesaplanan @Display.Count(detail.CommitsWithMetrics)</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">SZZ etiketi</p>
+            <p class="stat-value">@Display.Count(detail.BugIntroducingCount)</p>
+            <p class="stat-note">@Display.Count(detail.BugIntroducingCount) / @Display.Count(detail.CommitCount) commit</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Bot commit'i</p>
+            <p class="stat-value">@Display.Count(detail.BotCount)</p>
+            <p class="stat-note">ad kalibiyla isaretlendi</p>
+        </div>
+        <div class="card">
+            <p class="stat-label">Model profili</p>
+            <p class="stat-value" style="font-size:1.1rem">
+                @if (detail.ModelProfile is string profile)
+                {
+                    <span class="pill tone-done">@profile</span>
+                }
+                else
+                {
+                    <span class="pill tone-warning">Yok</span>
+                }
+            </p>
+            <p class="stat-note">kalibre edilmedi</p>
+        </div>
+    </div>
+
+    @if (detail.CoverageNotes.Count > 0)
+    {
+        <div class="section stack-tight">
+            @foreach (string note in detail.CoverageNotes)
+            {
+                <div class="notice warning"><p>@note</p></div>
+            }
+        </div>
+    }
+
+    <div class="section">
+        <h2>Bu deponun isleri</h2>
+
+        @if (jobs is null || jobs.Items.Count == 0)
+        {
+            <EmptyState Title="Bu depo icin henuz is acilmadi" />
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Tur</th>
+                            <th scope="col">Durum</th>
+                            <th scope="col" class="num">Sonuc</th>
+                            <th scope="col">Istek</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (AnalysisJobResponse job in jobs.Items.Take(5))
+                        {
+                            <tr>
+                                <td>@Display.Kind(job.Kind)</td>
+                                <td><span class="pill @Display.StatusTone(job.Status)">@Display.Status(job.Status)</span></td>
+                                <td class="num">@Display.Count(job.ResultCount)@(job.IsResultComplete ? string.Empty : " (kismi)")</td>
+                                <td>@Display.Moment(job.RequestedAtUtc)</td>
+                                <td><a href="analyses/@job.Id">Ayrinti</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="section">
+        <h2>Commit'ler</h2>
+
+        <div class="row" style="margin-bottom:var(--space-3)">
+            <label class="field">
+                Sira
+                <select value="@order" @onchange="@(args => Apply(() => order = args.Value?.ToString() ?? "newest"))">
+                    <option value="newest" selected="@(order == "newest")">En yeni once</option>
+                    <option value="oldest" selected="@(order == "oldest")">En eski once</option>
+                </select>
+            </label>
+
+            <label class="field">
+                Duzeltme commit'i
+                <select value="@Text(isFix)" @onchange="@(args => Apply(() => isFix = Flag(args)))">
+                    <option value="">Hepsi</option>
+                    <option value="true">Yalniz duzeltmeler</option>
+                    <option value="false">Duzeltme olmayanlar</option>
+                </select>
+            </label>
+
+            <label class="field">
+                SZZ etiketi
+                <select value="@Text(isBugIntroducing)" @onchange="@(args => Apply(() => isBugIntroducing = Flag(args)))">
+                    <option value="">Hepsi</option>
+                    <option value="true">Etiketliler</option>
+                    <option value="false">Etiketsizler</option>
+                </select>
+            </label>
+
+            <label class="field">
+                Bot
+                <select value="@Text(isBot)" @onchange="@(args => Apply(() => isBot = Flag(args)))">
+                    <option value="">Hepsi</option>
+                    <option value="true">Yalniz bot</option>
+                    <option value="false">Bot olmayanlar</option>
+                </select>
+            </label>
+        </div>
+
+        @if (commits is null)
+        {
+            <Loading Message="Commit'ler yukleniyor..." />
+        }
+        else if (commits.TotalCount == 0)
+        {
+            <EmptyState Title="Bu suzgeclerle commit yok" Detail="Suzgecleri gevsetip tekrar dene." />
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Commit</th>
+                            <th scope="col">Tarih</th>
+                            <th scope="col" class="wrap">Mesaj</th>
+                            <th scope="col" class="num">+/-</th>
+                            <th scope="col" class="num">C# dosyasi</th>
+                            <th scope="col">Isaretler</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (CommitListItem commit in commits.Items)
+                        {
+                            <tr>
+                                <td><code>@commit.ShortSha</code></td>
+                                <td>@Display.Day(commit.AuthorDateUtc)</td>
+                                <td class="wrap">@commit.MessageSubject</td>
+                                <td class="num">+@commit.LinesAdded / -@commit.LinesDeleted</td>
+                                <td class="num">@commit.CsFilesChanged</td>
+                                <td>
+                                    @if (commit.IsFix)
+                                    {
+                                        <span class="pill tone-idle">duzeltme</span>
+                                    }
+                                    @if (commit.IsBugIntroducing)
+                                    {
+                                        <span class="pill tone-warning">SZZ</span>
+                                    }
+                                    @if (commit.IsBot)
+                                    {
+                                        <span class="pill tone-unknown">bot</span>
+                                    }
+                                </td>
+                                <td><a href="repositories/@RepositoryId/commits/@commit.Sha/risk">Risk</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <Pager Page="commits.Page"
+                   PageSize="commits.PageSize"
+                   TotalCount="commits.TotalCount"
+                   PageChanged="ChangePageAsync"
+                   PageSizeChanged="ChangeSizeAsync" />
+        }
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    [Parameter]
+    public int RepositoryId { get; set; }
+
+    private bool loading = true;
+    private IProblemView? failure;
+    private RepositoryDetail? detail;
+    private PagedResponse<AnalysisJobResponse>? jobs;
+    private PagedResponse<CommitListItem>? commits;
+
+    private string? busy;
+    private IProblemView? startProblem;
+    private string? conflictUrl;
+
+    private int commitPage = 1;
+    private int commitSize = 25;
+    private string order = "newest";
+    private bool? isFix;
+    private bool? isBugIntroducing;
+    private bool? isBot;
+
+    /// <summary>Yerel klasor panelde gorunmuyor, o yuzden taramanin kosup kosmayacagini
+    /// buradan bilemiyoruz; dugme acik, sonuc API'den geliyor.</summary>
+    private bool CanScan => true;
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<RepositoryDetail> result = await Api.RepositoryAsync(RepositoryId, closing.Token);
+
+        if (!result.IsSuccess)
+        {
+            (loading, failure) = (false, result);
+
+            return;
+        }
+
+        detail = result.Value;
+        loading = false;
+
+        jobs = (await Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token)).Value;
+
+        await LoadCommitsAsync();
+    }
+
+    private async Task LoadCommitsAsync()
+    {
+        commits = null;
+        StateHasChanged();
+
+        commits = (await Api.CommitsAsync(
+            RepositoryId, commitPage, commitSize, order, isFix, isBugIntroducing, isBot, closing.Token)).Value;
+    }
+
+    /// <summary>
+    /// Isi baslatir.
+    ///
+    /// Tekrar anahtari **istek basina** burada uretiliyor ve dugme istek boyunca kapali
+    /// kaliyor. Ikisi birlikte cift tiklamayi kesiyor: dugme yetismezse bile ayni anahtarla
+    /// giden ikinci istek yeni bir is acmiyor.
+    /// </summary>
+    private async Task StartAsync(string kind)
+    {
+        busy = kind;
+        startProblem = null;
+        conflictUrl = null;
+        StateHasChanged();
+
+        JobStart start = await Api.StartAsync(RepositoryId, kind, Guid.NewGuid().ToString("n"), closing.Token);
+
+        busy = null;
+
+        switch (start.Outcome)
+        {
+            case JobStartOutcome.Accepted or JobStartOutcome.AlreadyOpen when start.Job is not null:
+                Navigation.NavigateTo($"analyses/{start.Job.Id}");
+
+                return;
+
+            case JobStartOutcome.Conflict:
+                conflictUrl = start.ActiveJobUrl;
+
+                break;
+
+            default:
+                startProblem = start.Problem is null ? null : ProblemSummary.From(start.Problem);
+
+                break;
+        }
+
+        jobs = (await Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token)).Value;
+    }
+
+    /// <summary>API'nin verdigi adresi panelin adresine cevirir.</summary>
+    private static string PanelLink(string apiUrl) =>
+        "analyses/" + apiUrl.Split('/', StringSplitOptions.RemoveEmptyEntries)[^1];
+
+    private static string Text(bool? value) => value switch
+    {
+        true => "true",
+        false => "false",
+        null => string.Empty,
+    };
+
+    private static bool? Flag(ChangeEventArgs args) => args.Value?.ToString() switch
+    {
+        "true" => true,
+        "false" => false,
+        _ => null,
+    };
+
+    private Task Apply(Action change)
+    {
+        change();
+        commitPage = 1;
+
+        return LoadCommitsAsync();
+    }
+
+    private Task ChangePageAsync(int value)
+    {
+        commitPage = value;
+
+        return LoadCommitsAsync();
+    }
+
+    private Task ChangeSizeAsync(int value)
+    {
+        commitSize = value;
+        commitPage = 1;
+
+        return LoadCommitsAsync();
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

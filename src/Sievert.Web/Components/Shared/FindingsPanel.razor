@@ -1,0 +1,201 @@
+@implements IDisposable
+@inject SievertApiClient Api
+
+@*
+    Statik tarama bulgulari.
+
+    Kartin basligi model skorundan ayri duruyor ve her gorunumde "model skoruna dahil
+    degil" yaziyor. Bu bir suslemenin degil, risk sozlesmesinin geregi: iki sayi yan yana
+    durunca insan onlari toplar.
+*@
+<h2>Statik bulgular</h2>
+
+<div class="notice info">
+    <p><strong>Bu bulgular model skoruna dahil degildir.</strong>
+    SV kurallari kodun kendisine bakiyor; model ise commit'in tarihsel olculerine.</p>
+</div>
+
+@if (!Ready)
+{
+    <EmptyState Title="@Waiting" Detail="Is bitince bulgular burada gorunecek." />
+}
+else if (page is null && failure is null)
+{
+    <Loading Message="Bulgular yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (page is not null)
+{
+    <PartialBanner Partial="page.Partial" Warning="@(page.PartialWarning)" />
+
+    <div class="row" style="margin:var(--space-3) 0">
+        <label class="field">
+            Kural
+            <select value="@ruleCode" @onchange="@(args => ApplyAsync(() => ruleCode = Value(args)))">
+                <option value="">Hepsi</option>
+                @foreach (string rule in RuleCodes)
+                {
+                    <option value="@rule" selected="@(rule == ruleCode)">@rule</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            Seviye
+            <select value="@severity" @onchange="@(args => ApplyAsync(() => severity = Value(args)))">
+                <option value="">Hepsi</option>
+                <option value="error">Hata</option>
+                <option value="warning">Uyari</option>
+                <option value="info">Bilgi</option>
+            </select>
+        </label>
+    </div>
+
+    @if (page.TotalCount == 0)
+    {
+        <EmptyState Title="Bu suzgeclerle bulgu yok"
+                    Detail="Bos liste 'kod temiz' demek degil; secilen kural ve seviyeyle eslesen bulgu yok demek." />
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <caption class="faint" style="text-align:left;padding:var(--space-2) var(--space-3)">
+                    Yollar depo kokune goreli. Sunucudaki tam yol panelde gosterilmiyor.
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Kural</th>
+                        <th scope="col">Seviye</th>
+                        <th scope="col" class="wrap">Dosya</th>
+                        <th scope="col" class="num">Satir</th>
+                        <th scope="col">Uye</th>
+                        <th scope="col" class="wrap">Mesaj</th>
+                        <th scope="col">Test kodu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (StaticFindingResponse finding in page.Items)
+                    {
+                        <tr>
+                            <td><code>@finding.RuleCode</code></td>
+                            <td><span class="pill @Display.SeverityTone(finding.Severity)">@Display.Severity(finding.Severity)</span></td>
+                            <td class="wrap mono">@finding.RelativePath</td>
+                            <td class="num">@finding.Line</td>
+                            <td>@(finding.MemberName ?? "-")</td>
+                            @* Mesaj metin olarak yaziliyor; Razor zaten kaciyor, HTML olarak islenmiyor. *@
+                            <td class="wrap">@finding.Message</td>
+                            <td>@(finding.IsTestCode ? "Evet" : "Hayir")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pager Page="page.Page"
+               PageSize="page.PageSize"
+               TotalCount="page.TotalCount"
+               PageChanged="ChangePageAsync"
+               PageSizeChanged="ChangeSizeAsync" />
+    }
+}
+
+@code {
+    /// <summary>Kural kodlari SV onekli (ADR 0009). Liste sabit; kural eklenirse buraya eklenir.</summary>
+    private static readonly string[] RuleCodes = ["SV001", "SV002", "SV003", "SV004", "SV005", "SV006", "SV007"];
+
+    private readonly CancellationTokenSource closing = new();
+
+    [Parameter, EditorRequired]
+    public Guid JobId { get; set; }
+
+    /// <summary>Is terminal duruma gecti mi; gecmeden sonuc sorulmuyor.</summary>
+    [Parameter, EditorRequired]
+    public bool Ready { get; set; }
+
+    [Parameter]
+    public string? Status { get; set; }
+
+    private AnalysisResultPage<StaticFindingResponse>? page;
+    private IProblemView? failure;
+    private string ruleCode = string.Empty;
+    private string severity = string.Empty;
+    private int pageNumber = 1;
+    private int pageSize = 25;
+    private bool loaded;
+
+    private string Waiting => Status switch
+    {
+        "queued" => "Is henuz baslamadi",
+        "running" => "Tarama suruyor",
+        _ => "Sonuc henuz yok",
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Ready && !loaded)
+        {
+            loaded = true;
+
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        page = null;
+        failure = null;
+        StateHasChanged();
+
+        ApiResult<AnalysisResultPage<StaticFindingResponse>> result = await Api.FindingsAsync(
+            JobId,
+            pageNumber,
+            pageSize,
+            string.IsNullOrEmpty(ruleCode) ? null : ruleCode,
+            string.IsNullOrEmpty(severity) ? null : severity,
+            closing.Token);
+
+        if (result.IsSuccess)
+        {
+            page = result.Value;
+        }
+        else
+        {
+            failure = result;
+        }
+    }
+
+    private static string Value(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+
+    private Task ApplyAsync(Action change)
+    {
+        change();
+        pageNumber = 1;
+
+        return LoadAsync();
+    }
+
+    private Task ChangePageAsync(int value)
+    {
+        pageNumber = value;
+
+        return LoadAsync();
+    }
+
+    private Task ChangeSizeAsync(int value)
+    {
+        pageSize = value;
+        pageNumber = 1;
+
+        return LoadAsync();
+    }
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

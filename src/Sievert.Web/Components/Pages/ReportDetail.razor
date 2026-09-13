@@ -1,0 +1,330 @@
+@page "/reports/{ReportId:guid}"
+@implements IDisposable
+@inject SievertApiClient Api
+@inject IPageState State
+@inject WebOptions Options
+
+<PageTitle>Rapor - Sievert</PageTitle>
+
+<PageHeader Title="Rapor"
+            Lead="Kaydedilmis bir risk sonucundan uretilen PDF raporu." />
+
+@if (report is null && failure is null)
+{
+    <Loading Message="Rapor yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="ReloadAsync" />
+}
+else if (report is ReportResponse ready)
+{
+    <div class="section">
+        <div class="row-spread">
+            <h2 style="margin:0">@ready.FileName</h2>
+            <span class="pill @Tone(ready.Status)">@Label(ready.Status)</span>
+        </div>
+
+        @if (ready.IsPartial)
+        {
+            <PartialResultBanner Partial="true" />
+        }
+
+        @if (ready.Status == ReportStatus.Pending)
+        {
+            <p class="faint">Rapor uretiliyor. Bu sayfa kendiliginden yenileniyor.</p>
+        }
+
+        @if (ready.Status == ReportStatus.Failed)
+        {
+            <div class="card section" role="alert">
+                <strong>Rapor uretilemedi.</strong>
+                <p class="mono" style="margin:var(--space-2) 0 0">@ready.ErrorCode</p>
+                <p class="muted" style="margin:var(--space-2) 0 0">@ready.ErrorMessage</p>
+                <button class="btn" type="button" @onclick="RetryAsync" disabled="@retrying">
+                    Yeniden dene
+                </button>
+                <p class="faint" style="margin-top:var(--space-2)">
+                    Yeniden deneme yeni bir rapor acar; eski kayit silinmez.
+                </p>
+            </div>
+        }
+
+        @if (ready.Status == ReportStatus.Corrupted)
+        {
+            <div class="card section" role="alert">
+                <strong>Rapor dosyasi dogrulanamadi.</strong>
+                <p class="muted" style="margin:var(--space-2) 0 0">
+                    Dosyanin ozeti kayittaki ozetle uyusmuyor, bu yuzden indirilmiyor.
+                </p>
+            </div>
+        }
+
+        @if (ready.Status == ReportStatus.Ready)
+        {
+            <p style="margin-top:var(--space-3)">
+                <a class="btn" href="@Download(ready)" target="_blank" rel="noopener">PDF indir</a>
+            </p>
+        }
+
+        <dl class="facts" style="margin-top:var(--space-3)">
+            <dt>Rapor kimligi</dt>
+            <dd class="mono">@ready.Id</dd>
+
+            <dt>Dil</dt>
+            <dd>@(ready.Culture == ReportCulture.Turkish ? "Turkce" : "Ingilizce")</dd>
+
+            <dt>Risk analizi isi</dt>
+            <dd><a href="/analyses/@ready.RiskAnalysisJobId" class="mono">@ready.RiskAnalysisJobId</a></dd>
+
+            <dt>Statik analiz isi</dt>
+            <dd>
+                @if (ready.StaticAnalysisJobId is Guid staticJob)
+                {
+                    <a href="/analyses/@staticJob" class="mono">@staticJob</a>
+                }
+                else
+                {
+                    <span class="faint">Eklenmedi</span>
+                }
+            </dd>
+
+            <dt>Uretim isi</dt>
+            <dd><a href="/analyses/@ready.AnalysisJobId" class="mono">@ready.AnalysisJobId</a></dd>
+
+            <dt>Kismi sonuc</dt>
+            <dd>@(ready.IsPartial ? "Evet" : "Hayir")</dd>
+
+            <dt>Manifest ozeti</dt>
+            <dd class="mono" style="overflow-wrap:anywhere">@ready.ManifestSha256</dd>
+
+            @if (ready.Sha256 is string checksum)
+            {
+                <dt>PDF ozeti (SHA-256)</dt>
+                <dd class="mono" style="overflow-wrap:anywhere">@checksum</dd>
+            }
+
+            @if (ready.ByteLength is long bytes)
+            {
+                <dt>Boyut</dt>
+                <dd>@Display.Size(bytes)</dd>
+            }
+
+            @if (ready.PageCount is int pages)
+            {
+                <dt>Sayfa</dt>
+                <dd>@Display.Count(pages)</dd>
+            }
+
+            <dt>Istek zamani</dt>
+            <dd>@Display.Moment(ready.RequestedAtUtc)</dd>
+
+            @if (ready.GeneratedAtUtc is DateTimeOffset generated)
+            {
+                <dt>Uretim zamani</dt>
+                <dd>@Display.Moment(generated)</dd>
+            }
+        </dl>
+    </div>
+
+    <div class="section">
+        <h3>Parametreler</h3>
+        <dl class="facts">
+            <dt>Commit penceresi</dt>
+            <dd>@Display.Count(ready.Parameters.CommitWindow)</dd>
+
+            <dt>Dosya siniri</dt>
+            <dd>@Display.Count(ready.Parameters.FileLimit)</dd>
+
+            <dt>Zaman cizelgesi noktasi</dt>
+            <dd>@Display.Count(ready.Parameters.TimelineCount)</dd>
+
+            <dt>Commit sayisi</dt>
+            <dd>@Display.Count(ready.Parameters.TopCommitCount)</dd>
+
+            <dt>Bulgu siniri</dt>
+            <dd>@Display.Count(ready.Parameters.FindingLimit)</dd>
+
+            @if (ready.Parameters.Title is string title)
+            {
+                <dt>Baslik</dt>
+                <dd>@title</dd>
+            }
+
+            @if (ready.Parameters.Notes is string notes)
+            {
+                <dt>Not</dt>
+                <dd>@notes</dd>
+            }
+        </dl>
+
+        <p class="faint">
+            Raporun neyden uretildigi manifestte yaziyor:
+            <a href="@Manifest(ready)" target="_blank" rel="noopener">manifesti ac</a>.
+        </p>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid ReportId { get; set; }
+
+    private readonly CancellationTokenSource closing = new();
+
+    private ReportResponse? report;
+    private ApiResult<ReportResponse>? failure;
+    private Task? polling;
+    private IDisposable? persisting;
+    private bool retrying;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ReloadAsync();
+
+        // Dongu yalniz etkilesimli olusturmada ve yalniz rapor hala uretiliyorsa
+        // basliyor. Hazir bir raporu tekrar sormak, degismeyecek bir seyi sormak olur.
+        if (polling is null
+            && RendererInfo.IsInteractive
+            && report is not null
+            && report.Status == ReportStatus.Pending)
+        {
+            polling = PollAsync();
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        string key = PageStateKey.For("report", ("id", ReportId));
+
+        ApiResult<ReportResponse> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.ReportAsync(ReportId, closing.Token));
+
+        if (result.IsSuccess)
+        {
+            report = result.Value;
+            failure = null;
+        }
+        else
+        {
+            failure = result;
+        }
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => report);
+    }
+
+    private async Task PollAsync()
+    {
+        int failures = 0;
+
+        while (!closing.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(JobPolling.Wait(failures), closing.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (closing.IsCancellationRequested)
+            {
+                return;
+            }
+
+            ApiResult<ReportResponse> result = await Api.ReportAsync(ReportId, closing.Token);
+
+            if (result.IsSuccess && result.Value is not null)
+            {
+                report = result.Value;
+                failure = null;
+                failures = 0;
+            }
+            else
+            {
+                failures++;
+                failure = result;
+            }
+
+            await InvokeAsync(StateHasChanged);
+
+            if (report is not null && report.Status != ReportStatus.Pending)
+            {
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Yeniden deneme acik bir kullanici eylemi ve **yeni** bir tekrar anahtari
+    /// uretiyor: eskisiyle gonderilse ayni basarisiz kayit donerdi.
+    /// </summary>
+    private async Task RetryAsync()
+    {
+        if (report is not ReportResponse current || retrying)
+        {
+            return;
+        }
+
+        retrying = true;
+
+        ReportStart start = await Api.StartReportAsync(
+            current.RepositoryId,
+            new ReportRequest(
+                current.RiskAnalysisJobId,
+                current.StaticAnalysisJobId,
+                current.IsPartial,
+                current.Parameters.CommitWindow,
+                current.Parameters.FileLimit,
+                current.Parameters.TimelineCount,
+                current.Parameters.TopCommitCount,
+                current.Parameters.FindingLimit,
+                current.Culture,
+                current.Parameters.Title,
+                current.Parameters.Notes),
+            Guid.CreateVersion7().ToString("n"),
+            closing.Token);
+
+        retrying = false;
+
+        if (start.Report is ReportAcceptedResponse accepted)
+        {
+            Navigation.NavigateTo($"/reports/{accepted.ReportId}");
+        }
+    }
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private string Download(ReportResponse ready) =>
+        $"{Options.ApiBaseUrl}/api/v1/reports/{ready.Id}/download";
+
+    private string Manifest(ReportResponse ready) =>
+        $"{Options.ApiBaseUrl}/api/v1/reports/{ready.Id}/manifest";
+
+    private static string Label(string status) => status switch
+    {
+        ReportStatus.Pending => "Uretiliyor",
+        ReportStatus.Ready => "Hazir",
+        ReportStatus.Failed => "Basarisiz",
+        ReportStatus.Corrupted => "Bozuk",
+        _ => status,
+    };
+
+    private static string Tone(string status) => status switch
+    {
+        ReportStatus.Ready => "tone-ok",
+        ReportStatus.Failed => "tone-error",
+        ReportStatus.Corrupted => "tone-error",
+        _ => "tone-info",
+    };
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+        persisting?.Dispose();
+    }
+}

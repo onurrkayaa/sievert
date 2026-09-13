@@ -1,0 +1,265 @@
+@inject SievertApiClient Api
+@inject NavigationManager Navigation
+
+<div class="section">
+    <div class="row-spread">
+        <h2 style="margin:0">Rapor olustur</h2>
+        <a class="btn quiet" href="/reports?repo=@RepositoryId">Raporlar</a>
+    </div>
+
+    <p class="muted" style="max-width:72ch">
+        Rapor, kaydedilmis bir risk sonucundan uretilir ve kaynaklari raporun icinde
+        yaziyor. Kesin kusur karari degildir; hangi dosyaya once bakilacagina yardim eder.
+    </p>
+
+    @if (Jobs.Count == 0)
+    {
+        <EmptyState Title="Once bir risk analizi calistir"
+                    Message="Rapor uretmek icin sonuc yazmis bir risk skorlama isi gerekiyor." />
+    }
+    else
+    {
+        <div class="row">
+            <label class="field">
+                Risk analizi isi
+                <select value="@job" @onchange="@(args => job = Guid.TryParse(Value(args), out Guid id) ? id : job)">
+                    @foreach (AnalysisJobResponse item in Jobs)
+                    {
+                        <option value="@item.Id" selected="@(item.Id == job)">
+                            @Display.Moment(item.RequestedAtUtc) &middot;
+                            @Display.Count(item.ResultCount) satir
+                            @(item.IsResultComplete ? string.Empty : " (Kismi)")
+                        </option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Statik analiz isi
+                <select value="@scan" @onchange="@(args => scan = Guid.TryParse(Value(args), out Guid id) ? id : null)">
+                    <option value="">Eklenmesin</option>
+                    @foreach (AnalysisJobResponse item in Scans)
+                    {
+                        <option value="@item.Id" selected="@(item.Id == scan)">
+                            @Display.Moment(item.RequestedAtUtc) &middot;
+                            @Display.Count(item.ResultCount) bulgu
+                        </option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Dil
+                <select value="@culture" @onchange="@(args => culture = Value(args) ?? ReportCulture.Turkish)">
+                    <option value="@ReportCulture.Turkish">Turkce</option>
+                    <option value="@ReportCulture.English">Ingilizce</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="row">
+            <label class="field">
+                Commit penceresi
+                <select value="@window" @onchange="@(args => window = Number(args, window))">
+                    @foreach (int choice in ReportLimits.WindowChoices)
+                    {
+                        <option value="@choice" selected="@(choice == window)">@choice</option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Dosya siniri
+                <select value="@files" @onchange="@(args => files = Number(args, files))">
+                    @foreach (int choice in ReportLimits.FileLimitChoices)
+                    {
+                        <option value="@choice" selected="@(choice == files)">@choice</option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Zaman cizelgesi noktasi
+                <select value="@timeline" @onchange="@(args => timeline = Number(args, timeline))">
+                    @foreach (int choice in ReportLimits.TimelineChoices)
+                    {
+                        <option value="@choice" selected="@(choice == timeline)">@choice</option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Commit sayisi
+                <select value="@commits" @onchange="@(args => commits = Number(args, commits))">
+                    @foreach (int choice in ReportLimits.TopCommitChoices)
+                    {
+                        <option value="@choice" selected="@(choice == commits)">@choice</option>
+                    }
+                </select>
+            </label>
+
+            <label class="field">
+                Bulgu siniri
+                <select value="@findings" @onchange="@(args => findings = Number(args, findings))">
+                    @foreach (int choice in ReportLimits.FindingChoices)
+                    {
+                        <option value="@choice" selected="@(choice == findings)">@choice</option>
+                    }
+                </select>
+            </label>
+        </div>
+
+        <div class="row">
+            <label class="field" style="flex:1 1 320px">
+                Baslik (istege bagli)
+                <input type="text" maxlength="@ReportLimits.MaximumTitleLength" value="@title"
+                       @onchange="@(args => title = Value(args))" />
+            </label>
+        </div>
+
+        <div class="row">
+            <label class="field" style="flex:1 1 100%">
+                Not (istege bagli)
+                <textarea rows="3" maxlength="@ReportLimits.MaximumNotesLength"
+                          @onchange="@(args => notes = Value(args))">@notes</textarea>
+            </label>
+        </div>
+
+        @if (SelectedIsPartial)
+        {
+            <div class="card section" style="border-left:3px solid var(--warning)">
+                <label>
+                    <input type="checkbox" checked="@acceptPartial"
+                           @onchange="@(args => acceptPartial = args.Value is true)" />
+                    Bu is tamamlanmadi. Raporun yalnizca kaydedilmis sonuclari kapsayacagini
+                    ve bunun raporda yazacagini kabul ediyorum.
+                </label>
+            </div>
+        }
+
+        @if (problem is ProblemResponse failure)
+        {
+            <div class="card section" role="alert">
+                <strong>Rapor istegi reddedildi.</strong>
+                <p class="mono" style="margin:var(--space-2) 0 0">@failure.ErrorCode</p>
+                <p class="muted" style="margin:var(--space-2) 0 0">@failure.Detail</p>
+            </div>
+        }
+
+        <p style="margin-top:var(--space-3)">
+            <button class="btn" type="button" @onclick="SubmitAsync" disabled="@(sending || Blocked)">
+                @(sending ? "Gonderiliyor..." : "Rapor olustur")
+            </button>
+        </p>
+
+        @if (Blocked)
+        {
+            <p class="faint">Kismi bir isten rapor icin yukaridaki kutuyu isaretle.</p>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public int RepositoryId { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AnalysisJobResponse> Jobs { get; set; } = [];
+
+    [Parameter]
+    public IReadOnlyList<AnalysisJobResponse> Scans { get; set; } = [];
+
+    private readonly CancellationTokenSource closing = new();
+
+    private Guid job;
+    private Guid? scan;
+    private string culture = ReportCulture.Turkish;
+    private int window = ReportLimits.DefaultCommitWindow;
+    private int files = ReportLimits.DefaultFileLimit;
+    private int timeline = ReportLimits.DefaultTimelineCount;
+    private int commits = ReportLimits.DefaultTopCommitCount;
+    private int findings = ReportLimits.DefaultFindingLimit;
+    private string? title;
+    private string? notes;
+    private bool acceptPartial;
+    private bool sending;
+    private ProblemResponse? problem;
+
+    /// <summary>
+    /// Gonderim sirasinda sabit kalan tekrar anahtari.
+    ///
+    /// Bir kez uretiliyor ve gonderim bitene kadar ayni kaliyor: dugmeye iki kez basmak
+    /// iki rapor uretmemeli. Basarili gonderimden sonra sayfa degistigi icin yenileniyor.
+    /// </summary>
+    private string idempotencyKey = Guid.CreateVersion7().ToString("n");
+
+    protected override void OnParametersSet()
+    {
+        if (job == Guid.Empty && Jobs.Count > 0)
+        {
+            // Varsayilan olarak tamamlanmis bir is; yoksa listedeki ilk is.
+            job = (Jobs.FirstOrDefault(item => item.IsResultComplete) ?? Jobs[0]).Id;
+        }
+    }
+
+    private bool SelectedIsPartial =>
+        Jobs.FirstOrDefault(item => item.Id == job) is AnalysisJobResponse chosen
+        && !chosen.IsResultComplete;
+
+    private bool Blocked => SelectedIsPartial && !acceptPartial;
+
+    private async Task SubmitAsync()
+    {
+        if (sending || Blocked)
+        {
+            return;
+        }
+
+        sending = true;
+        problem = null;
+
+        ReportStart start = await Api.StartReportAsync(
+            RepositoryId,
+            new ReportRequest(
+                job,
+                scan,
+                SelectedIsPartial && acceptPartial,
+                window,
+                files,
+                timeline,
+                commits,
+                findings,
+                culture,
+                title,
+                notes),
+            idempotencyKey,
+            closing.Token);
+
+        sending = false;
+
+        if (start.Report is ReportAcceptedResponse accepted)
+        {
+            Navigation.NavigateTo($"/reports/{accepted.ReportId}");
+
+            return;
+        }
+
+        problem = start.Problem;
+    }
+
+    private static string? Value(ChangeEventArgs args)
+    {
+        string? text = args.Value?.ToString();
+
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    private static int Number(ChangeEventArgs args, int fallback) =>
+        int.TryParse(args.Value?.ToString(), out int value) ? value : fallback;
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+    }
+}

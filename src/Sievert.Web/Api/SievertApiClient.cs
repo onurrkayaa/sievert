@@ -174,6 +174,69 @@ public sealed class SievertApiClient(HttpClient http, ILogger<SievertApiClient> 
     /// uretiliyor. Burada uretilseydi, kullanicinin iki kez tikladigi iki istek iki ayri
     /// anahtar alir ve tekrar anahtarinin varlik sebebi ortadan kalkardi.
     /// </summary>
+    public Task<ApiResult<ReportResponse>> ReportAsync(Guid reportId, CancellationToken cancellation) =>
+        GetAsync<ReportResponse>($"/api/v1/reports/{reportId}", cancellation);
+
+    public Task<ApiResult<PagedResponse<ReportSummaryResponse>>> ReportsAsync(
+        int repositoryId,
+        int page,
+        int pageSize,
+        CancellationToken cancellation) =>
+        GetAsync<PagedResponse<ReportSummaryResponse>>(
+            $"/api/v1/repositories/{repositoryId}/reports?page={page}&pageSize={Clamp(pageSize)}",
+            cancellation);
+
+    /// <summary>
+    /// Rapor uretimini baslatir.
+    ///
+    /// Tekrar anahtari **zorunlu**: panelde bir dugmeye iki kez basmak iki rapor
+    /// uretmemeli. Anahtari cagiran uretiyor, cunku ayni formun ayni gonderimi ayni
+    /// anahtari kullanmali.
+    /// </summary>
+    public async Task<ReportStart> StartReportAsync(
+        int repositoryId,
+        ReportRequest body,
+        string idempotencyKey,
+        CancellationToken cancellation)
+    {
+        using HttpRequestMessage request = new(
+            HttpMethod.Post, $"/api/v1/repositories/{repositoryId}/reports")
+        {
+            Content = JsonContent.Create(body, options: Json),
+        };
+
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
+
+        try
+        {
+            using HttpResponseMessage response = await http.SendAsync(request, cancellation);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new ReportStart(null, await ProblemAsync(response, cancellation));
+            }
+
+            ReportAcceptedResponse? accepted = await response.Content
+                .ReadFromJsonAsync<ReportAcceptedResponse>(Json, cancellation);
+
+            return accepted is null
+                ? new ReportStart(null, Unreadable())
+                : new ReportStart(accepted, null);
+        }
+        catch (HttpRequestException error)
+        {
+            logger.LogWarning(error, "Rapor istegi basarisiz. RepositoryId={RepositoryId}", repositoryId);
+
+            return new ReportStart(null, Unreachable());
+        }
+        catch (JsonException error)
+        {
+            logger.LogWarning(error, "Rapor cevabi okunamadi. RepositoryId={RepositoryId}", repositoryId);
+
+            return new ReportStart(null, Unreadable());
+        }
+    }
+
     public async Task<JobStart> StartAsync(
         int repositoryId,
         string kind,

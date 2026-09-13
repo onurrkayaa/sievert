@@ -89,6 +89,14 @@ public static class Display
 
     public static string Count(int value) => value.ToString("N0", new CultureInfo("tr-TR"));
 
+    /// <summary>Dosya boyutu; bin degil 1024 tabaninda, cunku dosya boyutu boyle okunuyor.</summary>
+    public static string Size(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes} B",
+        < 1024 * 1024 => $"{bytes / 1024.0:F1} KB".Replace('.', ','),
+        _ => $"{bytes / (1024.0 * 1024):F1} MB".Replace('.', ','),
+    };
+
     public static string Moment(DateTimeOffset? value) => value is DateTimeOffset moment
         ? moment.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + " UTC"
         : "-";

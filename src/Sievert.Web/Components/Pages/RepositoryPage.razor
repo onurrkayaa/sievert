@@ -125,6 +125,10 @@ else if (detail is not null)
                              SortChanged="value => Go(sort: value)"
                              OverlayChanged="value => Go(overlay: value, clearOverlay: value is null)" />
     }
+    else if (CurrentTab == "rapor")
+    {
+        <ReportForm RepositoryId="RepositoryId" Jobs="RiskJobs" Scans="ScanJobs" />
+    }
     else if (CurrentTab == "zaman")
     {
         <TimelineSection RepositoryId="RepositoryId"
@@ -399,6 +403,7 @@ else if (detail is not null)
         ("zaman", "Risk Zaman Cizelgesi"),
         ("commitler", "Commitler"),
         ("analizler", "Analizler"),
+        ("rapor", "Rapor"),
     ];
 
     private string CurrentTab => Tabs.Any(tab => tab.Key == Tab) ? Tab! : "genel";

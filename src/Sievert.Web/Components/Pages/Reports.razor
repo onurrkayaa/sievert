@@ -1,0 +1,183 @@
+@page "/reports"
+@implements IDisposable
+@inject SievertApiClient Api
+@inject IPageState State
+@inject NavigationManager Navigation
+
+<PageTitle>Raporlar - Sievert</PageTitle>
+
+<PageHeader Title="Raporlar"
+            Lead="Uretilmis PDF raporlari, en yeniden eskiye." />
+
+@if (repositories is null && failure is null)
+{
+    <Loading Message="Depolar yukleniyor..." />
+}
+else if (failure is not null)
+{
+    <ProblemView Result="failure" OnRetry="LoadAsync" />
+}
+else if (repositories is not null)
+{
+    <div class="row" style="margin-bottom:var(--space-4)">
+        <label class="field">
+            Depo
+            <select value="@repositoryId" @onchange="ChangeAsync">
+                @foreach (RepositoryListItem item in repositories)
+                {
+                    <option value="@item.Id" selected="@(item.Id == repositoryId)">@item.Name</option>
+                }
+            </select>
+        </label>
+
+        <a class="btn" href="/repositories/@repositoryId?tab=rapor">Rapor olustur</a>
+    </div>
+
+    @if (page is null)
+    {
+        <Loading Message="Raporlar yukleniyor..." />
+    }
+    else if (page.TotalCount == 0)
+    {
+        <EmptyState Title="Bu depoda rapor yok"
+                    Message="Depo sayfasindaki rapor sekmesinden yeni bir rapor uretebilirsin." />
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dosya</th>
+                        <th>Durum</th>
+                        <th>Dil</th>
+                        <th class="num">Sayfa</th>
+                        <th class="num">Boyut</th>
+                        <th>Istek</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (ReportSummaryResponse item in page.Items)
+                    {
+                        <tr>
+                            <td><a href="/reports/@item.Id">@item.FileName</a></td>
+                            <td>
+                                <span class="pill @Tone(item.Status)">@Label(item.Status)</span>
+                                @if (item.IsPartial)
+                                {
+                                    <span class="pill tone-warning">Kismi</span>
+                                }
+                            </td>
+                            <td>@(item.Culture == ReportCulture.Turkish ? "Turkce" : "Ingilizce")</td>
+                            <td class="num">@(item.PageCount is int pages ? Display.Count(pages) : "-")</td>
+                            <td class="num">@(item.ByteLength is long bytes ? Display.Size(bytes) : "-")</td>
+                            <td>@Display.Moment(item.RequestedAtUtc)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <Pager Page="page.Page" PageSize="page.PageSize" TotalCount="page.TotalCount"
+               PageChanged="GoToPageAsync" />
+    }
+}
+
+@code {
+    private readonly CancellationTokenSource closing = new();
+
+    private List<RepositoryListItem>? repositories;
+    private PagedResponse<ReportSummaryResponse>? page;
+    private ApiResult<PagedResponse<RepositoryListItem>>? failure;
+    private int repositoryId;
+    private int pageNumber = 1;
+    private IDisposable? persisting;
+
+    [SupplyParameterFromQuery(Name = "repo")]
+    private int? Repo { get; set; }
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        string key = PageStateKey.For("reports", ("repo", Repo));
+
+        ApiResult<PagedResponse<RepositoryListItem>> result = await State.TakeOrFetchAsync(
+            key,
+            () => Api.RepositoriesAsync(1, SievertApiClient.MaximumPageSize, closing.Token));
+
+        persisting?.Dispose();
+        persisting = State.Persist(key, () => result.IsSuccess ? result.Value : null);
+
+        if (!result.IsSuccess || result.Value is null)
+        {
+            failure = result;
+
+            return;
+        }
+
+        failure = null;
+        repositories = [.. result.Value.Items];
+
+        if (repositories.Count == 0)
+        {
+            return;
+        }
+
+        repositoryId = Repo is int given && repositories.Exists(item => item.Id == given)
+            ? given
+            : repositories[0].Id;
+
+        await LoadReportsAsync();
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        ApiResult<PagedResponse<ReportSummaryResponse>> result = await Api.ReportsAsync(
+            repositoryId, pageNumber, 25, closing.Token);
+
+        page = result.IsSuccess ? result.Value : null;
+    }
+
+    private async Task ChangeAsync(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out int id))
+        {
+            pageNumber = 1;
+            Navigation.NavigateTo($"/reports?repo={id}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task GoToPageAsync(int target)
+    {
+        pageNumber = target;
+
+        await LoadReportsAsync();
+    }
+
+    private static string Label(string status) => status switch
+    {
+        ReportStatus.Pending => "Uretiliyor",
+        ReportStatus.Ready => "Hazir",
+        ReportStatus.Failed => "Basarisiz",
+        ReportStatus.Corrupted => "Bozuk",
+        _ => status,
+    };
+
+    private static string Tone(string status) => status switch
+    {
+        ReportStatus.Ready => "tone-ok",
+        ReportStatus.Failed => "tone-error",
+        ReportStatus.Corrupted => "tone-error",
+        _ => "tone-info",
+    };
+
+    public void Dispose()
+    {
+        closing.Cancel();
+        closing.Dispose();
+        persisting?.Dispose();
+    }
+}

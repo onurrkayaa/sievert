@@ -122,4 +122,47 @@ public static class ApiError
 
     /// <summary>Ustuste bindirilmek istenen statik tarama bu harita icin uygun degil.</summary>
     public const string StaticAnalysisJobIncompatible = "STATIC_ANALYSIS_JOB_INCOMPATIBLE";
+
+    // PDF raporu (Asama 6 Adim 6).
+
+    /// <summary>Istek govdesi okunamadi ya da zorunlu alan eksik.</summary>
+    public const string ReportRequestInvalid = "REPORT_REQUEST_INVALID";
+
+    /// <summary>Bir parametre sozlesmedeki araligin disinda.</summary>
+    public const string ReportParameterInvalid = "REPORT_PARAMETER_INVALID";
+
+    public const string ReportRiskJobNotFound = "REPORT_RISK_JOB_NOT_FOUND";
+
+    public const string ReportRiskJobRepositoryMismatch = "REPORT_RISK_JOB_REPOSITORY_MISMATCH";
+
+    public const string ReportRiskJobKindMismatch = "REPORT_RISK_JOB_KIND_MISMATCH";
+
+    /// <summary>Iste hic sonuc satiri yok; raporlanacak bir sey uretilemez.</summary>
+    public const string ReportNoResults = "REPORT_NO_RESULTS";
+
+    /// <summary>Is kismi ve istek kismi sonuca acik izin vermemis.</summary>
+    public const string ReportPartialResultNotAllowed = "REPORT_PARTIAL_RESULT_NOT_ALLOWED";
+
+    /// <summary>Rapora eklenmek istenen statik tarama uygun degil.</summary>
+    public const string ReportStaticAnalysisIncompatible = "REPORT_STATIC_ANALYSIS_INCOMPATIBLE";
+
+    public const string ReportNotFound = "REPORT_NOT_FOUND";
+
+    /// <summary>Rapor hala uretiliyor; indirilecek dosya yok.</summary>
+    public const string ReportNotReady = "REPORT_NOT_READY";
+
+    public const string ReportGenerationFailed = "REPORT_GENERATION_FAILED";
+
+    /// <summary>Uretim surec yeniden baslamadan once yarida kalmis.</summary>
+    public const string ReportGenerationInterrupted = "REPORT_GENERATION_INTERRUPTED";
+
+    /// <summary>Dosya yazilamadi: disk dolu, izin yok ya da benzeri.</summary>
+    public const string ReportStorageFailed = "REPORT_STORAGE_FAILED";
+
+    public const string ReportArtifactTooLarge = "REPORT_ARTIFACT_TOO_LARGE";
+
+    /// <summary>Dosya kayip ya da ozeti tutmuyor; kullaniciya verilmiyor.</summary>
+    public const string ReportArtifactCorrupted = "REPORT_ARTIFACT_CORRUPTED";
+
+    public const string ReportCultureNotSupported = "REPORT_CULTURE_NOT_SUPPORTED";
 }

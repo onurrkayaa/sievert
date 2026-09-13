@@ -26,7 +26,9 @@ public static class VisualizationEndpoints
                 "Renk icin kullanilan deger meanRiskIndex'tir: dosyaya dokunan commit'lerin "
                 + "goreli risk endekslerinin ortalamasi. Dosyanin kendisi skorlanmiyor. "
                 + "Statik bulgu sayisi istege bagli olarak eklenebilir ama renge ve varsayilan "
-                + "siralamaya girmez.")
+                + "siralamaya girmez. Cevaptaki rankingScope siralamanin hangi kumede "
+                + "yapildigini soyler: kismi bir iste siralama yalniz yazilmis satirlar "
+                + "icindedir, deponun tamami icinde degil.")
             .Produces<FileActivityResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
@@ -39,7 +41,8 @@ public static class VisualizationEndpoints
             .WithDescription(
                 "Y ekseni yalniz goreli risk endeksi; ham model skoru ayni eksende cizilmez. "
                 + "Iki esik cizgisinin endeks karsiligi API tarafinda ayni skor referansiyla "
-                + "hesaplanip doner.")
+                + "hesaplanip doner. X ekseni commit sirasidir, tarih degil; iki nokta "
+                + "arasindaki mesafe gecen zamani gostermez.")
             .Produces<RiskTimelineResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)

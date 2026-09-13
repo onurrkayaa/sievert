@@ -375,6 +375,8 @@ request; you can point it somewhere else with `Sievert:ArtifactRoot`.
 | `POST /api/v1/analyses/{jobId}/cancel` | cancel a job |
 | `GET /api/v1/analyses/{jobId}/findings` | a static scan job's findings |
 | `GET /api/v1/analyses/{jobId}/risks` | a risk scoring job's commit assessments |
+| `GET /api/v1/repositories/{id}/visualizations/file-activity` | per-file summary over a commit window |
+| `GET /api/v1/repositories/{id}/visualizations/risk-timeline` | risk index per commit, newest last |
 
 ### What the risk endpoint does and does not say
 
@@ -445,6 +447,12 @@ curl -X POST http://127.0.0.1:5000/api/v1/analyses/<jobId>/cancel
 # results
 curl "http://127.0.0.1:5000/api/v1/analyses/<jobId>/findings?pageSize=100"
 curl "http://127.0.0.1:5000/api/v1/analyses/<jobId>/risks?order=highest-risk"
+
+# the two visualization endpoints (they need a finished risk-score-all job)
+curl "http://127.0.0.1:5000/api/v1/repositories/2/visualizations/file-activity\
+?analysisJobId=<jobId>&commitWindow=200&limit=100&sort=mean-risk-desc"
+curl "http://127.0.0.1:5000/api/v1/repositories/2/visualizations/risk-timeline\
+?analysisJobId=<jobId>&count=100"
 ```
 
 `kind` is either `static-scan` or `risk-score-all`. Starting a job returns `202` with a
@@ -499,8 +507,9 @@ The panel has **no authentication either** and listens on loopback by default, w
 same `SIEVERT_ALLOW_REMOTE=true` escape hatch and the same warning: anyone who can reach
 the address can use it.
 
-Pages: overview, repositories, repository detail, analysis jobs, job detail (with the
-result list), commit risk, models and system status. Job progress is polled once a second
+Pages: overview, repositories, repository detail (with a file activity map and a risk
+timeline), analysis jobs, job detail (with the result list), commit risk, models and
+system status. Job progress is polled once a second
 and stops as soon as the job reaches a terminal state; there is no SignalR push yet.
 
 ### What the panel says about the numbers
@@ -519,9 +528,51 @@ The panel repeats the risk contract rather than softening it:
 - A cancelled or failed job's rows are shown, but under a warning saying the result is
   incomplete.
 
+### The file activity map and the risk timeline
+
+The repository page has two tabs that draw the same numbers the tables already show.
+
+![File activity map](docs/images/asama6/file-activity-sharex-desktop.png)
+
+![Risk timeline](docs/images/asama6/timeline-sharex-desktop.png)
+
+There is no chart library and no CDN script: the timeline is SVG written by C# and the
+map is a CSS grid. Everything works offline.
+
+**What the colour means.** A cell's colour does **not** say the file is faulty. It
+summarises the *relative risk indices of the commits that touched that file* inside the
+chosen commit window - by default the mean. Three things keep that readable:
+
+- the index is printed as a number in every cell, so the colour is never the only signal;
+- the legend says the index is relative to the training distribution;
+- there is no percent sign anywhere, because the raw score is not a calibrated
+  probability.
+
+**Static findings are separate.** If you pick a static scan job as an overlay, files with
+findings get a badge. The badge does not change the colour or the order, and the detail
+panel says so in words: static findings are not part of the model score.
+
+**Partial results are labelled.** Every response carries a ranking scope. If the job was
+cancelled after writing some rows, the scope is `written-results-only`, the response
+carries a `PARTIAL_ANALYSIS_RESULT` warning and the panel shows a banner - because the
+"top 100 files" of a partial job is not the top 100 of the full one.
+
+![Partial result](docs/images/asama6/visualization-partial.png)
+
+The commit window (10-1000, default 200), the file limit (10-200, default 100) and the
+timeline point count (10-500, default 100) are all in the query string, so a view can be
+shared as a link. The timeline's X axis is commit order, not date; the response says so
+with a `TIMELINE_USES_ORDINAL_AXIS` warning.
+
+The decisions behind all of this are in ADR 0026, the numbers in
+`docs/olcumler/asama6-gorsellestirme.md`, and the independent recomputation from the raw
+tables in `data/asama6/gorsellestirme-dogrulama.json` (30 files, 150 points, 0
+differences).
+
 ![Panel overview](docs/images/asama6/dashboard-desktop.png)
 
 ![Commit risk](docs/images/asama6/commit-risk-desktop.png)
 
-More screenshots are in `docs/images/asama6/`. The decisions are in ADR 0025 and the
-measurements in `docs/olcumler/asama6-panel-temel.md`.
+More screenshots are in `docs/images/asama6/`. The decisions are in ADR 0025 and ADR
+0026, the measurements in `docs/olcumler/asama6-panel-temel.md` and
+`docs/olcumler/asama6-gorsellestirme.md`.

@@ -1,0 +1,39 @@
+{
+  "kod": "53b0388",
+  "uretildi": "2026-09-13T18:33:31.202606+00:00",
+  "aciklama": "PDF raporundaki degerler ham tablolardan yeniden hesaplanip PDF metniyle karsilastirildi. PDF metni ayri bir cikariciyla okundu.",
+  "parametreler": {
+    "commitWindow": 200,
+    "fileLimit": 25,
+    "timelineCount": 100,
+    "topCommitCount": 10
+  },
+  "toplamKontrol": 125,
+  "toplamFark": 0,
+  "raporlar": [
+    {
+      "Repository": "jellyfin-full",
+      "ReportId": "01a09c0a-1d82-7fee-9fe4-df884f7eb95a",
+      "PageCount": 8,
+      "ByteLength": 157709,
+      "Checked": 42,
+      "Differences": []
+    },
+    {
+      "Repository": "polly-full",
+      "ReportId": "01a09c0a-ce87-7fae-980f-86c121ec40f0",
+      "PageCount": 7,
+      "ByteLength": 149430,
+      "Checked": 41,
+      "Differences": []
+    },
+    {
+      "Repository": "sharex-full",
+      "ReportId": "01a09c0a-d18b-761e-aa2f-f78405659d0f",
+      "PageCount": 7,
+      "ByteLength": 152366,
+      "Checked": 42,
+      "Differences": []
+    }
+  ]
+}

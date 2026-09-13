@@ -12,6 +12,14 @@
   -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sievert.Api\Sievert.Api.csproj" />
+
+    <!--
+      Sievert.Web referansi yalnizca gorsel kodlamayi dogrulamak icin: renk ve koordinat
+      fonksiyonlarinin kultura duyarsiz ve monoton oldugu, urunun kullandigi kodun
+      kendisiyle sinaniyor. Ikinci bir kopya yazmak, olculen sey ile calisan sey arasinda
+      sessiz bir ayrisma birakirdi.
+    -->
+    <ProjectReference Include="..\..\src\Sievert.Web\Sievert.Web.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Data\Sievert.Data.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Mining\Sievert.Mining.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Modeling\Sievert.Modeling.csproj" />

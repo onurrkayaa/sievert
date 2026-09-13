@@ -284,6 +284,19 @@ if (args[0] == "panel-pages")
     return await PanelCommand.PagesAsync(args);
 }
 
+// Asama 6 Adim 5: gorsellestirme sayilarinin bagimsiz dogrulanmasi.
+// args: visualization-truth <repo-koku> <commit> <cikti.json>
+if (args[0] == "visualization-truth")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure visualization-truth <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await VisualizationTruthCommand.RunAsync(context, args);
+}
+
 // Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.
 // args: history-check <anlik-goruntu.csv> <ozet.sha256>
 if (args[0] == "history-check")

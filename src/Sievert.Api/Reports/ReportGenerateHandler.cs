@@ -65,7 +65,7 @@ public sealed class ReportGenerateHandler(
 
         if (await run.Progress.IsCancellationRequestedAsync(cancellation))
         {
-            return JobOutcome.Canceled(0, 0);
+            return await CanceledAsync(artifact, 0, cancellation);
         }
 
         await run.Progress.ReportAsync("veri", 1, 4, cancellation);
@@ -78,7 +78,7 @@ public sealed class ReportGenerateHandler(
 
         if (await run.Progress.IsCancellationRequestedAsync(cancellation))
         {
-            return JobOutcome.Canceled(0, 1);
+            return await CanceledAsync(artifact, 1, cancellation);
         }
 
         await run.Progress.ReportAsync("pdf", 2, 4, cancellation);
@@ -111,7 +111,7 @@ public sealed class ReportGenerateHandler(
         // kalmiyor.
         if (await run.Progress.IsCancellationRequestedAsync(cancellation))
         {
-            return JobOutcome.Canceled(0, 2);
+            return await CanceledAsync(artifact, 2, cancellation);
         }
 
         await run.Progress.ReportAsync("yazma", 3, 4, cancellation);
@@ -162,6 +162,27 @@ public sealed class ReportGenerateHandler(
             byteLength = artifact.ByteLength,
             manifestSha256 = artifact.ManifestSha256,
         });
+
+    /// <summary>
+    /// Iptal edilen uretimde rapor kaydi da kapaniyor.
+    ///
+    /// Ilk surumde yalniz is iptal ediliyordu ve kayit sonsuza kadar <c>pending</c>
+    /// kaliyordu: kullanici hic hazir olmayacak bir raporu bekliyordu. Olcum kosusunda
+    /// gorundu.
+    /// </summary>
+    private async Task<JobOutcome> CanceledAsync(
+        ReportArtifactRow artifact, int processed, CancellationToken cancellation)
+    {
+        artifact.Status = ReportArtifactStatus.Failed;
+        artifact.ErrorCode = JobOutcome.CanceledCode;
+        artifact.ErrorMessage = "Rapor uretimi iptal edildi.";
+
+        await context.SaveChangesAsync(cancellation);
+
+        store.Delete(artifact.StorageKey);
+
+        return JobOutcome.Canceled(0, processed);
+    }
 
     private async Task<JobOutcome> FailAsync(
         ReportArtifactRow artifact, string code, string message, CancellationToken cancellation)

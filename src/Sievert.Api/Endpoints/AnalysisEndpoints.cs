@@ -273,6 +273,23 @@ public static class AnalysisEndpoints
     /// gecmisse <c>200</c> ve is **oldugu gibi** donuyor; iptal istegi idempotent, bitmis
     /// bir isi "iptal edildi" diye yeniden yazmiyoruz (ADR 0024).
     /// </summary>
+    /// <summary>Iptal edilen rapor isinin kaydini kapatir.</summary>
+    private static async Task CloseReportAsync(
+        HttpContext context, Guid jobId, CancellationToken cancellation)
+    {
+        SievertContext database = Database.Open(context);
+
+        await database.ReportArtifacts
+            .Where(artifact => artifact.AnalysisJobId == jobId
+                && artifact.Status == ReportArtifactStatus.Pending)
+            .ExecuteUpdateAsync(
+                update => update
+                    .SetProperty(artifact => artifact.Status, ReportArtifactStatus.Failed)
+                    .SetProperty(artifact => artifact.ErrorCode, JobOutcome.CanceledCode)
+                    .SetProperty(artifact => artifact.ErrorMessage, "Rapor uretimi iptal edildi."),
+                cancellation);
+    }
+
     private static async Task<IResult> CancelAsync(
         Guid jobId,
         HttpContext context,
@@ -301,6 +318,14 @@ public static class AnalysisEndpoints
 
         if (await store.CancelQueuedAsync(jobId, now, cancellation))
         {
+            // Kuyrukta iptal edilen bir rapor isi hic kosmuyor, yani handler'in kaydi
+            // kapatma sansi da olmuyor. Kayit burada kapaniyor; yoksa kullanici hic
+            // hazir olmayacak bir raporu bekler.
+            if (job.Kind == AnalysisJobKind.ReportGenerate)
+            {
+                await CloseReportAsync(context, jobId, cancellation);
+            }
+
             return Results.Ok(Describe((await store.FindAsync(jobId, cancellation))!));
         }
 

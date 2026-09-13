@@ -17,11 +17,14 @@ public sealed record JobOutcome(
     string? ErrorMessage = null,
     string? ResultSummary = null)
 {
+    /// <summary>Iptal edilen isin hata kodu; rapor kaydi da ayni kodu yaziyor.</summary>
+    public const string CanceledCode = "ANALYSIS_CANCELED";
+
     public static JobOutcome Canceled(int resultCount, int processed) => new(
         AnalysisJobStatus.Canceled,
         resultCount,
         processed,
-        "ANALYSIS_CANCELED",
+        CanceledCode,
         "Is iptal edildi. Kaydedilen sonuc kismi.");
 
     public static JobOutcome Failed(string code, string message, int resultCount = 0, int processed = 0) =>

@@ -8,6 +8,9 @@ public enum AnalysisJobKind
 
     /// <summary>Reponun metrikli butun commit'lerini kendi profiliyle skorlar.</summary>
     RiskScoreAll,
+
+    /// <summary>Kaydedilmis bir risk sonucundan PDF raporu uretir.</summary>
+    ReportGenerate,
 }
 
 /// <summary>
@@ -151,15 +154,32 @@ public sealed class AnalysisJobRow
     {
         AnalysisJobKind.StaticScan => "static-scan",
         AnalysisJobKind.RiskScoreAll => "risk-score-all",
+        AnalysisJobKind.ReportGenerate => "report-generate",
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Bilinmeyen is turu."),
     };
 
-    /// <summary>Kablodaki yazilistan tur. Taninmayan deger null.</summary>
+    /// <summary>
+    /// Genel is baslatma ucundan **baslatilabilen** turler. Taninmayan deger null.
+    ///
+    /// <see cref="AnalysisJobKind.ReportGenerate"/> bilerek yok: rapor isinin kendi
+    /// zorunlu parametreleri var ve onlarsiz baslatilirsa uretecek bir sey bulamaz.
+    /// Rapor yalniz kendi ucundan baslatiliyor.
+    /// </summary>
     public static AnalysisJobKind? Parse(string? kind) => kind switch
     {
         "static-scan" => AnalysisJobKind.StaticScan,
         "risk-score-all" => AnalysisJobKind.RiskScoreAll,
         _ => null,
+    };
+
+    /// <summary>
+    /// Listeleme suzgecinde kullanilan tur cozumu: baslatilamayan turleri de taniyor.
+    /// Rapor isleri de listede gorunmeli, yoksa kullanicinin gecmisi eksik gorunur.
+    /// </summary>
+    public static AnalysisJobKind? ParseFilter(string? kind) => kind switch
+    {
+        "report-generate" => AnalysisJobKind.ReportGenerate,
+        _ => Parse(kind),
     };
 
     /// <summary>Durumun kablodaki yazilisi.</summary>

@@ -25,6 +25,8 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
 
     public DbSet<CommitRiskSnapshotRow> CommitRiskSnapshots => Set<CommitRiskSnapshotRow>();
 
+    public DbSet<ReportArtifactRow> ReportArtifacts => Set<ReportArtifactRow>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<RepositoryRow>(repository =>
@@ -170,6 +172,50 @@ public sealed class SievertContext(DbContextOptions<SievertContext> options) : D
             snapshot.HasOne(row => row.Commit)
                 .WithMany()
                 .HasForeignKey(row => row.CommitId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ReportArtifactRow>(report =>
+        {
+            report.Property(row => row.Format).HasMaxLength(10);
+            report.Property(row => row.Culture).HasMaxLength(10);
+            report.Property(row => row.SafeFileName).HasMaxLength(200);
+            report.Property(row => row.StorageKey).HasMaxLength(120);
+            report.Property(row => row.ContentType).HasMaxLength(100);
+            report.Property(row => row.Sha256).HasMaxLength(64);
+            report.Property(row => row.ManifestSha256).HasMaxLength(64);
+            report.Property(row => row.ErrorCode).HasMaxLength(60);
+            report.Property(row => row.ErrorMessage).HasMaxLength(1000);
+            report.Property(row => row.IdempotencyKey).HasMaxLength(128);
+            report.Property(row => row.RequestFingerprint).HasMaxLength(64);
+            report.Property(row => row.SchemaVersion).HasMaxLength(20);
+            report.Property(row => row.GeneratorVersion).HasMaxLength(40);
+            report.Property(row => row.Version).IsRowVersion();
+
+            // Her raporun tam bir uretim isi var; is kaydindan rapora tek adimda
+            // gidilebiliyor.
+            report.HasIndex(row => row.AnalysisJobId).IsUnique();
+
+            // Depolama anahtari dahili ve benzersiz: iki kayit ayni dosyayi gostermesin.
+            report.HasIndex(row => row.StorageKey).IsUnique();
+
+            // Ayni tekrar anahtari ayni raporu bulmali; arama bu indeksten geciyor.
+            report.HasIndex(row => new { row.RepositoryId, row.IdempotencyKey });
+
+            // Liste sayfasi en yeniden eskiye siraliyor.
+            report.HasIndex(row => new { row.RepositoryId, row.RequestedAtUtc });
+
+            report.HasOne(row => row.AnalysisJob)
+                .WithMany()
+                .HasForeignKey(row => row.AnalysisJobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Depo silinirse raporlari da gidiyor: raporun kaynagi olmadan metadata'nin
+            // izlenebilirligi zaten kalmiyor, ve dosya artefakti startup temizligiyle
+            // ortada kaliyor. Bu davranis ADR 0027'de yaziyor.
+            report.HasOne(row => row.Repository)
+                .WithMany()
+                .HasForeignKey(row => row.RepositoryId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

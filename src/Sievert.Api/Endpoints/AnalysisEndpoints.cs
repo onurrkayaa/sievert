@@ -231,11 +231,11 @@ public static class AnalysisEndpoints
 
         if (context.Request.Query["kind"].FirstOrDefault() is string rawKind && rawKind.Length > 0)
         {
-            if (AnalysisJobRow.Parse(rawKind) is not AnalysisJobKind kind)
+            if (AnalysisJobRow.ParseFilter(rawKind) is not AnalysisJobKind kind)
             {
                 return Problems.BadRequest(
                     context,
-                    "kind static-scan ya da risk-score-all olmali.",
+                    "kind static-scan, risk-score-all ya da report-generate olmali.",
                     ApiError.AnalysisKindInvalid);
             }
 

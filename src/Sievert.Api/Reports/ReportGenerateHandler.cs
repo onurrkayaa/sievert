@@ -42,6 +42,27 @@ public sealed class ReportGenerateHandler(
                 ApiError.ReportNotFound, "Bu ise bagli bir rapor kaydi bulunamadi.");
         }
 
+        try
+        {
+            return await GenerateAsync(artifact, run, cancellation);
+        }
+        catch (OperationCanceledException)
+        {
+            // Iptal jetonu bir await'in ortasinda tetiklendi: worker isi iptal edilmis
+            // sayacak ama rapor kaydini kapatacak olan burasi. Kapatilmazsa kayit
+            // sonsuza kadar "uretiliyor" kalir - olcum kosusunda tam bu gorundu.
+            //
+            // Yazma iptal edilmemis bir jetonla yapiliyor; iptal edilmis jetonla
+            // SaveChanges yine iptal atardi.
+            await CanceledAsync(artifact, 0, CancellationToken.None);
+
+            throw;
+        }
+    }
+
+    private async Task<JobOutcome> GenerateAsync(
+        ReportArtifactRow artifact, AnalysisJobRun run, CancellationToken cancellation)
+    {
         await run.Progress.ReportAsync("hazirlik", 0, 4, cancellation);
 
         RepositoryRow? repository = await context.Repositories

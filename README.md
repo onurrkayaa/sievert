@@ -41,6 +41,9 @@ src/
   Sievert.Api/                ASP.NET Core Web API: read-only endpoints + background jobs
   Sievert.Web/                Blazor panel, talks to the API over HTTP only
   Sievert.Cli/                console app, this is what you run
+tools/
+  Sievert.Demo/               one-command demo: container, seed, API, panel
+  Sievert.Measure/            measurement and verification tools
 tests/
   Sievert.Tests/              xUnit tests
   Sievert.Web.Tests/          bUnit tests for the panel components
@@ -379,6 +382,11 @@ request; you can point it somewhere else with `Sievert:ArtifactRoot`.
 | `GET /api/v1/analyses/{jobId}/risks` | a risk scoring job's commit assessments |
 | `GET /api/v1/repositories/{id}/visualizations/file-activity` | per-file summary over a commit window |
 | `GET /api/v1/repositories/{id}/visualizations/risk-timeline` | risk index per commit, newest last |
+| `POST /api/v1/repositories/{id}/reports` | start a PDF report from a finished risk job |
+| `GET /api/v1/repositories/{id}/reports` | a repository's reports, paged |
+| `GET /api/v1/reports/{reportId}` | report status, checksum, page count |
+| `GET /api/v1/reports/{reportId}/manifest` | the report's canonical input manifest |
+| `GET /api/v1/reports/{reportId}/download` | the PDF itself, verified before it is sent |
 
 ### What the risk endpoint does and does not say
 
@@ -455,6 +463,15 @@ curl "http://127.0.0.1:5000/api/v1/repositories/2/visualizations/file-activity\
 ?analysisJobId=<jobId>&commitWindow=200&limit=100&sort=mean-risk-desc"
 curl "http://127.0.0.1:5000/api/v1/repositories/2/visualizations/risk-timeline\
 ?analysisJobId=<jobId>&count=100"
+
+# a PDF report: start it, wait for it, download it
+curl -i -X POST http://127.0.0.1:5000/api/v1/repositories/2/reports \
+  -H "Content-Type: application/json" -H "Idempotency-Key: $(uuidgen)" \
+  -d '{"riskAnalysisJobId":"<jobId>","staticAnalysisJobId":"<scanId>","culture":"tr-TR"}'
+
+curl http://127.0.0.1:5000/api/v1/reports/<reportId>
+curl http://127.0.0.1:5000/api/v1/reports/<reportId>/manifest
+curl -O -J http://127.0.0.1:5000/api/v1/reports/<reportId>/download
 ```
 
 `kind` is either `static-scan` or `risk-score-all`. Starting a job returns `202` with a
@@ -487,8 +504,8 @@ compiler, not by good intentions.
 Running it needs four things in order:
 
 ```bash
-# 1. PostgreSQL (the same container the CLI uses)
-docker compose up -d
+# 1. PostgreSQL (the same container the CLI uses; see the command above)
+docker start sievert-db
 
 # 2. migrations
 export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=..."
@@ -580,3 +597,72 @@ differences).
 More screenshots are in `docs/images/asama6/`. The decisions are in ADR 0025 and ADR
 0026, the measurements in `docs/olcumler/asama6-panel-temel.md` and
 `docs/olcumler/asama6-gorsellestirme.md`.
+
+### The PDF report
+
+The repository page has a **Rapor** tab. Pick a finished risk job, optionally a static
+scan, and the panel starts a background job that writes a PDF.
+
+The report is a technical review summary - **not** an audit document and not a defect
+verdict. The cover says so, and it carries three sentences that never move off the first
+page: the raw score is not a calibrated probability, the risk index is a relative
+percentile, and static findings are not part of the model score.
+
+What makes it auditable:
+
+- Every report has a **canonical input manifest**: repository, job, model, parameters and
+  evidence checksums, as one canonical JSON document. The same data and the same
+  parameters produce the same bytes and the same SHA-256. The generation time is
+  deliberately *not* part of it, otherwise the checksum could never repeat.
+- The manifest checksum is printed inside the PDF and served at
+  `/api/v1/reports/{id}/manifest`.
+- The PDF's own SHA-256 cannot be printed inside itself (writing it would change the
+  file), so it is served in the metadata and in the download's `ETag`. The report says
+  this in plain words rather than leaving a gap.
+- The file is written to a temporary name, hashed, then moved atomically. Before every
+  download the size and hash are checked again; if they do not match, the artifact is
+  marked `corrupted` and nothing is sent.
+- Sending the same `Idempotency-Key` with the same body returns the same report and the
+  same bytes - no second job.
+
+A partial (cancelled) job can only be reported with an explicit `includePartial=true`,
+and then every section of the PDF says that it covers only the rows that were written.
+
+An example, produced from the demo data set:
+[`docs/demo/sievert-polly-ornek-rapor.pdf`](docs/demo/sievert-polly-ornek-rapor.pdf)
+(checksum next to it).
+
+The numbers in the PDF are verified independently: a separate tool extracts the text from
+the PDF with its own extractor and recomputes every value from the raw tables. Three
+reports, 125 checks, **0 differences** (`data/asama6/rapor-dogrulama.json`).
+
+### One command demo
+
+```bash
+dotnet run --project tools/Sievert.Demo
+```
+
+That starts a temporary PostgreSQL container, applies the migrations, imports a fixed
+demo data set, starts the API and the panel on free loopback ports, waits until both
+answer, prints the addresses and opens the browser. Ctrl+C shuts everything down: panel,
+then API, then the container.
+
+You need the .NET 10 SDK, a running Docker and the `postgres:17` image. With those three
+present it works **without an internet connection**. Measured startup: 7.8-10.3 seconds
+over five runs (`docs/olcumler/asama6-rapor-ve-demo.md`).
+
+Useful flags: `--no-open`, `--keep-database`, `--api-port`, `--web-port`, `--smoke-test`
+(start, check, shut down, exit code), `--verbose`.
+
+**The demo data is real, and it is a subset.** It is the newest 200 commits of the public
+Polly history with their real metrics, labels, risk scores and static findings - no
+invented rows. The selection rule was fixed before looking at any result, and the panel
+shows a banner saying this is a fixed public subset rather than a live analysis. The
+source manifest (`data/asama6/demo/source-manifest.json`) records where it came from.
+
+One property of that subset is worth stating: it has **zero SZZ-positive commits**,
+because the newest commits have not been fixed yet (right censoring), and 172 of the 200
+are bot commits. That was not a reason to change the rule - the demo shows how the tool
+works, not how good the model is.
+
+The walkthrough is in `docs/demo/asama6-demo-senaryosu.md`, the decisions in ADR 0027.

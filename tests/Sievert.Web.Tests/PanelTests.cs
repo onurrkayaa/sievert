@@ -234,6 +234,48 @@ public sealed class PanelTests : BunitContext
         Assert.DoesNotContain("/private/tmp", page.Markup, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Bu depo icin zaten calisan bir is varsa dugme kapali. API ikinci isi zaten
+    /// reddediyor; reddedilecegi belli olan bir dugme gostermenin anlami yok.
+    /// </summary>
+    [Fact]
+    public void TheStartButtonIsDisabledWhileAJobOfTheSameKindIsActive()
+    {
+        StubApi stub = new StubApi()
+            .Returns(
+                "/api/v1/repositories/2",
+                new RepositoryDetail(
+                    new RepositoryListItem(
+                        2, "polly-full", "github.com/app-vnext/polly", "remote", null,
+                        2759, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch, true),
+                    2759, 261, 0.09, 854, 2759, "polly", []))
+            .Returns(
+                "/api/v1/repositories/2/analyses",
+                new PagedResponse<AnalysisJobResponse>(1, 5, 1, [Samples.Job("running", "risk-score-all")]))
+            .Returns("/api/v1/repositories/2/commits", new PagedResponse<CommitListItem>(1, 25, 0, []));
+
+        Services.AddSingleton(stub.Client());
+
+        IRenderedComponent<RepositoryPage> page = Render<RepositoryPage>(parameters =>
+            parameters.Add(component => component.RepositoryId, 2));
+
+        string markup = page.Markup;
+
+        // Calisan is risk skorlamasi; o dugme kapali, tarama dugmesi acik.
+        Assert.Contains("su an Calisiyor", markup, StringComparison.Ordinal);
+
+        IReadOnlyList<AngleSharp.Dom.IElement> buttons = page.FindAll("button");
+
+        AngleSharp.Dom.IElement score = buttons.First(button =>
+            button.TextContent.Contains("skorla", StringComparison.Ordinal));
+
+        AngleSharp.Dom.IElement scan = buttons.First(button =>
+            button.TextContent.Contains("Statik tarama", StringComparison.Ordinal));
+
+        Assert.True(score.HasAttribute("disabled"), "calisan is varken skorlama dugmesi acik kalmis");
+        Assert.False(scan.HasAttribute("disabled"), "ilgisiz bir is yuzunden tarama dugmesi kapanmis");
+    }
+
     private IRenderedComponent<CommitRisk> RenderRisk(CommitRiskAssessment risk)
     {
         StubApi stub = new StubApi()

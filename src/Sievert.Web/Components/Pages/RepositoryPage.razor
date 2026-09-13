@@ -19,14 +19,14 @@ else if (detail is not null)
         <Actions>
             <button class="btn primary"
                     type="button"
-                    disabled="@(busy is not null || !CanScan)"
+                    disabled="@(busy is not null || Active("static-scan") is not null)"
                     @onclick="@(() => StartAsync("static-scan"))">
                 @(busy == "static-scan" ? "Baslatiliyor..." : "Statik tarama baslat")
             </button>
 
             <button class="btn primary"
                     type="button"
-                    disabled="@(busy is not null || detail.ModelProfile is null)"
+                    disabled="@(busy is not null || detail.ModelProfile is null || Active("risk-score-all") is not null)"
                     @onclick="@(() => StartAsync("risk-score-all"))">
                 @(busy == "risk-score-all" ? "Baslatiliyor..." : "Tum commit'leri skorla")
             </button>
@@ -36,6 +36,16 @@ else if (detail is not null)
     @if (startProblem is not null)
     {
         <ProblemView Result="startProblem" />
+    }
+
+    @foreach (AnalysisJobResponse running in ActiveJobs)
+    {
+        <div class="notice info" role="status">
+            <p>
+                @Display.Kind(running.Kind) isi su an @Display.Status(running.Status).
+                <a href="analyses/@running.Id">Ise git</a>
+            </p>
+        </div>
     }
 
     @if (conflictUrl is not null)
@@ -250,9 +260,17 @@ else if (detail is not null)
     private bool? isBugIntroducing;
     private bool? isBot;
 
-    /// <summary>Yerel klasor panelde gorunmuyor, o yuzden taramanin kosup kosmayacagini
-    /// buradan bilemiyoruz; dugme acik, sonuc API'den geliyor.</summary>
-    private bool CanScan => true;
+    /// <summary>
+    /// Bu depo ve tur icin su an aktif olan is; yoksa null.
+    ///
+    /// Dugmeyi kapatan sey bu. API zaten ikinci bir is acmiyor ve <c>409</c> donuyor;
+    /// ama kullaniciya reddedilecegi belli olan bir dugme gostermenin anlami yok.
+    /// </summary>
+    private AnalysisJobResponse? Active(string kind) =>
+        jobs?.Items.FirstOrDefault(job => job.Kind == kind && job.Status is "queued" or "running");
+
+    private IEnumerable<AnalysisJobResponse> ActiveJobs =>
+        jobs?.Items.Where(job => job.Status is "queued" or "running") ?? [];
 
     protected override Task OnParametersSetAsync() => LoadAsync();
 

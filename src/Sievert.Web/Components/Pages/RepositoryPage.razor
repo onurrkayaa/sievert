@@ -34,6 +34,8 @@ else if (detail is not null)
         </Actions>
     </PageHeader>
 
+    <DemoDataBanner IsDemoData="detail.Repository.IsDemoData" />
+
     @if (startProblem is not null)
     {
         <ProblemView Result="startProblem" />

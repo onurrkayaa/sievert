@@ -1,0 +1,24 @@
+@if (IsDemoData)
+{
+    <div class="card section" role="note"
+         style="border-left:3px solid var(--accent);margin-bottom:var(--space-4)">
+        <strong>Sabit demo veri kumesi</strong>
+        <p class="muted" style="margin:var(--space-2) 0 0;max-width:72ch">
+            Bu depo, kamuya acik Polly gecmisinden alinmis sabit bir alt kumedir; canli
+            bir depo analizi degildir. Secim kurali ve kaynak ozetleri
+            <span class="mono">data/asama6/demo/source-manifest.json</span> icinde yaziyor.
+        </p>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Deponun demo verisinden gelip gelmedigi.
+    ///
+    /// Bu bayrak yalniz **kaynak sunumu**: skorlari, siralamayi ya da uyarilari
+    /// degistirmiyor. Demoyu acan kisinin ekranda gordugu seyi canli bir analiz
+    /// sanmamasi icin var.
+    /// </summary>
+    [Parameter]
+    public bool IsDemoData { get; set; }
+}

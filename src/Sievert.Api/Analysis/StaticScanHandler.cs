@@ -39,6 +39,9 @@ public sealed class StaticScanHandler(
     /// </summary>
     private int MaxTrackedEntries { get; set; }
 
+    /// <summary>Temizlikten sonra takipcide kalan en yuksek kayit sayisi; tabana donuyor mu.</summary>
+    private int MaxTrackedAfterClear { get; set; }
+
     public async Task<JobOutcome> RunAsync(AnalysisJobRun run, CancellationToken cancellation)
     {
         RepositoryRow? repository = await context.Repositories
@@ -179,7 +182,7 @@ public sealed class StaticScanHandler(
             AnalysisJobStatus.Succeeded,
             saved,
             outcome.Summary.FileCount,
-            ResultSummary: Summarise(outcome, run.Progress, before, MaxTrackedEntries));
+            ResultSummary: Summarise(outcome, run.Progress, before, MaxTrackedEntries, MaxTrackedAfterClear));
     }
 
     /// <summary>
@@ -228,6 +231,7 @@ public sealed class StaticScanHandler(
         int saved = 0;
 
         MaxTrackedEntries = 0;
+        MaxTrackedAfterClear = 0;
 
         for (int start = 0; start < outcome.Findings.Count; start += options.FindingBatchSize)
         {
@@ -262,6 +266,8 @@ public sealed class StaticScanHandler(
             // Takipci temizlenmezse obek obek buyuyor ve her kayit oncekileri de tariyor.
             context.ChangeTracker.Clear();
 
+            MaxTrackedAfterClear = Math.Max(MaxTrackedAfterClear, context.ChangeTracker.Entries().Count());
+
             saved += batch.Count;
         }
 
@@ -272,7 +278,8 @@ public sealed class StaticScanHandler(
         ScanOutcome outcome,
         JobProgress progress,
         WorktreeSnapshot source,
-        int tracked)
+        int tracked,
+        int trackedAfterClear)
     {
         CheckSummary summary = outcome.Summary;
 
@@ -280,6 +287,7 @@ public sealed class StaticScanHandler(
         {
             ["sourceHeadShortSha"] = source.ShortSha,
             ["maxChangeTrackerEntries"] = tracked,
+            ["maxChangeTrackerEntriesAfterClear"] = trackedAfterClear,
             // Ilerlemenin kac kez yazildigi: oge basina yazilmadigini gosteren sayi.
             ["progressWrites"] = progress.WriteCount,
             ["cancellationChecks"] = progress.CancellationCheckCount,

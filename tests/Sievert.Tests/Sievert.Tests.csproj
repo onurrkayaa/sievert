@@ -27,6 +27,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sievert.Analysis\Sievert.Analysis.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Api\Sievert.Api.csproj" />
+
+    <!--
+      Demo araci testten cagriliyor: seed'in temizligi ve importun idempotentligi, aracin
+      kendi kodu uzerinden sinaniyor. Ikinci bir kopya yazmak, sinanan sey ile calisan sey
+      arasinda sessiz bir ayrisma birakirdi.
+    -->
+    <ProjectReference Include="..\..\tools\Sievert.Demo\Sievert.Demo.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Cli\Sievert.Cli.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Contracts\Sievert.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Sievert.Data\Sievert.Data.csproj" />

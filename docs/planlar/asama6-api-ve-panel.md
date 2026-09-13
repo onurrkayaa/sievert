@@ -114,7 +114,9 @@ bellek olcumu, es zamanlilik 1/2 karsilastirmasi.
 **Basari olcutu.** Kirli agacta tarama baslamiyor; tarama sirasinda depo degisirse is
 basarili sayilmiyor; ikinci bir worker ayni isi ikinci kez kosturmuyor.
 
-**Olculen.** `docs/olcumler/asama6-bellek-ayristirma.md`. Taze surecte en yuksek deger
+**Olculen.** `docs/olcumler/asama6-kaynak-durumu.md` ve
+`docs/olcumler/asama6-bellek-ayristirma.md`. Ayni HEAD'de yedi kosu ayni bulgu kumesini
+verdi; kirli agacta tarama 386 ms'de 0 bulguyla reddedildi. Taze surecte en yuksek deger
 504,5 MB (onceki 1267 MB alti isin ayni surecte kosmasindan geliyormus), model yuklemesi
 16 MB, takipci her zaman obek boyutunda.
 

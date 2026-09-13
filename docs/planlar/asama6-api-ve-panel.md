@@ -1,7 +1,7 @@
 # Asama 6 yol haritasi: API ve panel
 
 **Tarih:** 2026-09-12
-**Durum:** Adim 0, 1, 2 ve 3 yapildi. Geri kalan adimlar **yapilmadi**.
+**Durum:** Adim 0, 1, 2, 3 ve 4 yapildi. Geri kalan adimlar **yapilmadi**.
 
 Asama 5 bir model birakti ve o modelin ne olup ne olmadigini olctu. Asama 6 o modeli
 kullanilabilir hale getiriyor. Isin buyuk kismi teknik degil: **modelin ne soyleyip ne
@@ -101,12 +101,43 @@ olarak yazilmadi. Dagitik kuyruk, is onceligi, zaman asimi ve otomatik yeniden d
 dondurulmus kanit dosyalari bu islerden **etkilenmedi** - is sonuclari kendi tablolarinda
 duruyor ve Asama 5/6 kanit dosyalari yalnizca okunuyor.
 
-### 4. Blazor panel iskeleti — **yapilmadi**
+### 3b. Panel oncesi sertlestirme — **bu turda yapildi**
+
+**Amac.** Adim 3'ten kalan uc borcu panelden once kapatmak: static taramanin neyi
+taradigi kayitli degildi, bellegin nereden geldigi ayristirilmamisti ve es zamanlilik
+yalniz 1 ile olculmustu.
+
+**Uretilen.** Is kaydinda kaynak durumu (HEAD, calisma agaci, dogrulama), temiz agac
+sarti, iki worker ornegiyle tekillik ve dis surecten iptal testleri, taze sureclerde
+bellek olcumu, es zamanlilik 1/2 karsilastirmasi.
+
+**Basari olcutu.** Kirli agacta tarama baslamiyor; tarama sirasinda depo degisirse is
+basarili sayilmiyor; ikinci bir worker ayni isi ikinci kez kosturmuyor.
+
+**Olculen.** `docs/olcumler/asama6-bellek-ayristirma.md`. Taze surecte en yuksek deger
+504,5 MB (onceki 1267 MB alti isin ayni surecte kosmasindan geliyormus), model yuklemesi
+16 MB, takipci her zaman obek boyutunda.
+
+**Yapilmayanlar.** Es zamanlilik 3 ve 4 gercek repolarla olculmedi; tepe bellegin
+Roslyn / EF / ML.NET paylari ayrilmadi.
+
+### 4. Blazor panel iskeleti — **yapildi**
 
 **Amac.** Repo listesi, commit listesi ve tek commit risk goruntusu.
 
-**Basari olcutu.** Panel API'den okuyor, kendi hesabini yapmiyor; uyarilar ve
-"kalibre degil" notu ekranda gorunuyor.
+**Uretilen.** `src/Sievert.Contracts`, `src/Sievert.Web`, sekiz sayfa, tiplenmis API
+istemcisi, ADR 0025.
+
+**Basari olcutu.** Panel API'den okuyor, kendi hesabini yapmiyor - referans yok, yani bunu
+derleyici koruyor. Uyarilar ve "kalibre edilmedi" rozeti her degerlendirmede ekranda.
+
+**Olculen.** `docs/olcumler/asama6-panel-temel.md`. Sayfa sureleri Release'te 4-139 ms;
+en yuksek deger commit riski sayfasinin soguk ilk kosusu. Durum sorma dongusu 30 saniyede
+18 istek, ortanca aralik 1004 ms, ayni anda acik en fazla 1 istek, terminal durumdan
+sonra 0 istek.
+
+**Yapilmayanlar.** Grafik kutuphanesi, isi haritasi, zaman cizelgesi, PDF ve kimlik
+dogrulama yok. Sayfa acilisinda veri iki kez cekiliyor (on-isleme + devre).
 
 **Devralinan risk.** Arayuzde yuzde isareti gormek, skoru olasilik sanmaya en kolay yol.
 Risk sozlesmesindeki dil arayuzde de gecerli.
@@ -139,9 +170,10 @@ kapanis raporu.
 - [x] Adim 1 — read-only API ve model kayit defteri
 - [x] Adim 2 — commit risk skoru ve aciklama
 - [x] Adim 3 — arka plan isleri, iptal ve sonuc saklama
-- [ ] Adim 4 — Blazor panel
+- [x] Adim 3b — panel oncesi sertlestirme (kaynak durumu, bellek, es zamanlilik)
+- [x] Adim 4 — Blazor panel
 - [ ] Adim 5 — isi haritasi ve zaman cizelgesi
 - [ ] Adim 6 — rapor ve demo
 - [ ] Adim 7 — kullanilabilirlik ve kapanis
 
-**Asama 6 tamamlanmadi.** Sonraki nokta Adim 4: Blazor panel iskeleti.
+**Asama 6 tamamlanmadi.** Sonraki nokta Adim 5: isi haritasi ve risk zaman cizelgesi.

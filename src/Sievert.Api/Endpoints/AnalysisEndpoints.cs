@@ -27,6 +27,11 @@ public static class AnalysisEndpoints
         api.MapPost("/repositories/{repositoryId:int}/analyses", StartAsync)
             .WithName("StartAnalysis")
             .WithSummary("Bir depo icin arka plan analiz isi baslatir")
+            .WithDescription(
+                "Taranacak klasor depo kaydindan geliyor; istek dosya sistemi yolu almiyor. "
+                + "static-scan yalniz temiz bir calisma agacinda calisir: kaydedilmemis "
+                + "degisiklik varsa is REPOSITORY_WORKTREE_DIRTY ile basarisiz olur. "
+                + "Tarama sirasinda HEAD ya da calisma agaci degisirse sonuc tam sayilmaz.")
             .Produces<AnalysisJobResponse>(StatusCodes.Status202Accepted)
             .Produces<AnalysisJobResponse>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -62,6 +67,9 @@ public static class AnalysisEndpoints
         api.MapGet("/analyses/{jobId:guid}/findings", FindingsAsync)
             .WithName("AnalysisFindings")
             .WithSummary("Bir static-scan isinin bulgulari, sayfali")
+            .WithDescription(
+                "Yollar depo kokune goreli; sunucudaki tam yol donmez. Cevap, taramanin "
+                + "hangi HEAD uzerinde yapildigini ve calisma agacinin durumunu tasir.")
             .Produces<AnalysisResultPage<StaticFindingResponse>>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)

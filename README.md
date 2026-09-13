@@ -35,10 +35,13 @@ src/
   Sievert.Mining/             git history with LibGit2Sharp, separate from Analysis
   Sievert.Data/               PostgreSQL with EF Core, separate from Mining
   Sievert.Modeling/           feature transform, logistic regression, model registry
+  Sievert.Contracts/          DTOs and error codes shared by the API and the panel
   Sievert.Api/                ASP.NET Core Web API: read-only endpoints + background jobs
+  Sievert.Web/                Blazor panel, talks to the API over HTTP only
   Sievert.Cli/                console app, this is what you run
 tests/
   Sievert.Tests/              xUnit tests
+  Sievert.Web.Tests/          bUnit tests for the panel components
 samples/Patients/             sample repositories to test against
 docs/adr/                     short notes on why things were decided this way
 docs/proje-notlari.md         working notes: goal, technical decisions, conventions
@@ -328,14 +331,16 @@ Numbers and their sources: `docs/raporlar/asama5-kapanis.md`.
 
 ### Stage 6 so far
 
-Steps 0 to 3 of stage 6 are done: the product-language contract, a read-only Web API, the
-commit risk endpoint, and persistent background jobs with progress and cancellation. The
-dashboard is **not** written. The roadmap is in `docs/planlar/asama6-api-ve-panel.md`.
+Steps 0 to 4 of stage 6 are done: the product-language contract, a read-only Web API, the
+commit risk endpoint, persistent background jobs with progress and cancellation, and a
+Blazor panel. Heat maps, the risk timeline, report export and authentication are **not**
+written. The roadmap is in `docs/planlar/asama6-api-ve-panel.md`.
 
 ## The API
 
-`src/Sievert.Api` serves the three trained models over HTTP. Everything is read-only:
-there is no write operation, no repository cloning and no long-running job yet.
+`src/Sievert.Api` serves the three trained models over HTTP. Reads are the bulk of it; the
+only write is starting or cancelling a background job. There is still no repository
+cloning and no history mining behind the API.
 
 ```bash
 export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=..."
@@ -418,6 +423,12 @@ repository gets its own profile, an unknown one is not scored at all.
 Two things take too long for a single request: scanning a repository's working tree, and
 scoring every commit in it. Both run as background jobs.
 
+A static scan only runs on a **clean working tree**. If there are uncommitted changes the
+job fails immediately with `REPOSITORY_WORKTREE_DIRTY`; the names of the changed files are
+not returned, only how many there are. The job records the HEAD commit it scanned and
+checks it again when the scan finishes, so a result that was produced while somebody was
+checking out a different branch is never reported as complete.
+
 ```bash
 # start a job
 curl -i -X POST http://127.0.0.1:5000/api/v1/repositories/2/analyses \
@@ -454,4 +465,63 @@ The path to scan comes from the repository record, not from the request body. Th
 endpoint that takes a filesystem path, because there is no authentication either.
 
 The reasoning behind all of this is in ADR 0024, and the measurements are in
-`docs/olcumler/asama6-arka-plan-isleri.md`.
+`docs/olcumler/asama6-arka-plan-isleri.md` and `docs/olcumler/asama6-bellek-ayristirma.md`.
+
+## The panel
+
+`src/Sievert.Web` is a Blazor Web App (Interactive Server). It reads everything from the
+API over HTTP and has **no project reference** to `Sievert.Api`, `Sievert.Data` or
+`Sievert.Modeling` - so "the panel does not compute anything itself" is enforced by the
+compiler, not by good intentions.
+
+Running it needs four things in order:
+
+```bash
+# 1. PostgreSQL (the same container the CLI uses)
+docker compose up -d
+
+# 2. migrations
+export SIEVERT_DB="Host=localhost;Port=5433;Database=sievert;Username=sievert;Password=..."
+dotnet ef database update --project src/Sievert.Data --startup-project src/Sievert.Data
+
+# 3. the API
+dotnet run --project src/Sievert.Api --urls http://127.0.0.1:5000
+
+# 4. the panel, in another terminal
+export SIEVERT_API_URL="http://127.0.0.1:5000"
+dotnet run --project src/Sievert.Web --urls http://127.0.0.1:5001
+```
+
+Then open `http://127.0.0.1:5001`. `SIEVERT_API_URL` defaults to `http://127.0.0.1:5000`,
+so you can leave it out if you use that port.
+
+The panel has **no authentication either** and listens on loopback by default, with the
+same `SIEVERT_ALLOW_REMOTE=true` escape hatch and the same warning: anyone who can reach
+the address can use it.
+
+Pages: overview, repositories, repository detail, analysis jobs, job detail (with the
+result list), commit risk, models and system status. Job progress is polled once a second
+and stops as soon as the job reaches a terminal state; there is no SignalR push yet.
+
+### What the panel says about the numbers
+
+The panel repeats the risk contract rather than softening it:
+
+- The raw model score is shown with four decimals and **no percent sign**. It is not a
+  calibrated probability and a percent sign is the shortest way to make it look like one.
+- `RiskIndex` is shown as a relative index with the sentence explaining that it is a
+  percentile inside the training distribution.
+- The two decisions (at 0.5 and at the training threshold) are separate cards. Nothing is
+  merged into a single "risk" number.
+- Static findings are a separate card and every view of it says they are not part of the
+  model score.
+- Every model profile carries an "not calibrated" badge.
+- A cancelled or failed job's rows are shown, but under a warning saying the result is
+  incomplete.
+
+![Panel overview](docs/images/asama6/dashboard-desktop.png)
+
+![Commit risk](docs/images/asama6/commit-risk-desktop.png)
+
+More screenshots are in `docs/images/asama6/`. The decisions are in ADR 0025 and the
+measurements in `docs/olcumler/asama6-panel-temel.md`.

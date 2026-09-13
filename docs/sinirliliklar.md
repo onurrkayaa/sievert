@@ -162,3 +162,28 @@ Sutunlar: **etkiledigi kural** o sinirliligin hangi kuralin ciktisini bozdugunu,
 | Butun olcumler Debug derlemesiyle | Asama 6'nin butun sureleri | Release ile kosulmadi. | Surelerin Release'te ne olacagi olculmedi; muhtemelen daha kisa ama bu bir tahmin. | `asama6-api-temel.md`, `asama6-arka-plan-isleri.md` | Bir surum cikarilirken. |
 | `ANALYSIS_NOT_CANCELABLE` normal akista ulasilamiyor | iptal ucu | Yalnizca is biz bakarken durum degistirirse dusen savunma dalinda kullaniliyor. | Bu dal olcumde hic tetiklenmedi, yani gercek davranisi **gorulmedi**. | - | Yaris gercekten yasanirsa. |
 | Statik tarama sonuclari tek bir calisma agacina ait | `static-scan` | Is, deponun o anki calisma agacini tariyor; hangi commit'te oldugu kaydedilmiyor. | Iki farkli kosunun ayni agaci taradigi **garanti degil**; CLI esdegerligi ayni an icinde olculdu. | `asama6-arka-plan-isleri.md` 2. bolum | Is kaydina taranan commit'in sha'si eklenerek. |
+
+## Asama 6 - Adim 3b ve panel
+
+Onceki bolumdeki alti madde bu turda ele alindi. **Satirlar silinmedi**; asagida hangisine
+ne yapildigi yaziyor.
+
+| Onceki madde | Ne yapildi |
+|---|---|
+| Statik tarama sonuclari tek bir calisma agacina ait | **Kapandi.** Is kaydinda artik taranan HEAD ve calisma agacinin durumu duruyor; tarama yalniz temiz agacta basliyor ve bitiste kaynak yeniden okunuyor. |
+| Arka plan isleri tek surec varsayiyor | **Kismen kapandi.** Ayni veritabanina bagli iki worker ornegi test edildi: tekillik ve dis surecten iptal calisiyor. Iki gercek HTTP sureci hala denenmedi. |
+| Es zamanlilik yalniz 1 ile olculdu | **Kismen kapandi.** Gercek repolarla 2 olculdu (`asama6-bellek-ayristirma.md` bolum 6). 3 ve 4 gercek yukle hala olculmedi; 4'un siniri yalnizca kontrollu bir isleyiciyle sinandi. |
+| Tepe bellek 1267 MB ve kaynagi ayristirilmadi | **Kismen kapandi.** Taze sureclerde en yuksek deger 504,5 MB, model yuklemesi 16 MB. Geri kalanin Roslyn / EF / ML.NET paylarina ayrilmasi hala **yapilmadi**. |
+| Butun olcumler Debug derlemesiyle | **Kismen kapandi.** Panel olcumu Release yayim ciktisiyla yapildi; arka plan islerinin olcumleri hala Debug. |
+| `ANALYSIS_NOT_CANCELABLE` normal akista ulasilamiyor | **Duzeltildi ama kapanmadi.** Adim 3'te "yaris durumunda ulasilabilir" yazmistim; gecisleri izleyince uretebilen bir yol bulunamadi (ADR 0025). Dal savunma olarak duruyor. |
+
+Bu turda eklenen sinirliliklar:
+
+| Sinirlilik | Etkiledigi kisim | Neden boyle | Olcumu nasil etkiler | Etkiledigi olcum | Ne zaman ele alinacak |
+|---|---|---|---|---|---|
+| Panelde kimlik dogrulama yok | butun panel | API'de oldugu gibi bu turda yazilmadi. Panel de varsayilan olarak yalniz loopback dinliyor. | Olcumu etkilemiyor; araci ag uzerinde kullanilamaz yapiyor. | - | Gercek kullanim baslamadan once. |
+| Sayfa acilisinda veri iki kez cekiliyor | butun panel sayfalari | Blazor once sunucuda on-isliyor, sonra devre baglaninca bileseni yeniden olusturuyor; iki olusturma da veriyi soruyor. | Olculdu: is sayfasinda ilk iki istek arasinda 134 ms var, sonraki araliklar 1004 ms. Sayfa basina API istek sayisi iki katina cikiyor. | `asama6-panel-temel.md` bolum 3 | `PersistentComponentState` ile; bu turda yapilmadi. |
+| Panel tek istemciyle olculdu | panel sureleri | Tek tarayici, tek devre. | Es zamanli birden fazla kullanicinin sureleri ve sunucudaki devre maliyeti **olculmedi**. | `asama6-panel-temel.md` | Birden fazla kullanici olunca. |
+| Tarayicidaki boyama suresi olculmedi | panel sureleri | Olculen sey sunucunun HTML uretme suresi. | Kullanicinin gordugu an, olculen andan sonra; aradaki fark **bilinmiyor**. | `asama6-panel-temel.md` bolum 2 | Tarayici tarafli olcum kurulursa. |
+| Kismi sonuc sayfalarinda siralama sonucun tamamina degil kaydedilene gore | `risk-score-all` sonuc sayfasi | Iptal edilmis bir iste yalniz yazilmis satirlar var; "en yuksek skor" o satirlarin en yuksegi. | Kismi bir listede "en riskli commit" ifadesi yaniltici olabilir; sayfada kismi uyarisi var ama siralama uyarisi yok. | - | Kismi sonuclarda siralama kisitlanabilir. |
+| Statik bulgular tarama boyunca bellekte tutuluyor | `static-scan` | `ScanService` butun bulgulari dondurup sonra yaziyor; CLI ile ayni servis oldugu icin degistirilmedi. | Olculdu: 687 bulguda sorun yok (takipci en fazla 500 kayit). Cok daha buyuk bir depoda ne olacagi **olculmedi**. | `asama6-bellek-ayristirma.md` bolum 4 | Gercek bir sorun olculurse. |

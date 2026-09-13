@@ -1,6 +1,5 @@
 @implements IDisposable
 @inject SievertApiClient Api
-@inject IPageState State
 
 @*
     Zaman cizelgesi bolumu. Yukleme kurallari dosya haritasiyla ayni: onceki istek iptal
@@ -43,7 +42,6 @@ else
 
 @code {
     private CancellationTokenSource? inflight;
-    private IDisposable? persisting;
     private int sequence;
     private bool loading;
     private IProblemView? failure;
@@ -102,9 +100,8 @@ else
         failure = null;
         StateHasChanged();
 
-        ApiResult<RiskTimelineResponse> result = await State.TakeOrFetchAsync(
-            key,
-            () => Api.RiskTimelineAsync(RepositoryId, job, Count, inflight.Token));
+        ApiResult<RiskTimelineResponse> result =
+            await Api.RiskTimelineAsync(RepositoryId, job, Count, inflight.Token);
 
         if (mine != sequence)
         {
@@ -121,14 +118,10 @@ else
         }
 
         loading = false;
-
-        persisting?.Dispose();
-        persisting = State.Persist(key, () => timeline);
     }
 
     public void Dispose()
     {
-        persisting?.Dispose();
         inflight?.Cancel();
         inflight?.Dispose();
     }

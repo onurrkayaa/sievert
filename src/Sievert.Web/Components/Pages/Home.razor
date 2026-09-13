@@ -98,7 +98,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (AnalysisJobResponse job in recent)
+                            @foreach (JobSummary job in recent)
                             {
                                 <tr>
                                     <td>@Display.Kind(job.Kind)</td>
@@ -128,7 +128,7 @@
     private int repositoryCount;
     private int commitCount;
     private int modelCount;
-    private List<AnalysisJobResponse> recent = [];
+    private List<JobSummary> recent = [];
     private Dictionary<int, string> names = [];
 
     protected override Task OnInitializedAsync() => LoadAsync();
@@ -196,7 +196,7 @@
             repositories.Value.TotalCount,
             repositories.Value.Items.Sum(item => item.CommitCount),
             models.Value?.Count ?? 0,
-            [.. jobs.OrderByDescending(job => job.RequestedAtUtc).Take(8)],
+            [.. jobs.OrderByDescending(job => job.RequestedAtUtc).Take(8).Select(JobSummary.From)],
             repositories.Value.Items.ToDictionary(item => item.Id, item => item.Name)));
 
         loading = false;

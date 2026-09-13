@@ -39,7 +39,7 @@ else if (detail is not null)
         <ProblemView Result="startProblem" />
     }
 
-    @foreach (AnalysisJobResponse running in ActiveJobs)
+    @foreach (JobSummary running in ActiveJobs)
     {
         <div class="notice info" role="status">
             <p>
@@ -138,7 +138,7 @@ else if (detail is not null)
     <div class="section" hidden="@(CurrentTab is not ("genel" or "analizler"))">
         <h2>Bu deponun isleri</h2>
 
-        @if (jobs is null || jobs.Items.Count == 0)
+        @if (jobs is null || jobs.Count == 0)
         {
             <EmptyState Title="Bu depo icin henuz is acilmadi" />
         }
@@ -156,7 +156,7 @@ else if (detail is not null)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (AnalysisJobResponse job in jobs.Items.Take(5))
+                        @foreach (JobSummary job in jobs.Take(5))
                         {
                             <tr>
                                 <td>@Display.Kind(job.Kind)</td>
@@ -311,7 +311,7 @@ else if (detail is not null)
     private bool loading = true;
     private IProblemView? failure;
     private RepositoryDetail? detail;
-    private PagedResponse<AnalysisJobResponse>? jobs;
+    private List<JobSummary>? jobs;
     private PagedResponse<AnalysisJobResponse>? riskJobs;
     private PagedResponse<AnalysisJobResponse>? scanJobs;
     private PagedResponse<CommitListItem>? commits;
@@ -333,11 +333,11 @@ else if (detail is not null)
     /// Dugmeyi kapatan sey bu. API zaten ikinci bir is acmiyor ve <c>409</c> donuyor;
     /// ama kullaniciya reddedilecegi belli olan bir dugme gostermenin anlami yok.
     /// </summary>
-    private AnalysisJobResponse? Active(string kind) =>
-        jobs?.Items.FirstOrDefault(job => job.Kind == kind && job.Status is "queued" or "running");
+    private JobSummary? Active(string kind) =>
+        jobs?.FirstOrDefault(job => job.Kind == kind && job.Status is "queued" or "running");
 
-    private IEnumerable<AnalysisJobResponse> ActiveJobs =>
-        jobs?.Items.Where(job => job.Status is "queued" or "running") ?? [];
+    private IEnumerable<JobSummary> ActiveJobs =>
+        jobs?.Where(job => job.Status is "queued" or "running") ?? [];
 
     protected override Task OnParametersSetAsync() => LoadAsync();
 
@@ -361,17 +361,31 @@ else if (detail is not null)
         detail = result.Value;
         loading = false;
 
+        // Kucuk projeksiyon: is tablosu resultSummary gostermiyor ve o alan is basina
+        // ayri bir JSON blogu. Gostermedigin bayti on-isleme durumunda tasimak, durumu
+        // bosuna sisirip devre sinirini zorluyor.
         jobs = (await State.TakeOrFetchAsync(
             JobsKey,
-            () => Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token))).Value;
+            async () =>
+            {
+                ApiResult<PagedResponse<AnalysisJobResponse>> page =
+                    await Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token);
 
-        riskJobs = (await State.TakeOrFetchAsync(
-            PageStateKey.For("repository", ("repo", RepositoryId), ("part", "risk-jobs")),
-            () => Api.AnalysesAsync(RepositoryId, 1, 50, "succeeded", "risk-score-all", closing.Token))).Value;
+                return page.IsSuccess && page.Value is not null
+                    ? ApiResult<List<JobSummary>>.Ok([.. page.Value.Items.Select(JobSummary.From)])
+                    : ApiResult<List<JobSummary>>.Unreachable(page.Detail ?? "Isler okunamadi.");
+            })).Value;
 
-        scanJobs = (await State.TakeOrFetchAsync(
-            PageStateKey.For("repository", ("repo", RepositoryId), ("part", "scan-jobs")),
-            () => Api.AnalysesAsync(RepositoryId, 1, 50, "succeeded", "static-scan", closing.Token))).Value;
+        // Is listeleri yalniz gorsellestirme sekmelerinde kullaniliyor ve o sekmeler
+        // etkilesimli asamada calisiyor; on-islemede cekmek bosa istek olurdu.
+        if (RendererInfo.IsInteractive)
+        {
+            riskJobs = (await Api.AnalysesAsync(
+                RepositoryId, 1, 50, "succeeded", "risk-score-all", closing.Token)).Value;
+
+            scanJobs = (await Api.AnalysesAsync(
+                RepositoryId, 1, 50, "succeeded", "static-scan", closing.Token)).Value;
+        }
 
         await LoadCommitsAsync();
     }
@@ -482,8 +496,6 @@ else if (detail is not null)
         persisting = new Subscriptions(
             State.Persist(DetailKey, () => detail),
             State.Persist(JobsKey, () => jobs),
-            State.Persist(PageStateKey.For("repository", ("repo", RepositoryId), ("part", "risk-jobs")), () => riskJobs),
-            State.Persist(PageStateKey.For("repository", ("repo", RepositoryId), ("part", "scan-jobs")), () => scanJobs),
             State.Persist(key, () => commits));
     }
 
@@ -523,7 +535,8 @@ else if (detail is not null)
                 break;
         }
 
-        jobs = (await Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token)).Value;
+        jobs = (await Api.AnalysesAsync(RepositoryId, 1, 5, null, null, closing.Token))
+            .Value?.Items.Select(JobSummary.From).ToList();
     }
 
     /// <summary>API'nin verdigi adresi panelin adresine cevirir.</summary>

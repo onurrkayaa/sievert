@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 
 namespace Sievert.Web;
 
@@ -80,9 +81,56 @@ public static class PageStateExtensions
         state.TryTake(key, out T? cached) ? Api.ApiResult<T>.Ok(cached) : await fetch();
 }
 
-/// <summary>Cercevenin <c>PersistentComponentState</c> nesnesini saran hali.</summary>
-public sealed class PersistentPageState(PersistentComponentState state) : IPageState
+/// <summary>
+/// Cercevenin <c>PersistentComponentState</c> nesnesini saran hali.
+///
+/// **Boyut siniri var ve tesadufi degil.** Interactive Server'da saklanan durum sayfanin
+/// icine gomuluyor ve devre acilirken istemciden sunucuya **geri gonderiliyor**; o yolun
+/// varsayilan mesaj siniri 32 KB. Sinir asilinca devre aciklanamayan bir hatayla
+/// kapaniyor: sayfa on-islemeden geldigi icin dolu gorunuyor ama hicbir tiklama
+/// calismiyor ve sunucu gunlugune tek satir dusmuyor.
+///
+/// Bu tam olarak yasandi: dosya haritasi sayfasinin durumu 142 KB cikti ve sayfa olu
+/// dogdu. Gorsel kontrolde ekran goruntusu kusursuz gorundugu icin ancak bir hucreye
+/// tiklanip hicbir sey olmadigi fark edilerek bulundu.
+/// </summary>
+public sealed class PersistentPageState(
+    PersistentComponentState state,
+    ILogger<PersistentPageState> logger) : IPageState
 {
+    private int used;
+
+    /// <summary>
+    /// Tek bir anahtarin tasiyabilecegi en fazla bayt.
+    ///
+    /// Toplam butcenin altinda: sayfada birden fazla anahtar olabiliyor ve hepsi ayni
+    /// mesajda gidiyor. Anahtar basina sinir toplamdan buyuk olsaydi hicbir sey
+    /// sinirlamazdi.
+    /// </summary>
+    public const int Budget = 8 * 1024;
+
+    /// <summary>
+    /// Bir sayfanin butun anahtarlarinin toplami.
+    ///
+    /// Anahtar basina sinir tek basina yetmiyor: bes anahtarin her biri sinirin altinda
+    /// olup toplamda cerceve sinirini asabilir. Olculen sey de bu oldu - anahtar basina
+    /// 16 KB sinirliyken depo sayfasinin toplam durumu 26,6 KB'a cikti.
+    /// </summary>
+    public const int TotalBudget = 12 * 1024;
+
+    /// <summary>
+    /// Cercevenin varsayilan mesaj siniri.
+    ///
+    /// Burada yalnizca **kaynak** olarak duruyor: butcelerin neye gore secildigi
+    /// yazilmazsa, ileride biri butceyi "biraz buyutelim" diye degistirir ve neyin
+    /// kirilacagini bilemez. Kirilan sey sessiz: sayfa dolu gorunur ama olur.
+    /// </summary>
+    public const int CircuitMessageLimit = 32 * 1024;
+
+    /// <summary>Bu paket saklanabilir mi. Karar saf, o yuzden ayri ve sinanabilir.</summary>
+    public static bool Fits(int size, int alreadyUsed) =>
+        size <= Budget && alreadyUsed + size <= TotalBudget;
+
     public bool TryTake<T>(string key, [NotNullWhen(true)] out T? value)
     {
         if (state.TryTakeFromJson(key, out T? taken) && taken is not null)
@@ -100,13 +148,33 @@ public sealed class PersistentPageState(PersistentComponentState state) : IPageS
     public IDisposable Persist<T>(string key, Func<T?> snapshot) =>
         state.RegisterOnPersisting(() =>
         {
-            if (snapshot() is T value)
+            if (snapshot() is not T value)
             {
-                // Hassas veri buraya girmiyor: saklanan sey API'nin zaten dondugu
-                // sozlesme nesnesi ve o nesnelerde yol, baglanti dizesi ya da yazar
-                // e-postasi yok (ContractShapeTests).
-                state.PersistAsJson(key, value);
+                return Task.CompletedTask;
             }
+
+            int size = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(
+                value,
+                new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web)).Length;
+
+            if (!Fits(size, used))
+            {
+                // Buyuk paket saklanmiyor. Bunun bedeli bir ek API istegi; alternatifi
+                // calismayan bir sayfa.
+                logger.LogInformation(
+                    "Sayfa durumu butceyi astigi icin saklanmadi. Key={Key} Size={Size} Used={Used}",
+                    key,
+                    size,
+                    used);
+
+                return Task.CompletedTask;
+            }
+
+            // Hassas veri buraya girmiyor: saklanan sey API'nin zaten dondugu sozlesme
+            // nesnesi ve o nesnelerde yol, baglanti dizesi ya da yazar e-postasi yok
+            // (ContractShapeTests).
+            state.PersistAsJson(key, value);
+            used += size;
 
             return Task.CompletedTask;
         });

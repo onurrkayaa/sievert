@@ -138,6 +138,8 @@ public sealed class PanelTests : BunitContext
 
         Services.AddSingleton(stub.Client());
 
+        Renderer.SetRendererInfo(new Microsoft.AspNetCore.Components.RendererInfo("Server", isInteractive: true));
+
         IRenderedComponent<RepositoryPage> page = Render<RepositoryPage>(parameters =>
             parameters.Add(component => component.RepositoryId, 2));
 
@@ -263,6 +265,7 @@ public sealed class PanelTests : BunitContext
             .Returns("/api/v1/repositories/2/commits", new PagedResponse<CommitListItem>(1, 25, 0, []));
 
         Services.AddSingleton(stub.Client());
+        Renderer.SetRendererInfo(new Microsoft.AspNetCore.Components.RendererInfo("Server", isInteractive: true));
 
         IRenderedComponent<RepositoryPage> page = Render<RepositoryPage>(parameters =>
             parameters.Add(component => component.RepositoryId, 2));

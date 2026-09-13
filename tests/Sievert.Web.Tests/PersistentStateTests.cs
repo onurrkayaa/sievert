@@ -225,6 +225,74 @@ public sealed class PersistentStateTests : BunitContext
         Assert.Equal(afterFirstRender, stub.Requests.Count(path => path == $"/api/v1/analyses/{jobId}"));
     }
 
+    /// <summary>
+    /// Saklanan durumun bir boyut butcesi var ve olmasi sart.
+    ///
+    /// Interactive Server'da saklanan durum devre acilirken istemciden sunucuya geri
+    /// gonderiliyor ve o yolun varsayilan siniri 32 KB. Sinir asilinca devre kapaniyor:
+    /// sayfa on-islemeden geldigi icin dolu gorunuyor ama hicbir tiklama calismiyor ve
+    /// sunucu gunlugune tek satir dusmuyor.
+    ///
+    /// Bu yasandi: dosya haritasi sayfasinin durumu 142 KB cikti ve sayfa olu dogdu.
+    /// </summary>
+    [Fact]
+    public void TheStateBudgetStaysWellUnderTheCircuitLimit()
+    {
+        Assert.True(PersistentPageState.TotalBudget < PersistentPageState.CircuitMessageLimit);
+
+        // Kodlama saklanan baytlari buyutuyor; toplam butce cerceve sinirinin en fazla
+        // yarisi olmali ki kodlama payi sigsin.
+        Assert.True(PersistentPageState.TotalBudget <= PersistentPageState.CircuitMessageLimit / 2);
+
+        // Anahtar basina sinir toplamdan kucuk; buyuk olsaydi hicbir sey sinirlamazdi.
+        Assert.True(PersistentPageState.Budget < PersistentPageState.TotalBudget);
+
+        Assert.True(PersistentPageState.Fits(1024, 0));
+        Assert.True(PersistentPageState.Fits(PersistentPageState.Budget, 0));
+        Assert.False(PersistentPageState.Fits(PersistentPageState.Budget + 1, 0));
+
+        // Anahtar basina sinir tek basina yetmiyor; toplam da sayiliyor.
+        Assert.False(PersistentPageState.Fits(8 * 1024, PersistentPageState.TotalBudget - 1024));
+    }
+
+    /// <summary>Butceyi asan paket saklanmiyor ve bir sonraki olusturma onu yeniden cekiyor.</summary>
+    [Fact]
+    public void AnOversizedPayloadIsNotStoredAndIsFetchedAgain()
+    {
+        StubApi stub = new StubApi().Returns(
+            "/api/v1/repositories",
+            new PagedResponse<RepositoryListItem>(1, 25, 400, [.. Enumerable.Range(0, 400).Select(Big)]));
+
+        Services.AddSingleton(stub.Client());
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
+
+        Render<Repositories>();
+        PageState.Flush();
+
+        Assert.Contains("repositories|page=1|size=25", PageState.Skipped);
+        Assert.False(PageState.Has("repositories|page=1|size=25"));
+
+        int afterPrerender = stub.Requests.Count;
+
+        Render<Repositories>();
+
+        // Saklanmadigi icin ikinci olusturma cekiyor. Bu bir ek istek; alternatifi
+        // calismayan bir sayfa.
+        Assert.True(stub.Requests.Count > afterPrerender);
+    }
+
+    private static RepositoryListItem Big(int index) => new(
+        index,
+        "depo-" + index + new string('x', 60),
+        "github.com/ornek/depo-" + index + new string('y', 60),
+        "remote",
+        "https://github.com/ornek/depo-" + index,
+        1000 + index,
+        DateTimeOffset.UnixEpoch,
+        DateTimeOffset.UnixEpoch,
+        DateTimeOffset.UnixEpoch,
+        ModelProfileAvailable: true);
+
     private static AnalysisResultPage<CommitRiskSnapshotResponse> Empty(Guid jobId) => new(
         jobId, "succeeded", true, false, null, null, null, null, false, false, 1, 25, 0, []);
 

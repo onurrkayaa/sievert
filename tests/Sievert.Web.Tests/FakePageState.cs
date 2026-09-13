@@ -60,17 +60,39 @@ internal sealed class FakePageState : IPageState
         return subscription;
     }
 
-    /// <summary>On-islemenin bittigi ani taklit eder: kayitli anlik goruntuleri yazar.</summary>
+    /// <summary>
+    /// On-islemenin bittigi ani taklit eder: kayitli anlik goruntuleri yazar.
+    ///
+    /// Butce kurali gercek uygulamadakiyle ayni. Olmasaydi testler, uretimde devreyi
+    /// oldurecek kadar buyuk bir paketin saklandigini varsayardi.
+    /// </summary>
     public void Flush()
     {
+        int used = 0;
+
         foreach (Subscription subscription in open)
         {
-            if (subscription.Snapshot() is string json)
+            if (subscription.Snapshot() is not string json)
             {
-                stored[subscription.Key] = json;
+                continue;
             }
+
+            int size = System.Text.Encoding.UTF8.GetByteCount(json);
+
+            if (!PersistentPageState.Fits(size, used))
+            {
+                Skipped.Add(subscription.Key);
+
+                continue;
+            }
+
+            stored[subscription.Key] = json;
+            used += size;
         }
     }
+
+    /// <summary>Butceyi astigi icin saklanmayan anahtarlar.</summary>
+    public List<string> Skipped { get; } = [];
 
     /// <summary>Belli bir anahtar icin saklanmis veri var mi.</summary>
     public bool Has(string key) => stored.ContainsKey(key);

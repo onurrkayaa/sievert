@@ -77,7 +77,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (AnalysisJobResponse job in page.Items)
+                    @foreach (JobSummary job in page.Items)
                     {
                         <tr>
                             <td>@Display.Kind(job.Kind)</td>
@@ -117,7 +117,7 @@ else
     private IProblemView? failure;
     private PagedResponse<RepositoryListItem>? repositoryPage;
     private List<RepositoryListItem>? repositories;
-    private PagedResponse<AnalysisJobResponse>? page;
+    private PagedResponse<JobSummary>? page;
 
     private int repositoryId;
     private string status = string.Empty;
@@ -148,7 +148,7 @@ else
 
         if (repositories.Count == 0)
         {
-            page = new PagedResponse<AnalysisJobResponse>(1, pageSize, 0, []);
+            page = new PagedResponse<JobSummary>(1, pageSize, 0, []);
 
             return;
         }
@@ -176,15 +176,26 @@ else
             ("status", status),
             ("kind", kind));
 
-        ApiResult<PagedResponse<AnalysisJobResponse>> result = await State.TakeOrFetchAsync(
+        ApiResult<PagedResponse<JobSummary>> result = await State.TakeOrFetchAsync(
             key,
-            () => Api.AnalysesAsync(
-                repositoryId,
-                pageNumber,
-                pageSize,
-                string.IsNullOrEmpty(status) ? null : status,
-                string.IsNullOrEmpty(kind) ? null : kind,
-                closing.Token));
+            async () =>
+            {
+                ApiResult<PagedResponse<AnalysisJobResponse>> jobs = await Api.AnalysesAsync(
+                    repositoryId,
+                    pageNumber,
+                    pageSize,
+                    string.IsNullOrEmpty(status) ? null : status,
+                    string.IsNullOrEmpty(kind) ? null : kind,
+                    closing.Token);
+
+                return jobs.IsSuccess && jobs.Value is not null
+                    ? ApiResult<PagedResponse<JobSummary>>.Ok(new PagedResponse<JobSummary>(
+                        jobs.Value.Page,
+                        jobs.Value.PageSize,
+                        jobs.Value.TotalCount,
+                        [.. jobs.Value.Items.Select(JobSummary.From)]))
+                    : ApiResult<PagedResponse<JobSummary>>.Unreachable(jobs.Detail ?? "Isler okunamadi.");
+            });
 
         if (result.IsSuccess)
         {

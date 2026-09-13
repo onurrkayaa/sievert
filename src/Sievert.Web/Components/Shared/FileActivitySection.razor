@@ -1,6 +1,5 @@
 @implements IDisposable
 @inject SievertApiClient Api
-@inject IPageState State
 
 @*
     Dosya etkinlik bolumu: arac cubugu, kismi uyarisi ve harita.
@@ -53,7 +52,6 @@ else
 
 @code {
     private CancellationTokenSource? inflight;
-    private IDisposable? persisting;
     private int sequence;
     private bool loading;
     private IProblemView? failure;
@@ -110,9 +108,16 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        // Ayni anahtarla ikinci kez yuklemiyoruz; ust sayfanin her yeniden olusumunda
-        // istek atmak, filtre degismemisken de API'yi mesgul etmek olurdu.
-        if (JobId is not null && Key != loaded)
+        // On-islemede HIC cekmiyoruz.
+        //
+        // Harita ve cizelge paketleri buyuk; on-islemede cekilip saklansalardi devrenin
+        // acilis mesaji boyut sinirini asar ve sayfa dolu gorunup olu kalirdi. Bu bir kez
+        // yasandi. Cekmeyi etkilesimli asamaya birakmak ayni sonucu veriyor - toplam tek
+        // istek - ve devreden hicbir sey gecmiyor.
+        //
+        // Ayni anahtarla ikinci kez de yuklemiyoruz; filtre degismemisken istek atmak
+        // API'yi bosuna mesgul ederdi.
+        if (RendererInfo.IsInteractive && JobId is not null && Key != loaded)
         {
             await ReloadAsync();
         }
@@ -140,9 +145,8 @@ else
         failure = null;
         StateHasChanged();
 
-        ApiResult<FileActivityResponse> result = await State.TakeOrFetchAsync(
-            key,
-            () => Api.FileActivityAsync(RepositoryId, job, Window, Limit, Sort, Overlay, inflight.Token));
+        ApiResult<FileActivityResponse> result =
+            await Api.FileActivityAsync(RepositoryId, job, Window, Limit, Sort, Overlay, inflight.Token);
 
         if (mine != sequence)
         {
@@ -159,14 +163,10 @@ else
         }
 
         loading = false;
-
-        persisting?.Dispose();
-        persisting = State.Persist(key, () => map);
     }
 
     public void Dispose()
     {
-        persisting?.Dispose();
         inflight?.Cancel();
         inflight?.Dispose();
     }

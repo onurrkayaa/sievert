@@ -1,0 +1,548 @@
+{
+  "kod": "1bafac8",
+  "uretildi": "2026-09-13T15:24:37.152631+00:00",
+  "kosullar": {
+    "derleme": "Release yayim ciktisi",
+    "surecler": "API ve panel ayri surecte, loopback",
+    "kosuSayisi": 5,
+    "isinma": "her depo icin bir istek, sonuclara dahil degil",
+    "not": "Veritabani komut sayisi API gunlugundeki \u0027Executed DbCommand\u0027 satirlarindan."
+  },
+  "depolar": [
+    {
+      "Id": 4,
+      "Name": "jellyfin-full",
+      "Job": "01a099a8-a71f-7bb9-af9a-4f005c8c4df3"
+    },
+    {
+      "Id": 2,
+      "Name": "polly-full",
+      "Job": "01a099a8-a6de-721e-8132-e85bc791d4ae"
+    },
+    {
+      "Id": 3,
+      "Name": "sharex-full",
+      "Job": "01a099a8-a6fe-7b75-9a6b-bf22761fb277"
+    }
+  ],
+  "uclar": [
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "pencere 50",
+      "Rows": 68,
+      "Bytes": 59207,
+      "MinMs": 11.6,
+      "MedianMs": 15.8,
+      "MaxMs": 21.6,
+      "RunsMs": [
+        13.6,
+        21.6,
+        15.8,
+        16.9,
+        11.6
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "pencere 200",
+      "Rows": 100,
+      "Bytes": 82496,
+      "MinMs": 16.2,
+      "MedianMs": 19.2,
+      "MaxMs": 23.7,
+      "RunsMs": [
+        23.7,
+        19.2,
+        16.2,
+        20.8,
+        17.8
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "pencere 1000",
+      "Rows": 100,
+      "Bytes": 72514,
+      "MinMs": 25.9,
+      "MedianMs": 31.9,
+      "MaxMs": 49.4,
+      "RunsMs": [
+        25.9,
+        49.4,
+        31.9,
+        27.6,
+        37.9
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "limit 50",
+      "Rows": 50,
+      "Bytes": 38657,
+      "MinMs": 12.7,
+      "MedianMs": 15.2,
+      "MaxMs": 19.7,
+      "RunsMs": [
+        13.5,
+        17.2,
+        15.2,
+        12.7,
+        19.7
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "limit 100",
+      "Rows": 100,
+      "Bytes": 82496,
+      "MinMs": 6.9,
+      "MedianMs": 8,
+      "MaxMs": 20,
+      "RunsMs": [
+        8,
+        6.9,
+        7.6,
+        20,
+        15
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "jellyfin-full",
+      "Parameters": "limit 200",
+      "Rows": 185,
+      "Bytes": 166287,
+      "MinMs": 11.4,
+      "MedianMs": 24,
+      "MaxMs": 30,
+      "RunsMs": [
+        30,
+        24,
+        27.3,
+        11.4,
+        20.3
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "jellyfin-full",
+      "Parameters": "nokta 50",
+      "Rows": 50,
+      "Bytes": 29707,
+      "MinMs": 6.5,
+      "MedianMs": 8.1,
+      "MaxMs": 58.2,
+      "RunsMs": [
+        58.2,
+        8.1,
+        6.6,
+        10.4,
+        6.5
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "jellyfin-full",
+      "Parameters": "nokta 100",
+      "Rows": 100,
+      "Bytes": 59556,
+      "MinMs": 7.5,
+      "MedianMs": 11.2,
+      "MaxMs": 14.5,
+      "RunsMs": [
+        11.9,
+        7.5,
+        10.9,
+        11.2,
+        14.5
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "jellyfin-full",
+      "Parameters": "nokta 500",
+      "Rows": 500,
+      "Bytes": 296928,
+      "MinMs": 26.7,
+      "MedianMs": 30,
+      "MaxMs": 32.8,
+      "RunsMs": [
+        32.8,
+        30,
+        32.3,
+        26.7,
+        29.2
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "pencere 50",
+      "Rows": 16,
+      "Bytes": 11878,
+      "MinMs": 16.2,
+      "MedianMs": 23.5,
+      "MaxMs": 28.7,
+      "RunsMs": [
+        16.2,
+        28.7,
+        23.5,
+        20.1,
+        24.7
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "pencere 200",
+      "Rows": 51,
+      "Bytes": 38379,
+      "MinMs": 45.8,
+      "MedianMs": 49.9,
+      "MaxMs": 52.1,
+      "RunsMs": [
+        49.9,
+        45.8,
+        52.1,
+        48.7,
+        51.2
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "pencere 1000",
+      "Rows": 100,
+      "Bytes": 91044,
+      "MinMs": 33.2,
+      "MedianMs": 50.8,
+      "MaxMs": 61,
+      "RunsMs": [
+        61,
+        33.2,
+        50.8,
+        56.4,
+        49.3
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "limit 50",
+      "Rows": 50,
+      "Bytes": 37716,
+      "MinMs": 32,
+      "MedianMs": 38.3,
+      "MaxMs": 44,
+      "RunsMs": [
+        36.5,
+        32,
+        38.6,
+        38.3,
+        44
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "limit 100",
+      "Rows": 51,
+      "Bytes": 38379,
+      "MinMs": 26.7,
+      "MedianMs": 49.4,
+      "MaxMs": 66.4,
+      "RunsMs": [
+        26.7,
+        35.5,
+        66.4,
+        49.5,
+        49.4
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "polly-full",
+      "Parameters": "limit 200",
+      "Rows": 51,
+      "Bytes": 38379,
+      "MinMs": 39.3,
+      "MedianMs": 45.7,
+      "MaxMs": 53.6,
+      "RunsMs": [
+        51.7,
+        53.6,
+        39.3,
+        44.9,
+        45.7
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "polly-full",
+      "Parameters": "nokta 50",
+      "Rows": 50,
+      "Bytes": 31667,
+      "MinMs": 7.4,
+      "MedianMs": 19.4,
+      "MaxMs": 22,
+      "RunsMs": [
+        19.4,
+        7.4,
+        8.4,
+        21.9,
+        22
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "polly-full",
+      "Parameters": "nokta 100",
+      "Rows": 100,
+      "Bytes": 63282,
+      "MinMs": 13.6,
+      "MedianMs": 25.9,
+      "MaxMs": 28.7,
+      "RunsMs": [
+        28.7,
+        25.9,
+        26.2,
+        13.6,
+        19.8
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "polly-full",
+      "Parameters": "nokta 500",
+      "Rows": 500,
+      "Bytes": 312274,
+      "MinMs": 35.8,
+      "MedianMs": 40.5,
+      "MaxMs": 41.9,
+      "RunsMs": [
+        35.8,
+        37.3,
+        40.7,
+        40.5,
+        41.9
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "pencere 50",
+      "Rows": 100,
+      "Bytes": 81774,
+      "MinMs": 14.7,
+      "MedianMs": 18,
+      "MaxMs": 24,
+      "RunsMs": [
+        14.7,
+        16.6,
+        18.4,
+        18,
+        24
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "pencere 200",
+      "Rows": 100,
+      "Bytes": 88243,
+      "MinMs": 21.8,
+      "MedianMs": 25.4,
+      "MaxMs": 26.2,
+      "RunsMs": [
+        26.1,
+        25.4,
+        21.8,
+        24.6,
+        26.2
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "pencere 1000",
+      "Rows": 100,
+      "Bytes": 101005,
+      "MinMs": 44.1,
+      "MedianMs": 58.3,
+      "MaxMs": 61.9,
+      "RunsMs": [
+        61.9,
+        58.9,
+        45,
+        44.1,
+        58.3
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "limit 50",
+      "Rows": 50,
+      "Bytes": 46156,
+      "MinMs": 22.4,
+      "MedianMs": 23.9,
+      "MaxMs": 25.1,
+      "RunsMs": [
+        22.4,
+        24.9,
+        25.1,
+        23.3,
+        23.9
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "limit 100",
+      "Rows": 100,
+      "Bytes": 88243,
+      "MinMs": 9.8,
+      "MedianMs": 26.4,
+      "MaxMs": 28.4,
+      "RunsMs": [
+        9.8,
+        22.6,
+        27.2,
+        28.4,
+        26.4
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "file-activity",
+      "Repository": "sharex-full",
+      "Parameters": "limit 200",
+      "Rows": 200,
+      "Bytes": 159336,
+      "MinMs": 21.9,
+      "MedianMs": 23.8,
+      "MaxMs": 28.1,
+      "RunsMs": [
+        21.9,
+        25.9,
+        22.6,
+        28.1,
+        23.8
+      ],
+      "DatabaseCommands": 5
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "sharex-full",
+      "Parameters": "nokta 50",
+      "Rows": 50,
+      "Bytes": 30486,
+      "MinMs": 4.7,
+      "MedianMs": 11.1,
+      "MaxMs": 13.4,
+      "RunsMs": [
+        4.7,
+        11.1,
+        9.7,
+        12.4,
+        13.4
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "sharex-full",
+      "Parameters": "nokta 100",
+      "Rows": 100,
+      "Bytes": 60358,
+      "MinMs": 11.2,
+      "MedianMs": 14.7,
+      "MaxMs": 16.1,
+      "RunsMs": [
+        15.2,
+        14.7,
+        11.2,
+        14.5,
+        16.1
+      ],
+      "DatabaseCommands": 4
+    },
+    {
+      "Endpoint": "risk-timeline",
+      "Repository": "sharex-full",
+      "Parameters": "nokta 500",
+      "Rows": 500,
+      "Bytes": 302067,
+      "MinMs": 14.3,
+      "MedianMs": 22,
+      "MaxMs": 39.4,
+      "RunsMs": [
+        34.8,
+        22,
+        39.4,
+        15.7,
+        14.3
+      ],
+      "DatabaseCommands": 4
+    }
+  ],
+  "sayfalar": [
+    {
+      "Name": "Dosya haritasi",
+      "FirstMs": 122.4,
+      "MedianMs": 43.5,
+      "MaxMs": 122.4,
+      "HtmlBytes": 43066,
+      "ApiRequests": 4,
+      "RunsMs": [
+        122.4,
+        43.5,
+        41.7,
+        45.5,
+        36.7
+      ]
+    },
+    {
+      "Name": "Zaman cizelgesi",
+      "FirstMs": 43.1,
+      "MedianMs": 36,
+      "MaxMs": 76.9,
+      "HtmlBytes": 43042,
+      "ApiRequests": 4,
+      "RunsMs": [
+        43.1,
+        76.9,
+        36,
+        35.8,
+        28.8
+      ]
+    }
+  ]
+}

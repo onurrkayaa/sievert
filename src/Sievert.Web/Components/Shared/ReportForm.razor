@@ -15,7 +15,7 @@
     @if (Jobs.Count == 0)
     {
         <EmptyState Title="Once bir risk analizi calistir"
-                    Message="Rapor uretmek icin sonuc yazmis bir risk skorlama isi gerekiyor." />
+                    Detail="Rapor uretmek icin sonuc yazmis bir risk skorlama isi gerekiyor." />
     }
     else
     {
@@ -235,15 +235,17 @@
             idempotencyKey,
             closing.Token);
 
-        sending = false;
-
         if (start.Report is ReportAcceptedResponse accepted)
         {
+            // Basarida dugme kapali kaliyor: sayfa rapor ayrintisina gidiyor ve ikinci
+            // bir tiklama ikinci bir rapor acmamali. Ilk surumde bayrak burada
+            // sifirlaniyordu ve iki tiklama iki istek gonderiyordu.
             Navigation.NavigateTo($"/reports/{accepted.ReportId}");
 
             return;
         }
 
+        sending = false;
         problem = start.Problem;
     }
 

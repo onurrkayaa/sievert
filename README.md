@@ -13,7 +13,9 @@ of you while you are reviewing.
 
 ## Approach
 
-Two sources of signal, combined into one score:
+Two sources of signal. They are **not** merged into a single number - the model score and
+the static findings are reported separately, and combining them is a decision I have not
+made yet:
 
 - **Roslyn** parses the C# code and looks for .NET specific patterns that tend to cause
   bugs (things like async usage, disposal, null handling).

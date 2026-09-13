@@ -10,7 +10,13 @@ public sealed record RepositoryListItem(
     DateTimeOffset? FirstCommitDate,
     DateTimeOffset? LastCommitDate,
     DateTimeOffset ScanDate,
-    bool ModelProfileAvailable);
+    bool ModelProfileAvailable,
+
+    /// <summary>
+    /// Sabit demo veri kumesinden gelen bir depo mu. Yalniz kaynak sunumu icin;
+    /// skorlari ve siralamayi degistirmiyor.
+    /// </summary>
+    bool IsDemoData = false);
 
 public sealed record RepositoryDetail(
     RepositoryListItem Repository,

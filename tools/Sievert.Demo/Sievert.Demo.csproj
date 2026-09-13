@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <!--
+    Demo araci gercek uygulamalari alt surec olarak baslatiyor, kendi icinde host
+    kurmuyor. Sebep: demo, kullanicinin elle yapacagi seyin aynisini yapmali; ayri bir
+    barindirma yolu kurulsaydi "demo calisiyor ama elle calismiyor" mumkun olurdu.
+
+    Testcontainers zaten testlerde kullaniliyor; demo icin ikinci bir orkestrasyon
+    paketi eklenmedi.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sievert.Data\Sievert.Data.csproj" />
+    <ProjectReference Include="..\..\src\Sievert.Modeling\Sievert.Modeling.csproj" />
+  </ItemGroup>
+
+</Project>

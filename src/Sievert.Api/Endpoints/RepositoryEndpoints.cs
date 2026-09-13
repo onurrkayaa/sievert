@@ -211,5 +211,6 @@ public static class RepositoryEndpoints
         row.FirstCommitDate,
         row.LastCommitDate,
         row.ScannedAt,
-        registry.ForRepository(row.Identity) is not null);
+        registry.ForRepository(row.Identity) is not null,
+        row.IsDemoData);
 }

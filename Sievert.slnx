@@ -11,6 +11,7 @@
     <Project Path="src/Sievert.Web/Sievert.Web.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Sievert.Demo/Sievert.Demo.csproj" />
     <Project Path="tools/Sievert.Measure/Sievert.Measure.csproj" />
   </Folder>
   <Folder Name="/tests/">

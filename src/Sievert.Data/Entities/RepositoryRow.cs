@@ -48,5 +48,14 @@ public sealed class RepositoryRow
     /// </summary>
     public string? LocalPath { get; set; }
 
+    /// <summary>
+    /// Bu depo sabit bir demo veri kumesinden mi geldi.
+    ///
+    /// Yalniz **kaynak sunumu** icin: model skorunu, siralamayi ya da hicbir API
+    /// sonucunu degistirmiyor. Amaci tek cumle - demo ortamini acan kisi ekranda
+    /// gordugu seyin canli bir depo analizi olmadigini gorsun.
+    /// </summary>
+    public bool IsDemoData { get; set; }
+
     public List<CommitRow> Commits { get; } = [];
 }

@@ -173,14 +173,19 @@ public sealed class PanelTests : BunitContext
     [Fact]
     public void APartialResultIsNotPresentedLikeACompleteOne()
     {
-        IRenderedComponent<PartialBanner> banner = Render<PartialBanner>(parameters => parameters
+        IRenderedComponent<PartialResultBanner> banner = Render<PartialResultBanner>(parameters => parameters
             .Add(component => component.Partial, true)
-            .Add(component => component.Warning, "Is basariyla bitmedi."));
+            .Add(component => component.RankingScope, Contracts.RankingScope.WrittenResultsOnly));
 
-        Assert.Contains("Bu sonuc tamamlanmamistir", banner.Markup, StringComparison.Ordinal);
+        Assert.Contains("Bu analiz tamamlanmadi", banner.Markup, StringComparison.Ordinal);
+        Assert.Contains(
+            "Siralama ve ozetler yalnizca su ana kadar kaydedilmis sonuclara aittir",
+            banner.Markup,
+            StringComparison.Ordinal);
         Assert.Contains("notice warning", banner.Markup, StringComparison.Ordinal);
+        Assert.Contains("written-results-only", banner.Markup, StringComparison.Ordinal);
 
-        IRenderedComponent<PartialBanner> complete = Render<PartialBanner>(parameters =>
+        IRenderedComponent<PartialResultBanner> complete = Render<PartialResultBanner>(parameters =>
             parameters.Add(component => component.Partial, false));
 
         Assert.Equal(string.Empty, complete.Markup.Trim());

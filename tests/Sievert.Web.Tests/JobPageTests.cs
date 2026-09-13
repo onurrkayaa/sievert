@@ -117,7 +117,7 @@ public sealed class JobPageTests : BunitContext
 
         Assert.Contains("Iptal edildi", page.Markup, StringComparison.Ordinal);
         Assert.Contains("ANALYSIS_CANCELED", page.Markup, StringComparison.Ordinal);
-        Assert.Contains("Bu sonuc tamamlanmamistir", page.Markup, StringComparison.Ordinal);
+        Assert.Contains("Bu analiz tamamlanmadi", page.Markup, StringComparison.Ordinal);
         Assert.Contains("tam degil", page.Markup, StringComparison.Ordinal);
     }
 

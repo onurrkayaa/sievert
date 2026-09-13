@@ -27,6 +27,8 @@ else if (job is not null)
         </Actions>
     </PageHeader>
 
+    <PartialResultBanner Partial="@(JobPolling.IsTerminal(job.Status) && !job.IsResultComplete)" />
+
     @if (cancelNote is not null)
     {
         <div class="notice info" role="status"><p>@cancelNote</p></div>

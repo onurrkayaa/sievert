@@ -154,8 +154,11 @@ public sealed class RiskScoreAllHandler(
                 context.CommitRiskSnapshots.AddRange(rows);
                 await context.SaveChangesAsync(cancellation);
 
+                // sievert:disable SV004 ChangeTracker.Entries() bellekteki takipci listesini geziyor, veritabanina gitmiyor
                 maxTrackedEntries = Math.Max(maxTrackedEntries, context.ChangeTracker.Entries().Count());
                 context.ChangeTracker.Clear();
+
+                // sievert:disable SV004 ayni sebep: temizlik sonrasi da bellekteki liste sayiliyor
                 maxTrackedAfterClear = Math.Max(maxTrackedAfterClear, context.ChangeTracker.Entries().Count());
 
                 processed += batch.Count;

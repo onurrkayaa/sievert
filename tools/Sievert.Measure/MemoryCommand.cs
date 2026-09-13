@@ -356,6 +356,7 @@ public static class MemoryCommand
         {
             try
             {
+                // sievert:disable SV004 olculen sey bu: baglanti sayisi zaman icinde ornekleniyor, tek sorguya indirilemez
                 int current = await context.Database
                     .SqlQuery<int>($"select count(*)::int as \"Value\" from pg_stat_activity where datname = current_database()")
                     .SingleAsync(cancellation);

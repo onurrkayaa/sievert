@@ -262,11 +262,13 @@ public sealed class StaticScanHandler(
             context.StaticAnalysisFindings.AddRange(batch);
             await context.SaveChangesAsync(cancellation);
 
+            // sievert:disable SV004 ChangeTracker.Entries() bellekteki takipci listesini geziyor, veritabanina gitmiyor
             MaxTrackedEntries = Math.Max(MaxTrackedEntries, context.ChangeTracker.Entries().Count());
 
             // Takipci temizlenmezse obek obek buyuyor ve her kayit oncekileri de tariyor.
             context.ChangeTracker.Clear();
 
+            // sievert:disable SV004 ayni sebep: temizlik sonrasi da bellekteki liste sayiliyor
             MaxTrackedAfterClear = Math.Max(MaxTrackedAfterClear, context.ChangeTracker.Entries().Count());
 
             saved += batch.Count;

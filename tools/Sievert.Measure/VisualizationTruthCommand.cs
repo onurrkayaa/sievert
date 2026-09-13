@@ -192,6 +192,7 @@ public static class VisualizationTruthCommand
 
         foreach (FileActivityItem item in sample)
         {
+            // sievert:disable SV004 dosya basina ayri sorgu bilerek: dogrulama her dosyayi tek tek, farkli bir sorguyla kontrol ediyor
             List<Row> rows = await context.CommitFiles
                 .AsNoTracking()
                 .Where(file => file.Path == item.RelativePath && windowIds.Contains(file.CommitId))
@@ -213,22 +214,9 @@ public static class VisualizationTruthCommand
                         commit.Sha))
                 .ToListAsync();
 
-            // Commit basina tekillestirme: ayni commit ayni yol icin iki satir yazmissa
-            // endeks bir kez sayilir.
-            List<Row> deduped = [.. rows
-                .GroupBy(row => row.CommitId)
-                .Select(group => group.First() with
-                {
-                    LinesAdded = group.Sum(row => row.LinesAdded),
-                    LinesDeleted = group.Sum(row => row.LinesDeleted),
-                })];
+            List<Row> deduped = Dedupe(rows);
 
-            Row latest = deduped
-                .OrderByDescending(row => row.AuthorDateUtc)
-                .ThenByDescending(row => row.CommitId)
-                .First();
-
-            checks.Add(Compare(target.Name, item, deduped, latest));
+            checks.Add(Compare(target.Name, item, deduped, Latest(deduped)));
         }
 
         return checks;
@@ -534,6 +522,27 @@ public static class VisualizationTruthCommand
     };
 
     private sealed record Target(int Id, string Name);
+
+    /// <summary>
+    /// Commit basina tekillestirme: ayni commit ayni yol icin iki satir yazmissa endeks
+    /// bir kez sayilir. Dongunun disinda duruyor ki dongu govdesi kisa kalsin.
+    /// </summary>
+    private static List<Row> Dedupe(List<Row> rows) =>
+    [
+        .. rows
+            .GroupBy(row => row.CommitId)
+            .Select(group => group.First() with
+            {
+                LinesAdded = group.Sum(row => row.LinesAdded),
+                LinesDeleted = group.Sum(row => row.LinesDeleted),
+            }),
+    ];
+
+    /// <summary>En yeni dokunus; esitlikte commit kimligi bozuyor.</summary>
+    private static Row Latest(List<Row> rows) =>
+        rows.OrderByDescending(row => row.AuthorDateUtc)
+            .ThenByDescending(row => row.CommitId)
+            .First();
 
     private sealed record Row(
         int CommitId,

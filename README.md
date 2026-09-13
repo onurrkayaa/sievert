@@ -561,8 +561,10 @@ carries a `PARTIAL_ANALYSIS_RESULT` warning and the panel shows a banner - becau
 
 The commit window (10-1000, default 200), the file limit (10-200, default 100) and the
 timeline point count (10-500, default 100) are all in the query string, so a view can be
-shared as a link. The timeline's X axis is commit order, not date; the response says so
-with a `TIMELINE_USES_ORDINAL_AXIS` warning.
+shared as a link. The timeline's X axis is scaled by commit date, so gaps in time show up
+as gaps in the line. If every commit in the window happens to share one timestamp there is
+no span to scale by; the chart falls back to ordinal positions, the response carries a
+`TIMELINE_USES_ORDINAL_AXIS` warning and the page says it in words.
 
 The decisions behind all of this are in ADR 0026, the numbers in
 `docs/olcumler/asama6-gorsellestirme.md`, and the independent recomputation from the raw

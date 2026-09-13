@@ -41,8 +41,9 @@ public static class VisualizationEndpoints
             .WithDescription(
                 "Y ekseni yalniz goreli risk endeksi; ham model skoru ayni eksende cizilmez. "
                 + "Iki esik cizgisinin endeks karsiligi API tarafinda ayni skor referansiyla "
-                + "hesaplanip doner. X ekseni commit sirasidir, tarih degil; iki nokta "
-                + "arasindaki mesafe gecen zamani gostermez.")
+                + "hesaplanip doner. X ekseni commit tarihine gore olcekleniyor; pencerede "
+                + "butun commit'ler ayni tarihteyse eksen sira numarasina dusuyor ve cevapta "
+                + "TIMELINE_USES_ORDINAL_AXIS uyarisi donuyor.")
             .Produces<RiskTimelineResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)

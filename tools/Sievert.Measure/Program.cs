@@ -200,6 +200,20 @@ if (args[0] == "split")
     return SplitWriter.Write(args[1], args[2], args[3]);
 }
 
+// Durum sorma dongusunun sayilari yalnizca bir gunluk dosyasi okuyor; veritabani
+// gerekmiyor, o yuzden baglanti aranmadan once ele aliniyor.
+// args: panel-polling <panel-gunlugu> <is-kimligi> <cikti.json>
+if (args[0] == "panel-polling")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure panel-polling <panel-gunlugu> <is-kimligi> <cikti.json>");
+        return 2;
+    }
+
+    return PanelCommand.Polling(args);
+}
+
 string? connection = Environment.GetEnvironmentVariable(ConnectionString.EnvironmentVariable);
 
 if (string.IsNullOrWhiteSpace(connection))
@@ -255,6 +269,19 @@ if (args[0] == "memory")
     }
 
     return await MemoryCommand.RunAsync(context, args);
+}
+
+// Asama 6 Adim 4: panel sayfa sureleri. Release derlemesinden API ve paneli baslatiyor.
+// args: panel-pages <repo-koku> <commit> <cikti.json>
+if (args[0] == "panel-pages")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure panel-pages <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await PanelCommand.PagesAsync(args);
 }
 
 // Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.

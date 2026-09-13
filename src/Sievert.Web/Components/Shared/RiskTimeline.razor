@@ -81,11 +81,6 @@ else
                       y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
                       y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
                       class="chart-threshold chart-threshold-both" />
-                @Caption(
-                    VisualizationScale.PlotRight,
-                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
-                    "end",
-                    "Iki esik de " + Display.Index(Timeline.DecisionAt05RiskIndex))
             }
             else
             {
@@ -94,22 +89,11 @@ else
                       y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex))"
                       y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex))"
                       class="chart-threshold chart-threshold-train" />
-                @Caption(
-                    VisualizationScale.PlotRight,
-                    VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex) - 6,
-                    "end",
-                    "Egitim esigi " + Display.Index(Timeline.DecisionAtTrainThresholdRiskIndex))
-
                 <line x1="@VisualizationScale.Number(VisualizationScale.PlotLeft)"
                       x2="@VisualizationScale.Number(VisualizationScale.PlotRight)"
                       y1="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
                       y2="@VisualizationScale.Number(VisualizationScale.Y(Timeline.DecisionAt05RiskIndex))"
                       class="chart-threshold chart-threshold-half" />
-                @Caption(
-                    VisualizationScale.PlotRight,
-                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
-                    "end",
-                    "0,5 esigi " + Display.Index(Timeline.DecisionAt05RiskIndex))
             }
 
             @*
@@ -152,6 +136,33 @@ else
                                 class="chart-mark" />
                     }
                 </g>
+            }
+
+            @*
+                Esik etiketleri EN SONDA ciziliyor.
+
+                SVG belge sirasina gore boyuyor; etiketler noktalardan once cizildiginde
+                nokta yogun bolgelerde uzerleri kapaniyordu. Bes yuz noktali ShareX
+                cizelgesinde "0,5 esigi 93.5" yarim okunuyordu.
+            *@
+            @if (Coincide)
+            {
+                @ThresholdCaption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
+                    "Iki esik de " + Display.Index(Timeline.DecisionAt05RiskIndex))
+            }
+            else
+            {
+                @ThresholdCaption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAtTrainThresholdRiskIndex) - 6,
+                    "Egitim esigi " + Display.Index(Timeline.DecisionAtTrainThresholdRiskIndex))
+
+                @ThresholdCaption(
+                    VisualizationScale.PlotRight,
+                    VisualizationScale.Y(Timeline.DecisionAt05RiskIndex) - 6,
+                    "0,5 esigi " + Display.Index(Timeline.DecisionAt05RiskIndex))
             }
         </svg>
     </div>
@@ -260,6 +271,26 @@ else
     private static MarkupString Caption(double x, double y, string anchor, string content) =>
         new($"""<text x="{VisualizationScale.Number(x)}" y="{VisualizationScale.Number(y)}" """
             + $"""class="chart-axis" text-anchor="{anchor}">{System.Net.WebUtility.HtmlEncode(content)}</text>""");
+
+    /// <summary>
+    /// Esik etiketi, arkasina kucuk bir zemin cizilmis halde.
+    ///
+    /// Zemin gorsel kontrolde eklendi: 500 noktali bir cizelgede noktalar etiketin
+    /// ustune biniyor ve "0,5 esigi 93.5" okunmuyordu. Genislik karakter sayisindan
+    /// tahmin ediliyor - SVG'de metin olcusu ancak tarayicida bilinir ve bu is icin
+    /// JavaScript'e inmek gereksiz.
+    /// </summary>
+    private static MarkupString ThresholdCaption(double right, double y, string content)
+    {
+        double width = (content.Length * 6.9) + 10;
+        double left = right - width;
+
+        return new MarkupString(
+            $"""<rect x="{VisualizationScale.Number(left)}" y="{VisualizationScale.Number(y - 13)}" """
+            + $"""width="{VisualizationScale.Number(width)}" height="18" class="chart-plate" />"""
+            + $"""<text x="{VisualizationScale.Number(right - 5)}" y="{VisualizationScale.Number(y)}" """
+            + $"""class="chart-axis" text-anchor="end">{System.Net.WebUtility.HtmlEncode(content)}</text>""");
+    }
 
     private static MarkupString AxisTitle()
     {

@@ -677,6 +677,9 @@ ul.plain li { margin-bottom: var(--space-1); }
 }
 
 .chart-grid { stroke: var(--border); stroke-width: 1; }
+
+/* Esik etiketinin arkasindaki zemin: noktalar etiketin ustune binmesin. */
+.chart-plate { fill: var(--surface); opacity: 0.92; }
 .chart-axis { fill: var(--text-secondary); font-size: 12px; }
 
 .chart-threshold { stroke-width: 2; fill: none; }

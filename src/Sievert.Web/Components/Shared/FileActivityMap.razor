@@ -33,6 +33,25 @@
     }
 </p>
 
+@if (Map.Items.Count > 1)
+{
+    @*
+        Gosterilen araligi yazmak gerekiyor.
+
+        Varsayilan siralama en yuksek ortalamaya gore; o zaman butun hucreler dagilimin
+        tepesinden geliyor ve renkler birbirine cok yakin cikabiliyor. ShareX'te tam bu
+        oldu: 100 hucrenin hepsi 99,6 ile 99,9 arasindaydi ve harita tek renk gibi
+        gorundu. Renk bozuk degil - gosterilen dilim dar. Bunu yazmak, okuyanin
+        "her dosya ayni mi" diye dusunmesini engelliyor.
+    *@
+    <p class="faint" style="margin-top:calc(-1 * var(--space-2))">
+        Gosterilen dosyalarin endeks araligi: @Display.Index(Map.Items.Min(item => item.MeanRiskIndex))
+        - @Display.Index(Map.Items.Max(item => item.MeanRiskIndex)).
+        Aralik darsa renkler birbirine yakin cikar; siralamayi degistirerek daha genis bir
+        dilim gorebilirsin.
+    </p>
+}
+
 @if (Map.Items.Count == 0)
 {
     <VisualizationEmptyState Title="Bu pencerede degistirilmis C# dosyasi yok"

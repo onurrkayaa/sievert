@@ -62,9 +62,6 @@ public static class ApiError
 
     public const string AnalysisNotFound = "ANALYSIS_NOT_FOUND";
 
-    /// <summary>Is iptal edilebilecek bir durumda degil; yaris durumunda savunma amacli.</summary>
-    public const string AnalysisNotCancelable = "ANALYSIS_NOT_CANCELABLE";
-
     /// <summary>Bulgular risk isinden, risk satirlari tarama isinden istendi.</summary>
     public const string AnalysisResultTypeMismatch = "ANALYSIS_RESULT_TYPE_MISMATCH";
 
@@ -98,4 +95,31 @@ public static class ApiError
 
     /// <summary>Depo bir git deposu ama HEAD okunamadi; taranacak bir surum yok.</summary>
     public const string RepositoryHeadUnavailable = "REPOSITORY_HEAD_UNAVAILABLE";
+
+    // Gorsellestirme (Asama 6 Adim 5).
+
+    /// <summary>Gorsellestirme icin bir risk isi secilmedi.</summary>
+    public const string VisualizationJobRequired = "VISUALIZATION_JOB_REQUIRED";
+
+    public const string VisualizationJobNotFound = "VISUALIZATION_JOB_NOT_FOUND";
+
+    /// <summary>Secilen is baska bir depoya ait.</summary>
+    public const string VisualizationJobRepositoryMismatch = "VISUALIZATION_JOB_REPOSITORY_MISMATCH";
+
+    /// <summary>Secilen is risk skorlamasi degil.</summary>
+    public const string VisualizationJobKindMismatch = "VISUALIZATION_JOB_KIND_MISMATCH";
+
+    /// <summary>Iste hic sonuc satiri yok; gosterilecek bir sey uretilemez.</summary>
+    public const string VisualizationNoResults = "VISUALIZATION_NO_RESULTS";
+
+    public const string VisualizationWindowInvalid = "VISUALIZATION_WINDOW_INVALID";
+
+    public const string VisualizationLimitInvalid = "VISUALIZATION_LIMIT_INVALID";
+
+    public const string VisualizationSortInvalid = "VISUALIZATION_SORT_INVALID";
+
+    public const string VisualizationCountInvalid = "VISUALIZATION_COUNT_INVALID";
+
+    /// <summary>Ustuste bindirilmek istenen statik tarama bu harita icin uygun degil.</summary>
+    public const string StaticAnalysisJobIncompatible = "STATIC_ANALYSIS_JOB_INCOMPATIBLE";
 }

@@ -175,6 +175,22 @@ public sealed class ContractShapeTests
         Assert.False(model.IsCalibrated);
     }
 
+    /// <summary>
+    /// Ulasilamaz oldugu gosterilen kod sozlesmede durmuyor.
+    ///
+    /// <c>ANALYSIS_NOT_CANCELABLE</c> Adim 3'te "yaris durumunda ulasilabilir" diye
+    /// yazilmisti; Adim 3b'de gecisler izlenince uretilemedigi goruldu. Istemciye hic
+    /// gelmeyecek bir kodu katalogda tutmak, olmayan bir cevabi beklettirmek olur.
+    /// </summary>
+    [Fact]
+    public void TheUnreachableCancelCodeIsNotInTheCatalogue()
+    {
+        foreach (System.Reflection.FieldInfo field in typeof(ApiError).GetFields())
+        {
+            Assert.NotEqual("ANALYSIS_NOT_CANCELABLE", field.GetValue(null) as string);
+        }
+    }
+
     /// <summary>Hata cevabinda kod ve iz kimligi her zaman okunabiliyor; ek alanlar kayboluyor degil.</summary>
     [Fact]
     public void AProblemResponseKeepsItsCodeTraceAndExtensions()

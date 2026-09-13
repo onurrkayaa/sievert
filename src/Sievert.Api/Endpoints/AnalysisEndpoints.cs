@@ -61,7 +61,6 @@ public static class AnalysisEndpoints
             .Produces<AnalysisJobResponse>(StatusCodes.Status200OK)
             .Produces<AnalysisJobResponse>(StatusCodes.Status202Accepted)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
         api.MapGet("/analyses/{jobId:guid}/findings", FindingsAsync)
@@ -314,18 +313,18 @@ public static class AnalysisEndpoints
             return Problems.NotFound(context, $"{jobId} numarali is yok.", ApiError.AnalysisNotFound);
         }
 
-        if (AnalysisJobTransitions.IsTerminal(updated.Status))
-        {
-            // Biz bakarken bitmis; iptal istegi bir sey degistirmedi.
-            return Results.Ok(Describe(updated));
-        }
-
+        // Kosuyorsa 202: istek kaydedildi, gercek durus bir sonraki obek sinirinda.
+        // Diger her durumda 200 ve is oldugu gibi doner - bitmisse iptal bir sey
+        // degistirmedi, kuyruktaysa yukarida zaten iptal edilmisti.
+        //
+        // Adim 3'te burada ucuncu bir dal vardi: "iptal edilebilecek durumda degil" diye
+        // 409 donen bir savunma. Adim 3b'de gecisleri izleyince o dalin uretilemedigi
+        // goruldu - is `queued` disina cikip geri donmedigi surece oraya dusulemiyor ve
+        // oyle bir gecis yok. Ulasilamaz bir kodu sozlesmede tutmak, istemciye hic
+        // gelmeyecek bir cevabi bekletmek olurdu; dal genel idempotent davranisa birakildi.
         return updated.Status == AnalysisJobStatus.Running
             ? Results.Accepted($"/api/v1/analyses/{jobId}", Describe(updated))
-            : Problems.Conflict(
-                context,
-                "Is su an iptal edilebilecek bir durumda degil; tekrar dene.",
-                ApiError.AnalysisNotCancelable);
+            : Results.Ok(Describe(updated));
     }
 
     private static async Task<IResult> FindingsAsync(

@@ -297,6 +297,21 @@ if (args[0] == "visualization-truth")
     return await VisualizationTruthCommand.RunAsync(context, args);
 }
 
+// PDF'ten metin cikarma; gorsel QA ve hata ayiklama icin.
+// args: pdf-text <dosya.pdf>
+if (args[0] == "pdf-text")
+{
+    if (args.Length < 2)
+    {
+        Console.Error.WriteLine("Kullanim: measure pdf-text <dosya.pdf>");
+        return 2;
+    }
+
+    Console.WriteLine(PdfText.Extract(File.ReadAllBytes(args[1])));
+
+    return 0;
+}
+
 // Asama 6 Adim 6: PDF raporunun bagimsiz dogrulanmasi.
 // args: report-truth <repo-koku> <commit> <cikti.json>
 if (args[0] == "report-truth")

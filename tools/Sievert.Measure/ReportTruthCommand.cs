@@ -129,7 +129,13 @@ public static class ReportTruthCommand
         JsonElement report = await WaitForReadyAsync(client, reportId);
 
         byte[] pdf = await client.GetByteArrayAsync($"/api/v1/reports/{reportId}/download");
-        string text = Normalise(PdfText.Extract(pdf));
+
+        string extracted = PdfText.Extract(pdf);
+        string text = Normalise(extracted);
+
+        // Uzun dosya yollari satir sonunda bolunuyor ve araya bosluk giriyor. Yol ve
+        // ozet gibi bosluksuz degerler icin butun boslugu atilmis bir kopya kullaniliyor.
+        string dense = new(extracted.Where(character => !char.IsWhiteSpace(character)).ToArray());
 
         string manifest = await client.GetStringAsync($"/api/v1/reports/{reportId}/manifest");
 
@@ -137,7 +143,7 @@ public static class ReportTruthCommand
         int count = 0;
 
         // 1 - Depo kimligi ve model.
-        Expect(text, target.Identity, "depo kimligi", differences, ref count);
+        Expect(dense, target.Identity, "depo kimligi", differences, ref count);
         Expect(text, target.Profile, "model profili", differences, ref count);
 
         // 2 - Manifest ozeti: metadata ile PDF ayni ozeti tasimali.
@@ -151,7 +157,7 @@ public static class ReportTruthCommand
             differences.Add("manifest ozeti metadata ile tutmuyor");
         }
 
-        Expect(text, manifestChecksum, "manifest ozeti PDF'te", differences, ref count);
+        Expect(dense, manifestChecksum, "manifest ozeti PDF'te", differences, ref count);
 
         // 3 - Ham tablolardan yeniden hesap.
         Recomputed expected = await RecomputeAsync(context, target);
@@ -176,7 +182,7 @@ public static class ReportTruthCommand
         {
             count++;
 
-            int found = text.IndexOf(sha, StringComparison.Ordinal);
+            int found = dense.IndexOf(sha, StringComparison.Ordinal);
 
             if (found < 0)
             {
@@ -195,7 +201,7 @@ public static class ReportTruthCommand
         // 5 - Dosya etkinligi: ilk yollar ve degerleri.
         foreach ((string path, double mean) in expected.TopFiles)
         {
-            Expect(text, path, $"dosya {path}", differences, ref count);
+            Expect(dense, path, $"dosya {path}", differences, ref count);
             Expect(text, Index(mean), $"dosya {path} ortalamasi", differences, ref count);
         }
 
@@ -217,15 +223,20 @@ public static class ReportTruthCommand
         }
 
         // 8 - Kapsam ve zorunlu cumleler.
+        // Beklenen cumleler raporun kendi yazimiyla, Turkce karakterleriyle araniyor:
+        // "degildir" yazip gecmek, Turkce karakterlerin bozulmadigini sinamamak olurdu.
         Expect(text, "Kalibre edilmedi", "kalibrasyon ifadesi", differences, ref count);
-        Expect(text, "kesin kusur karari degildir", "urun siniri", differences, ref count);
-        Expect(text, "Statik bulgular ham model skoruna dahil degildir", "ayrim", differences, ref count);
+        Expect(text, "Bu rapor kesin kusur kararı değildir.", "urun siniri", differences, ref count);
+        Expect(text, "Statik bulgular ham model skoruna dahil değildir", "ayrim", differences, ref count);
+        Expect(text, "Göreli risk endeksi", "endeks tanimi", differences, ref count);
 
         count++;
 
-        if (text.Contains("hata olasiligi", StringComparison.OrdinalIgnoreCase))
+        if (text.Contains("hata olasılığı", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("hata olasiligi", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("birleşik skor", StringComparison.OrdinalIgnoreCase))
         {
-            differences.Add("yasakli ifade bulundu: hata olasiligi");
+            differences.Add("yasakli ifade bulundu");
         }
 
         Console.WriteLine($"  {count} kontrol, {differences.Count} fark");

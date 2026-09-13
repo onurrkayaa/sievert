@@ -68,6 +68,18 @@ public static partial class PdfText
                 continue;
             }
 
+            // Metin cogunlukla TJ dizisi icinde geliyor: aralarinda konum duzeltmesi
+            // olan birden fazla onaltilik parca. Parcalar birlestiriliyor.
+            if (match.Groups["array"].Success)
+            {
+                foreach (Match piece in HexString().Matches(match.Groups["array"].Value))
+                {
+                    text.Append(Decode(piece.Groups["hex"].Value, current));
+                }
+
+                continue;
+            }
+
             if (match.Groups["hex"].Success)
             {
                 text.Append(Decode(match.Groups["hex"].Value, current));
@@ -75,14 +87,9 @@ public static partial class PdfText
                 continue;
             }
 
-            if (match.Groups["literal"].Success)
-            {
-                text.Append(match.Groups["literal"].Value);
-            }
-
             if (match.Groups["newline"].Success)
             {
-                text.Append('\n');
+                text.Append(' ');
             }
         }
 
@@ -131,10 +138,22 @@ public static partial class PdfText
     {
         Dictionary<int, int> toUnicodeOf = [];
 
-        foreach (Match match in ToUnicodeReference().Matches(raw))
+        // Nesne bloklari tek tek geziliyor: tek bir buyuk desen, bir nesnenin sonuyla
+        // digerinin basini birlestirip yanlis eslesme uretiyordu.
+        foreach (Match block in ObjectBlock().Matches(raw))
         {
-            toUnicodeOf[int.Parse(match.Groups["font"].Value, CultureInfo.InvariantCulture)] =
-                int.Parse(match.Groups["map"].Value, CultureInfo.InvariantCulture);
+            string body = block.Groups["body"].Value;
+
+            if (!body.Contains("/Type /Font", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (ToUnicodeReference().Match(body) is { Success: true } reference)
+            {
+                toUnicodeOf[int.Parse(block.Groups["object"].Value, CultureInfo.InvariantCulture)] =
+                    int.Parse(reference.Groups["map"].Value, CultureInfo.InvariantCulture);
+            }
         }
 
         Dictionary<int, string> streams = ObjectStreams(document, raw);
@@ -252,11 +271,23 @@ public static partial class PdfText
     [GeneratedRegex(@"/Type\s*/Page(?![s])")]
     private static partial Regex PageObject();
 
-    [GeneratedRegex(@"(?<object>\d+) 0 obj.*?stream\r?\n(?<data>.*?)\r?\nendstream", RegexOptions.Singleline)]
+    // "(?!endobj)" onemli: bu olmadan desen bir nesnenin basiyla bir sonrakinin akisini
+    // birlestiriyor ve akislar yanlis nesne numarasina baglaniyordu. Belirtisi de sessizdi:
+    // metin cikiyordu ama her harf yerine bilinmeyen karakter yaziliyordu.
+    [GeneratedRegex(@"(?<object>\d+) 0 obj(?:(?!endobj).)*?stream\r?\n(?<data>.*?)\r?\nendstream", RegexOptions.Singleline)]
     private static partial Regex ObjectStream();
 
-    [GeneratedRegex(@"(?<object>\d+) 0 obj[^>]*?/Type\s*/Font.*?/ToUnicode (?<map>\d+) 0 R", RegexOptions.Singleline)]
+    [GeneratedRegex(@"/ToUnicode\s+(?<map>\d+) 0 R")]
     private static partial Regex ToUnicodeReferenceInternal();
+
+    [GeneratedRegex(@"(?<object>\d+) 0 obj(?<body>.*?)endobj", RegexOptions.Singleline)]
+    private static partial Regex ObjectBlock();
+
+    [GeneratedRegex(@"\[(?<array>[^\]]*)\]\s*TJ")]
+    private static partial Regex ShowArray();
+
+    [GeneratedRegex(@"<(?<hex>[0-9A-Fa-f]+)>")]
+    private static partial Regex HexString();
 
     [GeneratedRegex(@"/(?<name>F\d+)\s+(?<object>\d+) 0 R")]
     private static partial Regex FontResource();
@@ -273,7 +304,7 @@ public static partial class PdfText
     [GeneratedRegex(@"<(?<from>[0-9A-Fa-f]+)>\s*<(?<to>[0-9A-Fa-f]+)>\s*<(?<value>[0-9A-Fa-f]+)>")]
     private static partial Regex HexTriple();
 
-    [GeneratedRegex(@"/(?<font>F\d+)\s+[\d.]+\s+Tf|<(?<hex>[0-9A-Fa-f]+)>\s*Tj|\((?<literal>[^)]*)\)\s*Tj|(?<newline>T\*|TD|Td)")]
+    [GeneratedRegex(@"/(?<font>F\d+)\s+[\d.]+\s+Tf|\[(?<array>[^\]]*)\]\s*TJ|<(?<hex>[0-9A-Fa-f]+)>\s*Tj|(?<newline>T\*|Td|TD|ET)")]
     private static partial Regex Token();
 
     private static Regex ToUnicodeReference() => ToUnicodeReferenceInternal();

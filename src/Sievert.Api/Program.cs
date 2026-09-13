@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Sievert.Api;
 using Sievert.Api.Analysis;
 using Sievert.Api.Endpoints;
+using Sievert.Api.Reports;
 using Sievert.Contracts;
 using Sievert.Data;
 using Sievert.Modeling;
@@ -92,9 +93,21 @@ builder.Services.AddScoped<AnalysisJobStore>();
 builder.Services.AddScoped<IAnalysisJobHandler, StaticScanHandler>();
 builder.Services.AddScoped<IAnalysisJobHandler, RiskScoreAllHandler>();
 
+// Rapor uretimi. Depo tek ornek: kok dizin acilista bir kez mutlaklastiriliyor ve
+// olusturuluyor, her istekte degil.
+builder.Services.AddSingleton<IReportArtifactStore>(
+    new LocalReportArtifactStore(options.ReportDirectory));
+builder.Services.AddSingleton<ReportCleanupState>();
+builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<IAnalysisJobHandler, ReportGenerateHandler>();
+
 // Once kurtarma, sonra worker: kuyrukta bekleyen isler worker basladiginda kuyruga
 // alinmis olmali.
 builder.Services.AddHostedService<AnalysisJobRecovery>();
+
+// Rapor temizligi kurtarmadan SONRA: once isler terminal duruma dusuyor, sonra o islere
+// bagli yarim kalmis rapor kayitlari toparlaniyor.
+builder.Services.AddHostedService<ReportStartupCleanup>();
 builder.Services.AddHostedService<AnalysisJobWorker>();
 
 builder.Services.AddProblemDetails();
@@ -136,6 +149,7 @@ api.MapRepositories();
 api.MapRisk();
 api.MapAnalyses();
 api.MapVisualizations();
+api.MapReports();
 
 app.Run();
 

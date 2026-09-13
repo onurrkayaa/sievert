@@ -15,5 +15,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sievert.Tests/Sievert.Tests.csproj" />
+    <Project Path="tests/Sievert.Web.Tests/Sievert.Web.Tests.csproj" />
   </Folder>
 </Solution>

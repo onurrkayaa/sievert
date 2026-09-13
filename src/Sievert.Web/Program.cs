@@ -73,5 +73,6 @@ app.Run();
 
 return 0;
 
-/// <summary>Test sunucusunun tutunacagi giris noktasi.</summary>
-public partial class Program;
+// Ust duzey deyimlerin urettigi Program sinifi ACIK EDILMIYOR. Sievert.Api'de de ayni
+// adda bir sinif var ve ikisi birden test projesinden gorunurse ad catisiyor. Panelin
+// bilesen testleri zaten sunucu ayaga kaldirmiyor; bilesenleri dogrudan isliyor.

@@ -22,6 +22,17 @@
   </ItemGroup>
 
   <ItemGroup Label="Testler">
+    <!--
+      bUnit: Blazor bileseni test icin gercekten isleniyor.
+
+      Neden gerekli: panelin en kritik iddialarinin hepsi *ciktida* - "yuzde isareti yok",
+      "zorunlu uyarilar gorunuyor", "kismi sonuc tam sonuc gibi gorunmuyor". Bunlari
+      sinif duzeyinde sinamak, gosterilen seyi degil hesaplanan seyi sinamak olurdu.
+      Gercek bir kusur da tam buradan cikti: katki cubugunun genisligi kultura bagli
+      bicimlenince "width:67,8%" yaziliyordu ve tarayici bunu yok sayip cubugu tam
+      dolduruyordu.
+    -->
+    <PackageVersion Include="bunit" Version="2.10.3" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

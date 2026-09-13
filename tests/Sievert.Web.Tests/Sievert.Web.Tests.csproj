@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Panel bilesenleri icin ayri bir test projesi.
+
+    Sebep teknik: ust duzey deyimlerin urettigi Program sinifi hem Sievert.Api'de hem
+    Sievert.Web'de var ve ikisi ayni test projesinden gorununce ad catisiyor. API
+    testleri WebApplicationFactory<Program> kullaniyor, o yuzden ayirmak en temizi.
+  -->
+  <ItemGroup>
+    <PackageReference Include="bunit" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sievert.Contracts\Sievert.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Sievert.Web\Sievert.Web.csproj" />
+  </ItemGroup>
+
+</Project>

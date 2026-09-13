@@ -210,3 +210,17 @@ Bu turda eklenen sinirliliklar:
 | Butun commit'ler ayni tarihteyse eksen sira numarasina dusuyor | zaman cizelgesi | Olceklenecek bir zaman araligi kalmiyor; boyle bir pencerede noktalar esit araliga yerlesiyor. | Bu durumda mesafe zamani degil sirayi gosteriyor. Cevapta `TIMELINE_USES_ORDINAL_AXIS` uyarisi donuyor ve sayfa bunu yaziyor. Olcek fonksiyonunun bu dali birim testiyle sinandi; uc gercek depoda hic tetiklenmedi. | - | Gercek bir depoda goruldugunde. |
 | Gorsellestirme olcumu tek istemciyle yapildi | harita ve zaman cizelgesi sureleri | Tek tarayici, tek devre, loopback. | Es zamanli kullanicilarda devre basina bellek ve API kuyrugu **olculmedi**. | `asama6-gorsellestirme.md` bolum 10 | Birden fazla kullanici olunca. |
 | Jellyfin `nokta 50` kosusunda 58.2 ms'lik sicrama | zaman cizelgesi ucu | Bes kosunun birinde ortancanin yedi kati bir sure cikti. | Sebebi **olculmedi**; tek bir kosu oldugu icin ortanca etkilenmedi ama tekrarlanip tekrarlanmayacagi bilinmiyor. | `asama6-gorsellestirme.md` bolum 4 | Tekrarlarsa. |
+
+## Asama 6 - Adim 6 (PDF raporu ve demo)
+
+Bu turda eklenen sinirliliklar:
+
+| Sinirlilik | Etkiledigi kisim | Neden boyle | Olcumu nasil etkiler | Etkiledigi olcum | Ne zaman ele alinacak |
+|---|---|---|---|---|---|
+| PDF uretimi tek bir kutuphane cagrisi; ortasinda iptal edilemiyor | rapor isi | QuestPDF belgeyi tek seferde olusturuyor; ara nokta yok. | Iptal asamalar arasinda kontrol ediliyor. Uretim baslamissa kutuphane isini bitiriyor, ama dosya diske **yazilmiyor** ve kayit failed oluyor. | `asama6-rapor-ve-demo.md` bolum 5 | Kutuphane ara iptal verirse. |
+| Uretilen rapor dosyalari silinmiyor | artefakt deposu | Bu turda otomatik silme/retention yazilmadi. | `data/runtime/reports` altinda birikiyor; disk dolarsa `REPORT_STORAGE_FAILED` doner ama bunu yasatan bir olcum yapilmadi. | - | Disk bir sorun olunca. |
+| Es zamanli iki rapor istegi olculmedi | rapor isi | Worker es zamanliligi varsayilan 1; ikinci istek kuyrukta bekliyor. | Ikinci istegin bekleme suresi **bilinmiyor**. | `asama6-rapor-ve-demo.md` | Es zamanli kullanim olunca. |
+| 20 MB sinirina yaklasan rapor uretilmedi | artefakt siniri | Olculen en buyuk rapor 194 KB. | Sinirin gercekten calistigi **gorulmedi**; yalniz birim testiyle sinandi. | `asama6-rapor-ve-demo.md` bolum 8 | Cok buyuk bir depoda. |
+| Demo alt kumesinde SZZ pozitifi yok | demo verisi | Secim kurali "en yeni 200 commit" ve en yeni commit'lerin duzeltmesi henuz yazilmamis (sag sansurleme). 172'si bot commit'i. | Demo ekraninda pozitif etiketli commit gorunmuyor; demo model basarisini gostermiyor, aracin islerligini gosteriyor. | `data/asama6/demo/source-manifest.json` | Daha eski bir pencere secilirse - ama o zaman kural sonucdan sonra degismis olur. |
+| Ctrl+C temizligi gercek terminalde dogrulanamadi | demo araci | Arac test ortaminda arka planda kosuyor; arka plan islerinde SIGINT yok sayiliyor. | Ayni kod yolundan gecen SIGTERM ile dogrulandi: container silindi, surec kalmadi. Ctrl+C'nin kendisi **olculmedi**. | `asama6-rapor-ve-demo.md` bolum 6 | Gercek bir terminalde denenince. |
+| PDF metin cikarici genel bir ayristirici degil | dogrulama araci | Yalniz bu projenin urettigi PDF'leri okuyor (Flate akis, ToUnicode esleme). | Baska bir ureticinin PDF'i okunamaz; dogrulama yalniz kendi ciktimiz icin gecerli. | `data/asama6/rapor-dogrulama.json` | Baska bir uretici eklenirse. |

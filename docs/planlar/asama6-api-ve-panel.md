@@ -1,7 +1,7 @@
 # Asama 6 yol haritasi: API ve panel
 
 **Tarih:** 2026-09-13
-**Durum:** Adim 0, 1, 2, 3, 3b, 4 ve 5 yapildi. Geri kalan adimlar **yapilmadi**.
+**Durum:** Adim 0, 1, 2, 3, 3b, 4, 5 ve 6 yapildi. Adim 7 **yapilmadi**.
 
 Asama 5 bir model birakti ve o modelin ne olup ne olmadigini olctu. Asama 6 o modeli
 kullanilabilir hale getiriyor. Isin buyuk kismi teknik degil: **modelin ne soyleyip ne
@@ -177,11 +177,33 @@ oldugu yazili. Varsayilan siralamada (`mean-risk-desc`) gosterilen 100 dosya cok
 endeks araligina dusebiliyor ve harita tek renk gibi gorunuyor; sayfa gosterilen aralik
 bilgisini yaziyor.
 
-### 6. Rapor/PDF ve demo akisi — **yapilmadi**
+### 6. Denetlenebilir PDF raporu ve tek komutluk demo — **bu turda yapildi**
 
-**Amac.** Tek sayfalik ozet cikti ve tekrarlanabilir bir demo senaryosu.
+**Amac.** Panelden uretilebilen, kaynagi izlenebilir bir PDF raporu ve temiz bir makinede
+tek komutla acilan, gercek veriye dayali bir demo ortami.
 
-**Basari olcutu.** Rapor, sinirliliklari ve model profilini tasiyor.
+**Uretilen.** `ReportArtifacts` tablosu, rapor sozlesmesi, canonical girdi manifesti,
+atomik artefakt deposu, rapor uretim isi, bes rapor ucu, panel rapor akisi,
+`tools/Sievert.Demo` (seed ureticisi, idempotent importer, tek komut orkestratoru),
+sabit demo veri kumesi, bagimsiz PDF dogrulama araci, ADR 0027.
+
+**Basari olcutu.** Rapor sinirliliklarini ve model profilini tasiyor; kapakta "kalibre
+edilmedi" ve "bu rapor kesin kusur karari degildir" yaziyor; kismi sonuc her bolumde
+gorunuyor.
+
+**Olculen.** `docs/olcumler/asama6-rapor-ve-demo.md`. Rapor uretimi isinmis durumda
+82-119 ms, istek 6-10 ms'de donuyor, rapor uretilirken saglik ucunun ortancasi 3 ms.
+Tek komutluk demo bes kosuda 7,8-10,3 saniyede hazir. Bagimsiz dogrulama: uc raporda
+**125 kontrol, 0 fark**.
+
+**Bu turda bulunan kusurlar.** Rapor kaydi guncellenmiyordu (baglamin varsayilani
+NoTracking), uyari kodlari JSON yerine virgulle ayrilmis metin sanilmisti, tablo basligi
+sayfa asiminda tekrarlanmiyordu, cizelge etiketleri belge kulturunden farkli
+bicimleniyordu, iptal edilen raporun kaydi sonsuza kadar "uretiliyor" kaliyordu ve demo
+yalniz Ctrl+C ile temizleniyordu. Altisi da duzeltildi; ayrinti olcum dosyasinda.
+
+**Yapilmayanlar.** Otomatik artefakt silme, e-posta ile gonderme, kimlik dogrulama,
+es zamanli rapor olcumu.
 
 ### 7. Kullanilabilirlik kontrolu ve kapanis — **yapilmadi**
 
@@ -199,7 +221,8 @@ kapanis raporu.
 - [x] Adim 3b — panel oncesi sertlestirme (kaynak durumu, bellek, es zamanlilik)
 - [x] Adim 4 — Blazor panel
 - [x] Adim 5 — dosya etkinlik haritasi ve risk zaman cizelgesi
-- [ ] Adim 6 — rapor ve demo
+- [x] Adim 6 — denetlenebilir PDF raporu ve tek komutluk demo
 - [ ] Adim 7 — kullanilabilirlik ve kapanis
 
-**Asama 6 tamamlanmadi.** Sonraki nokta Adim 6: rapor/PDF ve demo akisi.
+**Asama 6 tamamlanmadi.** Sonraki nokta Adim 7: kullanilabilirlik dogrulamasi ve Asama 6
+kapanisi.

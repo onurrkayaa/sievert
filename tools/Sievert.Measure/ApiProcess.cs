@@ -2,6 +2,11 @@ using System.Diagnostics;
 
 namespace Sievert.Measure;
 
+/// <summary>Tek bir bellek ornegi.</summary>
+/// <param name="ElapsedMs">Surec acildiktan sonra gecen sure.</param>
+/// <param name="WorkingSetBytes">O andaki calisma kumesi.</param>
+public sealed record RssSample(double ElapsedMs, long WorkingSetBytes);
+
 /// <summary>
 /// Olcum icin baslatilan gercek API sureci.
 ///
@@ -20,6 +25,12 @@ public sealed class ApiProcess : IDisposable
 
     private readonly CancellationTokenSource sampling = new();
 
+    private readonly Lock gate = new();
+
+    private readonly List<RssSample> samples = [];
+
+    private readonly Stopwatch clock = Stopwatch.StartNew();
+
     private int commandCount;
 
     private long peak;
@@ -29,12 +40,33 @@ public sealed class ApiProcess : IDisposable
         this.process = process;
     }
 
+    /// <summary>
+    /// 50 ms'de bir alinan calisma kumesi ornekleri. Gercek tepe DEGIL: ornekler arasinda
+    /// kalan bir sicramayi kimse gormuyor.
+    /// </summary>
+    public IReadOnlyList<RssSample> Samples
+    {
+        get
+        {
+            lock (gate)
+            {
+                return [.. samples];
+            }
+        }
+    }
+
+    /// <summary>Surecin acilmasindan bu yana gecen sure; ornekler bununla damgalaniyor.</summary>
+    public double ElapsedMilliseconds => clock.Elapsed.TotalMilliseconds;
+
     /// <summary>EF Core'un calistirdigi komut sayisi. Gunluk kapaliysa 0 kalir.</summary>
     public int DatabaseCommandCount => Volatile.Read(ref commandCount);
 
     public long PeakWorkingSetBytes => Interlocked.Read(ref peak);
 
-    public static ApiProcess Start(string repositoryRoot, bool logQueries)
+    public static ApiProcess Start(
+        string repositoryRoot,
+        bool logQueries,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         string dll = Path.Combine(
             repositoryRoot, "src", "Sievert.Api", "bin", "Debug", "net10.0", "Sievert.Api.dll");
@@ -58,6 +90,11 @@ public sealed class ApiProcess : IDisposable
         start.Environment["DOTNET_ENVIRONMENT"] = "Production";
         start.Environment["Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command"] =
             logQueries ? "Information" : "Warning";
+
+        foreach ((string key, string value) in environment ?? new Dictionary<string, string>(StringComparer.Ordinal))
+        {
+            start.Environment[key] = value;
+        }
 
         ApiProcess api = new(Process.Start(start)
             ?? throw new InvalidOperationException("API sureci baslatilamadi."));
@@ -136,6 +173,11 @@ public sealed class ApiProcess : IDisposable
                 if (current > Interlocked.Read(ref peak))
                 {
                     Interlocked.Exchange(ref peak, current);
+                }
+
+                lock (gate)
+                {
+                    samples.Add(new RssSample(Math.Round(clock.Elapsed.TotalMilliseconds, 1), current));
                 }
             }
             catch (InvalidOperationException)

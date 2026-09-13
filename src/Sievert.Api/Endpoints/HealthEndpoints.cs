@@ -38,11 +38,29 @@ public static class HealthEndpoints
                 health,
                 registry.ModelResultsChecksum[..12],
                 models,
-                await CheckAnalysis(context, health, queue, options, recovery, cancellation)));
+                await CheckAnalysis(context, health, queue, options, recovery, cancellation),
+                CheckProcess()));
         })
         .WithName("Health")
         .WithSummary("Veritabani ve model profillerinin durumu")
         .Produces<HealthResponse>();
+
+    /// <summary>
+    /// Surecin kendi bellegi. Zorlanmis toplama YOK: <c>GC.Collect</c> cagirmak olculen
+    /// sayiyi guzellestirirdi ve olculen sey artik normal calisma olmazdi.
+    /// </summary>
+    private static ProcessHealth CheckProcess()
+    {
+        using System.Diagnostics.Process current = System.Diagnostics.Process.GetCurrentProcess();
+
+        return new ProcessHealth(
+            current.WorkingSet64,
+            GC.GetTotalMemory(forceFullCollection: false),
+            GC.CollectionCount(0),
+            GC.CollectionCount(1),
+            GC.CollectionCount(2),
+            Math.Round((DateTime.UtcNow - current.StartTime.ToUniversalTime()).TotalSeconds, 1));
+    }
 
     /// <summary>
     /// Kuyruk ve worker durumu. Veritabani hazir degilse is sayilari sorulmuyor; sayilar

@@ -525,6 +525,30 @@ public sealed class AnalysisApiTests(PostgresFixture postgres)
     }
 
     /// <summary>
+    /// Saglik cevabindaki surec bolumu. Yalniz sayilar var: yol, kullanici adi ya da
+    /// makine adi yok.
+    /// </summary>
+    [DockerFact]
+    public async Task HealthReportsTheProcessMemoryWithoutNamingTheMachine()
+    {
+        (SievertApiFactory factory, int _, int _, string _) = Setup(localPath: null);
+        using SievertApiFactory owner = factory;
+        using HttpClient client = factory.CreateClient();
+
+        string body = await client.GetStringAsync("/api/v1/health");
+        JsonElement process = JsonDocument.Parse(body).RootElement.GetProperty("process");
+
+        Assert.True(process.GetProperty("workingSetBytes").GetInt64() > 0);
+        Assert.True(process.GetProperty("managedHeapBytes").GetInt64() > 0);
+        Assert.True(process.GetProperty("gen0Collections").GetInt32() >= 0);
+        Assert.True(process.GetProperty("gen2Collections").GetInt32() >= 0);
+        Assert.True(process.GetProperty("uptimeSeconds").GetDouble() >= 0);
+
+        Assert.DoesNotContain(Environment.MachineName, body, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(Environment.UserName, body, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Acilis tanilama kodu hata katalogunda degil, o yuzden OpenAPI'de de olmamali.
     /// Bir istek karsiliginda hicbir zaman donmeyen bir kodu sozlesmeye koymak, istemciye
     /// olmayan bir cevabi bekletmek olurdu.

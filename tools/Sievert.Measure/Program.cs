@@ -244,6 +244,19 @@ if (args[0] == "background-jobs")
     return await BackgroundJobsCommand.RunAsync(context, args);
 }
 
+// Asama 6 Adim 3b: bellek ayristirma ve es zamanlilik. Her is icin taze API sureci.
+// args: memory <repo-koku> <commit> <cikti.json>
+if (args[0] == "memory")
+{
+    if (args.Length < 4)
+    {
+        Console.Error.WriteLine("Kullanim: measure memory <repo-koku> <commit> <cikti.json>");
+        return 2;
+    }
+
+    return await MemoryCommand.RunAsync(context, args);
+}
+
 // Tarihsel oznitelik kontrolu de uc repoyu birden geziyor.
 // args: history-check <anlik-goruntu.csv> <ozet.sha256>
 if (args[0] == "history-check")

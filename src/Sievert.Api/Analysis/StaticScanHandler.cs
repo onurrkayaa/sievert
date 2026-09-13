@@ -33,6 +33,12 @@ public sealed class StaticScanHandler(
 {
     public AnalysisJobKind Kind => AnalysisJobKind.StaticScan;
 
+    /// <summary>
+    /// Obek yaziminda takipcide gorulen en yuksek kayit sayisi. Olcumun sordugu soru:
+    /// bulgu sayisiyla dogrusal buyuyor mu, yoksa obek boyutunda mi kaliyor.
+    /// </summary>
+    private int MaxTrackedEntries { get; set; }
+
     public async Task<JobOutcome> RunAsync(AnalysisJobRun run, CancellationToken cancellation)
     {
         RepositoryRow? repository = await context.Repositories
@@ -173,7 +179,7 @@ public sealed class StaticScanHandler(
             AnalysisJobStatus.Succeeded,
             saved,
             outcome.Summary.FileCount,
-            ResultSummary: Summarise(outcome, run.Progress, before));
+            ResultSummary: Summarise(outcome, run.Progress, before, MaxTrackedEntries));
     }
 
     /// <summary>
@@ -221,6 +227,8 @@ public sealed class StaticScanHandler(
         DateTimeOffset now = clock.GetUtcNow();
         int saved = 0;
 
+        MaxTrackedEntries = 0;
+
         for (int start = 0; start < outcome.Findings.Count; start += options.FindingBatchSize)
         {
             List<StaticAnalysisFindingRow> batch = [];
@@ -249,6 +257,8 @@ public sealed class StaticScanHandler(
             context.StaticAnalysisFindings.AddRange(batch);
             await context.SaveChangesAsync(cancellation);
 
+            MaxTrackedEntries = Math.Max(MaxTrackedEntries, context.ChangeTracker.Entries().Count());
+
             // Takipci temizlenmezse obek obek buyuyor ve her kayit oncekileri de tariyor.
             context.ChangeTracker.Clear();
 
@@ -258,13 +268,18 @@ public sealed class StaticScanHandler(
         return saved;
     }
 
-    private static string Summarise(ScanOutcome outcome, JobProgress progress, WorktreeSnapshot source)
+    private static string Summarise(
+        ScanOutcome outcome,
+        JobProgress progress,
+        WorktreeSnapshot source,
+        int tracked)
     {
         CheckSummary summary = outcome.Summary;
 
         return JsonSerializer.Serialize(new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["sourceHeadShortSha"] = source.ShortSha,
+            ["maxChangeTrackerEntries"] = tracked,
             // Ilerlemenin kac kez yazildigi: oge basina yazilmadigini gosteren sayi.
             ["progressWrites"] = progress.WriteCount,
             ["cancellationChecks"] = progress.CancellationCheckCount,

@@ -79,6 +79,11 @@ public sealed class RiskScoreAllHandler(
         int saved = 0;
         int explanationMismatches = 0;
 
+        // Obek yaziminin takipcide biriktirip biriktirmedigini olcen iki sayac. Beklenen
+        // davranis: her obekte ayni tabana donmek, commit sayisiyla buyumemek.
+        int maxTrackedEntries = 0;
+        int maxTrackedAfterClear = 0;
+
         // Jeton dongunun ICINDEKI her await'i kesebilir: obek sorgusu, kayit, ilerleme
         // yazimi. Hepsini tek bir yerde yakaliyoruz ki iptal her durumda gercek
         // sayilarla raporlansin. Sadece dongu basinda bakmak yetmedi; olcumde is 2250
@@ -147,7 +152,10 @@ public sealed class RiskScoreAllHandler(
 
                 context.CommitRiskSnapshots.AddRange(rows);
                 await context.SaveChangesAsync(cancellation);
+
+                maxTrackedEntries = Math.Max(maxTrackedEntries, context.ChangeTracker.Entries().Count());
                 context.ChangeTracker.Clear();
+                maxTrackedAfterClear = Math.Max(maxTrackedAfterClear, context.ChangeTracker.Entries().Count());
 
                 processed += batch.Count;
                 saved += rows.Count;
@@ -195,6 +203,8 @@ public sealed class RiskScoreAllHandler(
                 ["progressWrites"] = run.Progress.WriteCount,
                 ["cancellationChecks"] = run.Progress.CancellationCheckCount,
                 ["modelLoads"] = registry.LoadCountOf(profile.ProfileCode),
+                ["maxChangeTrackerEntries"] = maxTrackedEntries,
+                ["maxChangeTrackerEntriesAfterClear"] = maxTrackedAfterClear,
             }));
     }
 
